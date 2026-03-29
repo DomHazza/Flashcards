@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stereo Vision Notes Mind Map</title>
+
+    <!-- Markmap -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markmap-view@0.15.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markmap-lib@0.15.4"></script>
+
+    <!-- KaTeX for LaTeX rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <!-- Mermaid for diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+
+        #mindmap-container {
+            width: 65%;
+            height: 100%;
+            background: white;
+            border-right: 1px solid #ddd;
+        }
+
+        #mindmap {
+            width: 100%;
+            height: 100%;
+        }
+
+        #content-panel {
+            width: 35%;
+            height: 100%;
+            overflow-y: auto;
+            padding: 24px;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #nav-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        #nav-bar button {
+            width: 38px;
+            height: 38px;
+            border: 2px solid #4a90d9;
+            border-radius: 6px;
+            background: white;
+            color: #4a90d9;
+            font-size: 1.2em;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #nav-bar button:hover {
+            background: #4a90d9;
+            color: white;
+        }
+
+        #topic-selector {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 12px;
+            font-size: 1em;
+            border: 2px solid #4a90d9;
+            border-radius: 6px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+        }
+
+        #topic-selector:hover {
+            border-color: #2c5282;
+        }
+
+        #topic-selector:focus {
+            outline: none;
+            border-color: #2c5282;
+            box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.2);
+        }
+
+        #content-panel h2 {
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+            font-size: 1.4em;
+        }
+
+        #content-area {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        #content-panel .content {
+            line-height: 1.7;
+            color: #444;
+        }
+
+        #content-panel .content p {
+            margin-bottom: 12px;
+        }
+
+        #content-panel .content ul {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        #content-panel .content li {
+            margin-bottom: 8px;
+        }
+
+        #content-panel .placeholder {
+            color: #888;
+            font-style: italic;
+            text-align: center;
+            margin-top: 40%;
+        }
+
+        /* KaTeX styling */
+        .katex-display {
+            margin: 16px 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        /* Mermaid diagram styling */
+        .mermaid {
+            margin: 16px 0;
+            text-align: center;
+        }
+
+        /* Tables */
+        table {
+            border-collapse: collapse;
+            margin: 16px 0;
+            width: 100%;
+            font-size: 0.95em;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #4a90d9;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f0f4fa;
+        }
+
+        /* Code blocks */
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9em;
+        }
+
+        /* Bold text */
+        strong {
+            color: #2c5282;
+        }
+
+        /* Tag pills */
+        .tag {
+            display: inline-block;
+            font-size: 0.7em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        .tag-definition { background: #dbeafe; color: #1e40af; }
+        .tag-theorem    { background: #fce7f3; color: #9d174d; }
+        .tag-proof      { background: #ede9fe; color: #5b21b6; }
+        .tag-formula    { background: #fef3c7; color: #92400e; }
+        .tag-fact       { background: #d1fae5; color: #065f46; }
+        .tag-example    { background: #ffedd5; color: #9a3412; }
+        .tag-algorithm  { background: #e0e7ff; color: #3730a3; }
+        .tag-intuition  { background: #f0fdfa; color: #115e59; }
+
+        /* Markmap node styling */
+        .markmap-node text {
+            cursor: pointer;
+        }
+
+        .markmap-node:hover text {
+            fill: #4a90d9;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="mindmap-container">
+        <svg id="mindmap"></svg>
+    </div>
+
+    <div id="content-panel">
+        <div id="nav-bar">
+            <button id="prev-btn" title="Previous topic">&uarr;</button>
+            <select id="topic-selector">
+                <option value="">-- Select a topic --</option>
+            </select>
+            <button id="next-btn" title="Next topic">&darr;</button>
+        </div>
+        <div id="content-area">
+            <h2 id="content-title">Notes</h2>
+            <div id="content-body" class="content">
+                <p class="placeholder">Select a topic from the dropdown above to view its content.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Content data
+        const contentMap = {
+  "Stereo Vision/Epipolar Geometry/Calibrated/Derive the epipolar constraint p'^T E p = 0 in camera-centred coordinates.": "**Q:** Derive the epipolar constraint $\\mathbf{p}'^T \\mathbf{E} \\mathbf{p} = 0$ in camera-centred coordinates.\n\n$$\\mathbf{X}' = \\mathbf{R}\\mathbf{X} + \\mathbf{T}$$\n\n$$\\mathbf{T}\\times\\mathbf{X}'=\\mathbf{T}\\times \\mathbf{R}\\mathbf{X}+ \\mathbf{T}\\times \\mathbf{T}$$\n\n$$\\mathbf{T}\\times\\mathbf{X}'=\\mathbf{T}\\times \\mathbf{R}\\mathbf{X}$$\n\n$$\\mathbf{X}'\\cdot(\\mathbf{T}\\times\\mathbf{X}')=\\mathbf{X}'\\cdot(\\mathbf{T}\\times \\mathbf{R}\\mathbf{X})$$\n\n$$0= \\mathbf{X}'\\cdot(\\mathbf{T}\\times \\mathbf{R}\\mathbf{X})$$\n\n$$\\mathbf{T}_X=\\begin{bmatrix}0 & -T_z & T_y \\\\ T_z & 0 & -T_x \\\\ -T_y & T_x & 0 \\end{bmatrix} $$\n\n- Define $\\mathbf{E}=\\mathbf{T}_X\\mathbf{R}$, then $\\mathbf{X}'^T\\mathbf{E}\\mathbf{X}=0 $",
+  "Stereo Vision/Epipolar Geometry/Calibrated/Show that Epₑ = 0. What does this mean geometrically?": "**Q:** Show that $\\mathbf{E}\\mathbf{p}_e = 0$. What does this mean geometrically?\n\n$$\\lambda \\mathbf{T} = \\mathbf{R}\\mathbf{p}_e + \\mathbf{T}$$\n\n$$0 = \\mathbf{T} \\times \\mathbf{R}\\mathbf{p}_e$$\n\n$$0 = \\mathbf{E}\\mathbf{p}_e$$\n\n- The epipole $\\mathbf{p}_e$ is the image of the other camera's optical centre\n- All epipolar lines in the left image pass through $\\mathbf{p}_e$",
+  "Stereo Vision/Epipolar Geometry/Calibrated/Derive the fundamental matrix constraint mathbfw'^T F mathbfw = 0 in pixel co...": "**Q:** Derive the fundamental matrix constraint $\\tilde{\\mathbf{w}}'^T \\mathbf{F} \\tilde{\\mathbf{w}} = 0$ in pixel coordinates.\n\n- Pixel coordinates relate to camera coordinates by $\\tilde{\\mathbf{w}} = \\mathbf{K}\\mathbf{p}$, so $\\mathbf{p} = \\mathbf{K}^{-1}\\tilde{\\mathbf{w}}$\n- Substituting into $\\mathbf{p}'^T \\mathbf{E} \\mathbf{p} = 0$:\n$$(\\mathbf{K}'^{-1}\\tilde{\\mathbf{w}}')^T \\mathbf{E} (\\mathbf{K}^{-1}\\tilde{\\mathbf{w}}) = 0$$\n\n$$\\tilde{\\mathbf{w}}'^T \\underbrace{\\mathbf{K}'^{-T} \\mathbf{E} \\mathbf{K}^{-1}}_{\\mathbf{F}} \\tilde{\\mathbf{w}} = 0$$\n\n- The **fundamental matrix** is $\\mathbf{F} = \\mathbf{K}'^{-T} \\mathbf{T}_\\times \\mathbf{R} \\mathbf{K}^{-1}$\n- The **epipolar line** in the right image for a point $\\tilde{\\mathbf{w}}$ in the left image is $\\mathbf{l}' = \\mathbf{F}\\tilde{\\mathbf{w}}$ so $\\tilde{\\mathbf{w}}^T\\mathbf{l}'=0$",
+  "Stereo Vision/Epipolar Geometry/Calibrated/Show that Fmathbfwₑ = 0 and that rank(F) = 2.": "**Q:** Show that $\\mathbf{F}\\tilde{\\mathbf{w}}_e = 0$ and that $\\text{rank}(\\mathbf{F}) = 2$.\n\n- The epipole $\\tilde{\\mathbf{w}}_e$ satisfies $\\mathbf{F}\\tilde{\\mathbf{w}}_e = 0$ (and $\\mathbf{F}^T\\tilde{\\mathbf{w}}'_e = 0$ for the right epipole)\n- Since $\\mathbf{F}\\tilde{\\mathbf{w}}_e = 0$ has a non-trivial solution, $\\mathbf{F}$ is not invertible → $\\det \\mathbf{F} = 0$ → $\\text{rank}(\\mathbf{F}) \\leq 2$\n- $\\mathbf{F}$ has rank exactly 2 (not 1) because it encodes a genuine epipolar geometry with distinct epipoles",
+  "Stereo Vision/Epipolar Geometry/Calibrated/How many dof does F have?": "**Q:** How many dof does $\\mathbf{F}$ have?\n\n- 7 dof\n  - 9 terms in the matrix\n  - But scale irrelevant so 8\n  - And we force zero determinant so 7",
+  "Stereo Vision/Epipolar Geometry/Calibrated/How is the fundamental matrix estimated from point correspondences?": "**Q:** How is the fundamental matrix estimated from point correspondences?\n\n- Each correspondence $(u_i, v_i) \\leftrightarrow (u'_i, v'_i)$ gives one linear equation in the 9 elements of $\\mathbf{F}$:\n$$\\begin{bmatrix} u'_iu_i & u'_iv_i & u'_i & v'_iu_i & v'_iv_i & v'_i & u_i & v_i & 1 \\end{bmatrix} \\mathbf{f} = 0$$\n- $\\mathbf{F}$ has 8 DoF (9 elements, minus scale) → need $\\geq 8$ correspondences\n- Normalise points for numerical stability\n- Stack into $A\\mathbf{f} = 0$, solve by SVD (smallest singular vector)\n- The solution may not satisfy $\\det \\mathbf{F} = 0$ — enforce rank 2 by SVD of the estimated $\\mathbf{F}$: set the third singular value to 0\n- Use RANSAC to handle outlier correspondences",
+  "Stereo Vision/Epipolar Geometry/Calibrated/What matching constraints can be used to find point correspondences in stereo...": "**Q:** What matching constraints can be used to find point correspondences in stereo vision?\n\n- **Epipolar constraint**: corresponding point must lie on the epipolar line in the other image (from $\\mathbf{E}$ or $\\mathbf{F}$)\n- **Uniqueness**: for opaque objects, each point in one image has at most one match in the other\n- **Ordering**: corresponding points on the surface of an opaque object appear in the same order in both images\n- **Figural continuity**: when points lie on contours, the contour structure aids matching\n- **Disparity gradient**: for smooth surfaces, disparity varies smoothly — limit the allowable spatial derivative of disparity",
+  "Stereo Vision/Epipolar Geometry/Calibrated/Given calibrated cameras (K, R, T all known), how are 3D positions recovered?": "**Q:** Given calibrated cameras ($\\mathbf{K}$, $\\mathbf{R}$, $\\mathbf{T}$ all known), how are 3D positions recovered?\n\n1. For each correspondence, triangulate by solving $A\\mathbf{X} = 0$ where $\\mathbf{P} = \\mathbf{K}[I | 0]$ and $\\mathbf{P}' = \\mathbf{K}'[\\mathbf{R} | \\mathbf{T}]$\n\n$$\\begin{bmatrix} u_i \\mathbf{p}_{3}^T - \\mathbf{p}_{1}^T \\\\ v_i \\mathbf{p}_{3}^T - \\mathbf{p}_{2}^T \\\\ u'_i \\mathbf{p}'^T_{3} - \\mathbf{p}'^T_{1} \\\\ v'_i \\mathbf{p}'^T_{3} - \\mathbf{p}'^T_{2} \\end{bmatrix} \\tilde{\\mathbf{X}} = 0$$\n\n2. Solve by SVD. Geometrically this is triangulation: finding the 3D point most consistent with the two rays.\n\n- Improve with more views\n  - Track features across multiple views\n  - Optimise camera poses and 3D positions jointly",
+  "Stereo Vision/Epipolar Geometry/Uncalibrated, Known K/Given unknown camera motion but known K, how are R, T, and 3D positions recov...": "**Q:** Given unknown camera motion but known $\\mathbf{K}$, how are $\\mathbf{R}$, $\\mathbf{T}$, and 3D positions recovered?\n\n1. Find corners in both images\n2. Use normalised cross-correlation to obtain a few matches\n3. Use the seed matches to compute $\\mathbf{F}$ - find an $\\mathbf{F}$ that is consistent with as many matches as possible, then reject the rest as mistakes\n4. Now we know $\\mathbf{F}$ we can search for more matches in a narrow band around the epipolar lines to get a lot of matches\n5. Known $\\mathbf{K}$\n    6. Compute the essential matrix: $\\mathbf{E} = \\mathbf{K}'^T \\mathbf{F} \\mathbf{K}$\n    7. SVD decompose: $\\mathbf{E} = \\mathbf{U}\\Lambda \\mathbf{V}^T$ where $\\Lambda = \\text{diag}(1, 1, 0)$\n    8. Recover $\\mathbf{R}$ and $\\mathbf{T}_\\times$:\n    $$\\mathbf{T}_\\times = \\mathbf{U} \\begin{bmatrix} 0 & 1 & 0 \\\\ -1 & 0 & 0 \\\\ 0 & 0 & 0 \\end{bmatrix} \\mathbf{U}^T \\qquad \\mathbf{R} = \\mathbf{U} \\begin{bmatrix} 0 & -1 & 0 \\\\ 1 & 0 & 0 \\\\ 0 & 0 & 1 \\end{bmatrix} \\mathbf{V}^T$$\n    9. 4 possible solutions (sign ambiguities) — resolve by checking that reconstructed depths are positive\n    10. Recover the structure as for the calibrated case\n    11. We do not know $|\\mathbf{T}|$ so we can only recover structure up to scale (speed-scale ambiguity)",
+  "Stereo Vision/Epipolar Geometry/Uncalibrated, Unknown K/What can be recovered when the camera intrinsic parameters K are unknown?": "**Q:** What can be recovered when the camera intrinsic parameters $\\mathbf{K}$ are unknown?\n\n1. Estimate $\\mathbf{F}$ from $\\geq 8$ correspondences (using matching constraints and RANSAC)\n2. $\\mathbf{F}$ gives epipolar geometry: epipolar lines, epipoles\n3. But $\\mathbf{F} = \\mathbf{K}'^{-T} \\mathbf{T}_\\times \\mathbf{R} \\mathbf{K}^{-1}$ — without $\\mathbf{K}$, cannot extract $\\mathbf{R}$ or $\\mathbf{T}$\n4. Only a **projective reconstruction** is possible (see below)\n5. To recover metric 3D, $\\mathbf{K}$ must be known or estimated (e.g. from self-calibration constraints)",
+  "Stereo Vision/Epipolar Geometry/Uncalibrated, Unknown K/Why can 3D structure only be recovered up to a projective transformation when...": "**Q:** Why can 3D structure only be recovered up to a projective transformation when $\\mathbf{K}$ is unknown?\n\n- For any invertible $4 \\times 4$ matrix $\\mathbf{H}$:\n$$\\mathbf{P}\\tilde{\\mathbf{X}} = (\\mathbf{P}\\mathbf{H}^{-1})(\\mathbf{H}\\tilde{\\mathbf{X}}) \\quad \\text{and} \\quad \\mathbf{P}'\\tilde{\\mathbf{X}} = (\\mathbf{P}'\\mathbf{H}^{-1})(\\mathbf{H}\\tilde{\\mathbf{X}})$$\n- Images are identical for $(\\mathbf{P}, \\mathbf{P}', \\tilde{\\mathbf{X}})$ and $(\\mathbf{P}\\mathbf{H}^{-1}, \\mathbf{P}'\\mathbf{H}^{-1}, \\mathbf{H}\\tilde{\\mathbf{X}})$ — so $\\mathbf{H}$ is unrecoverable from images alone\n- Choose $\\mathbf{H} = \\mathbf{P}^{-1}$ (extending $\\mathbf{P}$ to $4 \\times 4$), giving:\n$$\\mathbf{P}\\mathbf{H} = [I | 0], \\qquad \\mathbf{P}'\\mathbf{H} = [\\mathbf{M} | \\mathbf{e}']$$\n- where $\\mathbf{M}$ and $\\mathbf{e}'$ are extracted from $\\mathbf{F}$ (since $\\mathbf{F} = [\\mathbf{e}']_\\times \\mathbf{M}$, with $\\mathbf{M} = [\\mathbf{e}']_\\times \\mathbf{F} + \\mathbf{e}'\\mathbf{v}^T$)\n- This gives a projective reconstruction — 3D structure up to the unknown $\\mathbf{H}$"
+};
+
+        // Markmap data
+        const markmapData = `- Stereo Vision
+  - Epipolar Geometry
+    - Calibrated
+      - Derive the epipolar constraint p'^T E p = 0 in camera-centred coordinates.
+      - Show that Epₑ = 0. What does this mean geometrically?
+      - Derive the fundamental matrix constraint mathbfw'^T F mathbfw = 0 in pixel co...
+      - Show that Fmathbfwₑ = 0 and that rank(F) = 2.
+      - How many dof does F have?
+      - How is the fundamental matrix estimated from point correspondences?
+      - What matching constraints can be used to find point correspondences in stereo...
+      - Given calibrated cameras (K, R, T all known), how are 3D positions recovered?
+    - Uncalibrated, Known K
+      - Given unknown camera motion but known K, how are R, T, and 3D positions recov...
+    - Uncalibrated, Unknown K
+      - What can be recovered when the camera intrinsic parameters K are unknown?
+      - Why can 3D structure only be recovered up to a projective transformation when...
+  - Affine Stereo`;
+
+        // Initialize Mermaid
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'neutral'
+        });
+
+        // Parse and render markmap
+        const { Transformer } = window.markmap;
+        const { Markmap } = window.markmap;
+
+        const transformer = new Transformer();
+        const { root } = transformer.transform(markmapData);
+
+        const svg = document.getElementById('mindmap');
+        const mm = Markmap.create(svg, {
+            autoFit: true,
+            color: (node) => {
+                const depth = node.depth;
+                const colors = ['#4a90d9', '#50b87d', '#f5a623', '#d9534f', '#9b59b6'];
+                return colors[depth % colors.length];
+            },
+            paddingX: 16,
+            duration: 300
+        }, root);
+
+        // Populate the topic selector dropdown with grouped options
+        const selector = document.getElementById('topic-selector');
+        const paths = Object.keys(contentMap);  // Preserve original order
+
+        // Group paths by section (folder level), preserving order
+        const groups = [];
+        const groupMap = {};
+        paths.forEach(path => {
+            const parts = path.split('/');
+            // Group by folder (e.g., "Introduction") and file (e.g., "Definitions")
+            const section = parts.length >= 3 ? `${parts[1]} - ${parts[2]}` : parts[1] || 'General';
+            if (!groupMap[section]) {
+                groupMap[section] = [];
+                groups.push(section);  // Track order of first appearance
+            }
+            groupMap[section].push(path);
+        });
+
+        // Create optgroups for each section in original order
+        groups.forEach(section => {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = section;
+
+            groupMap[section].forEach(path => {
+                const option = document.createElement('option');
+                option.value = path;
+                // Extract just the topic name for display
+                const parts = path.split('/');
+                const topicName = parts[parts.length - 1];
+                option.textContent = topicName;
+                optgroup.appendChild(option);
+            });
+
+            selector.appendChild(optgroup);
+        });
+
+        // Handle dropdown selection
+        selector.addEventListener('change', (e) => {
+            const path = e.target.value;
+            if (path) {
+                showContent(path);
+            }
+        });
+
+        // Helper: find next valid option index (skip optgroup elements)
+        function nextOptionIndex(current) {
+            for (let i = current + 1; i < selector.options.length; i++) {
+                if (selector.options[i].value) return i;
+            }
+            // Wrap: return first option with a value
+            for (let i = 0; i < selector.options.length; i++) {
+                if (selector.options[i].value) return i;
+            }
+            return current;
+        }
+
+        function prevOptionIndex(current) {
+            for (let i = current - 1; i >= 0; i--) {
+                if (selector.options[i].value) return i;
+            }
+            // Wrap: return last option with a value
+            for (let i = selector.options.length - 1; i >= 0; i--) {
+                if (selector.options[i].value) return i;
+            }
+            return current;
+        }
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            const idx = nextOptionIndex(selector.selectedIndex);
+            selector.selectedIndex = idx;
+            if (selector.value) showContent(selector.value);
+        });
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            const idx = prevOptionIndex(selector.selectedIndex);
+            selector.selectedIndex = idx;
+            if (selector.value) showContent(selector.value);
+        });
+
+        function showContent(path) {
+            const titleEl = document.getElementById('content-title');
+            const bodyEl = document.getElementById('content-body');
+
+            // Extract topic name from path
+            const parts = path.split('/');
+            const title = parts[parts.length - 1];
+            titleEl.textContent = title;
+
+            const content = contentMap[path];
+
+            if (content) {
+                bodyEl.innerHTML = renderContent(content);
+                renderMath();
+                renderMermaid();
+            } else {
+                bodyEl.innerHTML = '<p class="placeholder">No detailed content available for this topic.</p>';
+            }
+        }
+
+        function renderContent(content) {
+            // Convert markdown to HTML
+            let html = content;
+
+            // Extract mermaid code blocks first and replace with placeholders
+            const mermaidBlocks = [];
+            html = html.replace(/```mermaid\n([\s\S]*?)```/g, (match, code) => {
+                const placeholder = `__MERMAID_PLACEHOLDER_${mermaidBlocks.length}__`;
+                mermaidBlocks.push(code.trim());
+                return placeholder;
+            });
+
+            // Remove div align tags (now safe since mermaid is protected)
+            html = html.replace(/<div[^>]*>/g, '');
+            html = html.replace(/<\/div>/g, '');
+
+            // Extract markdown tables and replace with placeholders
+            const tableBlocks = [];
+            html = html.replace(/((?:^\|.+\|\s*$\n?)+)/gm, (match) => {
+                const placeholder = `__TABLE_PLACEHOLDER_${tableBlocks.length}__`;
+                tableBlocks.push(match.trim());
+                return placeholder;
+            });
+
+            // Convert bullet points and numbered lists with nesting support
+            const lines = html.split('\n');
+            let result = [];
+            let depthStack = [];  // stack of {indent, type} where type is 'ul' or 'ol'
+
+            function closeListsTo(targetDepth) {
+                while (depthStack.length > 0 && depthStack[depthStack.length - 1].indent > targetDepth) {
+                    const popped = depthStack.pop();
+                    result.push('</li>');
+                    result.push(`</${popped.type}>`);
+                }
+            }
+
+            function closeAllLists() {
+                while (depthStack.length > 0) {
+                    const popped = depthStack.pop();
+                    result.push('</li>');
+                    result.push(`</${popped.type}>`);
+                }
+            }
+
+            for (let line of lines) {
+                const bulletMatch = line.match(/^(\s*)- (.+)$/);
+                const numberedMatch = line.match(/^(\s*)\d+\.\s+(.+)$/);
+                const listMatch = bulletMatch || numberedMatch;
+                const listType = bulletMatch ? 'ul' : 'ol';
+
+                if (listMatch) {
+                    const indent = listMatch[1].length;
+                    let content = listMatch[2];
+                    content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+                    if (depthStack.length === 0) {
+                        result.push(`<${listType}>`);
+                        result.push(`<li>${content}`);
+                        depthStack.push({indent, type: listType});
+                    } else if (indent > depthStack[depthStack.length - 1].indent) {
+                        result.push(`<${listType}>`);
+                        result.push(`<li>${content}`);
+                        depthStack.push({indent, type: listType});
+                    } else if (indent === depthStack[depthStack.length - 1].indent) {
+                        result.push('</li>');
+                        result.push(`<li>${content}`);
+                    } else {
+                        closeListsTo(indent);
+                        result.push('</li>');
+                        result.push(`<li>${content}`);
+                    }
+                } else if (line.trim() === '' && depthStack.length > 0) {
+                    // Keep list open for blank lines
+                } else if (line.trim().startsWith('$$') || line.trim().startsWith('\\[')) {
+                    closeAllLists();
+                    result.push(line);
+                } else {
+                    if (depthStack.length > 0 && line.trim() !== '') {
+                        closeAllLists();
+                    }
+                    line = line.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+                    result.push(line);
+                }
+            }
+
+            closeAllLists();
+
+            html = result.join('\n');
+
+            // Restore table placeholders with rendered HTML tables
+            tableBlocks.forEach((block, i) => {
+                const rows = block.split('\n').filter(r => r.trim());
+                if (rows.length < 2) {
+                    html = html.replace(`__TABLE_PLACEHOLDER_${i}__`, block);
+                    return;
+                }
+                let tbl = '<table><thead><tr>';
+                const headerCells = rows[0].split('|').slice(1, -1);
+                headerCells.forEach(cell => {
+                    let c = cell.trim();
+                    c = c.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+                    tbl += `<th>${c}</th>`;
+                });
+                tbl += '</tr></thead><tbody>';
+                for (let r = 2; r < rows.length; r++) {
+                    tbl += '<tr>';
+                    const cells = rows[r].split('|').slice(1, -1);
+                    cells.forEach(cell => {
+                        let c = cell.trim();
+                        c = c.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+                        tbl += `<td>${c}</td>`;
+                    });
+                    tbl += '</tr>';
+                }
+                tbl += '</tbody></table>';
+                html = html.replace(`__TABLE_PLACEHOLDER_${i}__`, tbl);
+            });
+
+            // Restore mermaid blocks as proper divs (after line processing to avoid corruption)
+            mermaidBlocks.forEach((code, i) => {
+                html = html.replace(`__MERMAID_PLACEHOLDER_${i}__`,
+                    `<div class="mermaid" id="mermaid-${i}">${code}</div>`);
+            });
+
+            // Style [Fact], [Definition], etc. tags as coloured pills
+            html = html.replace(/\[(Definition|Theorem|Proof|Formula|Fact|Example|Algorithm|Intuition)\]/g,
+                (match, tag) => `<span class="tag tag-${tag.toLowerCase()}">${tag}</span>`);
+
+            // Convert paragraphs (consecutive non-empty lines)
+            html = html.replace(/\n\n+/g, '</p><p>');
+            if (!html.startsWith('<')) {
+                html = '<p>' + html + '</p>';
+            }
+
+            return html;
+        }
+
+        function renderMath() {
+            renderMathInElement(document.getElementById('content-body'), {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\[', right: '\\]', display: true},
+                    {left: '\\(', right: '\\)', display: false}
+                ],
+                throwOnError: false
+            });
+        }
+
+        async function renderMermaid() {
+            const mermaidDivs = document.querySelectorAll('.mermaid');
+            for (const div of mermaidDivs) {
+                const code = div.textContent;
+                try {
+                    const { svg } = await mermaid.render(div.id + '-svg', code);
+                    div.innerHTML = svg;
+                } catch (e) {
+                    console.error('Mermaid rendering error:', e);
+                }
+            }
+        }
+
+        // Fit to screen on load
+        setTimeout(() => mm.fit(), 100);
+
+        // Handle window resize
+        window.addEventListener('resize', () => mm.fit());
+    </script>
+</body>
+</html>
