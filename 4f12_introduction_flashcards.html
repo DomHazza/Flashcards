@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4F12 Introduction — Flashcards</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #0f1117;
+  color: #e0e0e0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px 16px 100px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.back-btn {
+  color: #a0c4ff;
+  text-decoration: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  padding: 4px;
+}
+
+h1 {
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: #777;
+  font-size: 0.8rem;
+  margin-bottom: 16px;
+  padding-left: 36px;
+}
+
+/* Filter pills */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.pill {
+  background: #1a1d27;
+  border: 1px solid #2a2d3a;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  color: #bbb;
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.pill:hover { border-color: #a0c4ff; color: #e0e0e0; }
+.pill.active { background: #a0c4ff; color: #0f1117; border-color: #a0c4ff; font-weight: 600; }
+
+/* Card */
+.card-wrapper {
+  perspective: 1000px;
+  min-height: 220px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+  transition: transform 0.45s cubic-bezier(.4,.2,.2,1);
+  transform-style: preserve-3d;
+}
+
+.card.flipped { transform: rotateX(180deg); }
+
+.card-face {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  min-height: 220px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 12px;
+  padding: 24px 22px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-front {
+  background: #1a1d27;
+  border: 1px solid #2a2d3a;
+}
+
+.card-back {
+  background: #1a1d27;
+  border: 1px solid #2a2d3a;
+  transform: rotateX(180deg);
+}
+
+.card-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+.card-front .card-label { color: #a0c4ff; }
+.card-back .card-label { color: #4ecdc4; }
+
+.card-front .card-body {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #fff;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.card-back .card-body {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: #e0e0e0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.card-back .card-body ul,
+.card-back .card-body ol {
+  margin-left: 18px;
+  margin-bottom: 8px;
+}
+
+.card-back .card-body li {
+  margin-bottom: 5px;
+}
+
+.card-back .card-body p {
+  margin-bottom: 8px;
+}
+
+.card-back .card-body code {
+  background: #252838;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: 'Consolas', monospace;
+  font-size: 0.88em;
+}
+
+.card-back .card-body pre {
+  font-family: 'Consolas', monospace;
+}
+
+.math-display {
+  margin: 10px 0;
+  overflow-x: auto;
+}
+
+.group-tag {
+  font-size: 0.68rem;
+  color: #777;
+  margin-top: 10px;
+  text-align: right;
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.nav button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid #2a2d3a;
+  background: #1a1d27;
+  color: #a0c4ff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav button:hover { background: #252838; }
+.nav button:disabled { opacity: 0.3; cursor: default; }
+
+.progress {
+  color: #777;
+  font-size: 0.85rem;
+  font-family: 'Consolas', monospace;
+  min-width: 60px;
+  text-align: center;
+}
+
+.hint {
+  text-align: center;
+  color: #555;
+  font-size: 0.75rem;
+  margin-top: 4px;
+}
+
+/* Keyboard hint */
+.kbd {
+  display: inline-block;
+  background: #1a1d27;
+  border: 1px solid #2a2d3a;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: 'Consolas', monospace;
+  font-size: 0.72rem;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <a class="back-btn" href="index.html">&larr;</a>
+    <h1>Introduction</h1>
+  </div>
+  <p class="subtitle">4F12 &middot; <span id="count">3</span> cards</p>
+
+  <div class="filters" id="filters"></div>
+
+  <div class="card-wrapper" id="cardWrapper" onclick="flip()">
+    <div class="card" id="card">
+      <div class="card-face card-front">
+        <div class="card-label">Question</div>
+        <div class="card-body" id="frontBody"></div>
+        <div class="group-tag" id="frontGroup"></div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-label">Answer</div>
+        <div class="card-body" id="backBody"></div>
+        <div class="group-tag" id="backGroup"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button id="prevBtn" onclick="event.stopPropagation(); prev();">&larr;</button>
+    <span class="progress" id="progress"></span>
+    <button id="nextBtn" onclick="event.stopPropagation(); next();">&rarr;</button>
+  </div>
+  <p class="hint">Tap card to flip &middot; <span class="kbd">&larr;</span> <span class="kbd">&rarr;</span> navigate &middot; <span class="kbd">Space</span> flip</p>
+</div>
+
+<script>
+const ALL_CARDS = [{"group": "Image Intensity Variables", "question": "What factors influence the intensity $I(x, y)$ of a monochrome CCD image?", "answer_html": "<ol>\n<li>The position of the camera</li>\n<li>The properties of the lens and the CCD</li>\n<li>The shape of the structures in the scene</li>\n<li>The position and distribution of light sources</li>\n<li>The reflectance properties of the visible surfaces</li>\n</ol>", "answer_md": "1. The position of the camera\n2. The properties of the lens and the CCD\n3. The shape of the structures in the scene\n4. The position and distribution of light sources\n5. The reflectance properties of the visible surfaces"}, {"group": "Image Intensity Variables", "question": "Why are raw pixel intensities rarely used directly in CV algorithms?", "answer_html": "<ul>\n<li>Raw pixel values are sensitive to changes in lighting brightness and contrast: $I' = \\alpha I + \\beta$</li>\n<li>They depend on lighting (position and distribution) and camera optics (intrinsic properties)</li>\n<li>Small changes in illumination or viewpoint can cause large changes in pixel values, making them unreliable as features</li>\n</ul>", "answer_md": "- Raw pixel values are sensitive to changes in lighting brightness and contrast: $I' = \\alpha I + \\beta$\n- They depend on lighting (position and distribution) and camera optics (intrinsic properties)\n- Small changes in illumination or viewpoint can cause large changes in pixel values, making them unreliable as features"}, {"group": "Image Intensity Variables", "question": "How can images be made more invariant to lighting changes?", "answer_html": "<ol>\n<li><strong>Edge detection / image gradients</strong> — use edges or SIFT descriptors, which respond to relative intensity changes rather than absolute values</li>\n<li><strong>Intensity normalisation</strong> — normalise pixel values as $\\left(\\frac{I - \\mu}{\\sigma}\\right)$, as used in NCC matching</li>\n</ol>", "answer_md": "1. **Edge detection / image gradients** — use edges or SIFT descriptors, which respond to relative intensity changes rather than absolute values\n2. **Intensity normalisation** — normalise pixel values as $\\left(\\frac{I - \\mu}{\\sigma}\\right)$, as used in NCC matching"}];
+const GROUPS = ["Image Intensity Variables"];
+
+let activeGroup = null; // null = all
+let filtered = ALL_CARDS.slice();
+let idx = 0;
+
+function initFilters() {
+  const el = document.getElementById('filters');
+  // "All" pill
+  const all = document.createElement('span');
+  all.className = 'pill active';
+  all.textContent = 'All';
+  all.dataset.group = '';
+  all.onclick = () => selectGroup(null);
+  el.appendChild(all);
+
+  GROUPS.forEach(g => {
+    const p = document.createElement('span');
+    p.className = 'pill';
+    p.textContent = g;
+    p.dataset.group = g;
+    p.onclick = () => selectGroup(g);
+    el.appendChild(p);
+  });
+}
+
+function selectGroup(group) {
+  activeGroup = group;
+  filtered = group ? ALL_CARDS.filter(c => c.group === group) : ALL_CARDS.slice();
+  idx = 0;
+
+  document.querySelectorAll('.pill').forEach(p => {
+    p.classList.toggle('active', group === null ? p.dataset.group === '' : p.dataset.group === group);
+  });
+  document.getElementById('count').textContent = filtered.length;
+  render();
+}
+
+function render() {
+  if (filtered.length === 0) {
+    document.getElementById('frontBody').innerHTML = '<span style="color:#777;">No cards in this group.</span>';
+    document.getElementById('backBody').innerHTML = '';
+    document.getElementById('frontGroup').textContent = '';
+    document.getElementById('backGroup').textContent = '';
+    document.getElementById('progress').textContent = '0 / 0';
+    return;
+  }
+  const c = filtered[idx];
+  // Unflip
+  document.getElementById('card').classList.remove('flipped');
+
+  document.getElementById('frontBody').innerHTML = c.question;
+  document.getElementById('backBody').innerHTML = c.answer_html;
+  document.getElementById('frontGroup').textContent = c.group;
+  document.getElementById('backGroup').textContent = c.group;
+  document.getElementById('progress').textContent = (idx + 1) + ' / ' + filtered.length;
+  document.getElementById('prevBtn').disabled = idx === 0;
+  document.getElementById('nextBtn').disabled = idx === filtered.length - 1;
+
+  // Render KaTeX
+  renderMathInElement(document.getElementById('frontBody'), {
+    delimiters: [
+      {left: '$$', right: '$$', display: true},
+      {left: '$', right: '$', display: false}
+    ],
+    throwOnError: false
+  });
+  renderMathInElement(document.getElementById('backBody'), {
+    delimiters: [
+      {left: '$$', right: '$$', display: true},
+      {left: '$', right: '$', display: false}
+    ],
+    throwOnError: false
+  });
+}
+
+function flip() {
+  document.getElementById('card').classList.toggle('flipped');
+}
+
+function prev() {
+  if (idx > 0) { idx--; render(); }
+}
+
+function next() {
+  if (idx < filtered.length - 1) { idx++; render(); }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft') prev();
+  else if (e.key === 'ArrowRight') next();
+  else if (e.key === ' ') { e.preventDefault(); flip(); }
+});
+
+// Touch swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].screenX - touchStartX;
+  if (Math.abs(dx) > 50) {
+    if (dx > 0) prev(); else next();
+  }
+});
+
+initFilters();
+render();
+</script>
+</body>
+</html>
