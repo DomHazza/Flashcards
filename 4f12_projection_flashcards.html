@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>4F12 Projection — Flashcards</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>4F12 Projection Flashcards</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,368 +17,593 @@ body {
   background: #0f1117;
   color: #e0e0e0;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
 }
 
 .container {
-  max-width: 700px;
+  max-width: 500px;
   margin: 0 auto;
-  padding: 20px 16px 100px;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 4px;
-}
-
-.back-btn {
-  color: #a0c4ff;
-  text-decoration: none;
-  font-size: 1.3rem;
-  line-height: 1;
-  padding: 4px;
-}
-
-h1 {
-  color: #fff;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
-.subtitle {
-  color: #777;
-  font-size: 0.8rem;
-  margin-bottom: 16px;
-  padding-left: 36px;
-}
-
-/* Filter pills */
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 18px;
-}
-
-.pill {
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
-  border-radius: 20px;
-  padding: 6px 14px;
-  font-size: 0.78rem;
-  color: #bbb;
-  cursor: pointer;
-  transition: all 0.15s;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
-
-.pill:hover { border-color: #a0c4ff; color: #e0e0e0; }
-.pill.active { background: #a0c4ff; color: #0f1117; border-color: #a0c4ff; font-weight: 600; }
-
-/* Card */
-.card-wrapper {
-  perspective: 1000px;
-  min-height: 220px;
-  margin-bottom: 16px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.card {
-  position: relative;
-  width: 100%;
-  min-height: 220px;
-  transition: transform 0.45s cubic-bezier(.4,.2,.2,1);
-  transform-style: preserve-3d;
-}
-
-.card.flipped { transform: rotateX(180deg); }
-
-.card-face {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  min-height: 220px;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  border-radius: 12px;
-  padding: 24px 22px;
+  padding: 28px 16px;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
 
-.card-front {
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
+/* ── Topic Picker ── */
+
+#topic-screen h1 {
+  color: #fff;
+  font-size: 1.4rem;
+  margin-bottom: 4px;
 }
 
-.card-back {
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
-  transform: rotateX(180deg);
+#topic-screen .subtitle {
+  color: #777;
+  font-size: 0.85rem;
+  margin-bottom: 24px;
 }
 
-.card-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.topic-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: #1a1d27;
+  border: 1px solid #2a2d3a;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+
+.topic-btn:active { background: #252838; }
+
+.topic-name {
+  color: #e0e0e0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.topic-count {
+  color: #777;
+  font-size: 0.85rem;
+}
+
+/* ── Card Screen ── */
+
+#card-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 12px;
 }
 
-.card-front .card-label { color: #a0c4ff; }
-.card-back .card-label { color: #4ecdc4; }
-
-.card-front .card-body {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: #fff;
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.card-back .card-body {
-  font-size: 0.92rem;
-  line-height: 1.65;
-  color: #e0e0e0;
-  flex: 1;
-  overflow-y: auto;
-}
-
-.card-back .card-body ul,
-.card-back .card-body ol {
-  margin-left: 18px;
-  margin-bottom: 8px;
-}
-
-.card-back .card-body li {
-  margin-bottom: 5px;
-}
-
-.card-back .card-body p {
-  margin-bottom: 8px;
-}
-
-.card-back .card-body code {
-  background: #252838;
-  padding: 1px 5px;
-  border-radius: 3px;
-  font-family: 'Consolas', monospace;
-  font-size: 0.88em;
-}
-
-.card-back .card-body pre {
-  font-family: 'Consolas', monospace;
-}
-
-.math-display {
-  margin: 10px 0;
-  overflow-x: auto;
-}
-
-.group-tag {
-  font-size: 0.68rem;
-  color: #777;
-  margin-top: 10px;
-  text-align: right;
-}
-
-/* Navigation */
-.nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 10px;
-}
-
-.nav button {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid #2a2d3a;
-  background: #1a1d27;
+.back-btn {
+  background: none;
+  border: none;
   color: #a0c4ff;
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.15s;
+  padding: 6px 0;
   -webkit-tap-highlight-color: transparent;
 }
 
-.nav button:hover { background: #252838; }
-.nav button:disabled { opacity: 0.3; cursor: default; }
-
-.progress {
-  color: #777;
+.progress-text {
+  color: #a0c4ff;
   font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 4px;
+  background: #2a2d3a;
+  border-radius: 2px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #4ecdc4;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ── The Card ── */
+
+.card-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+
+.card {
+  background: #fff;
+  color: #1a1a1a;
+  border-radius: 12px;
+  padding: 28px 24px;
+  min-height: 200px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  position: relative;
+  overflow-y: auto;
+  max-height: 65vh;
+}
+
+.card .label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  color: #999;
+}
+
+.card.question-side .label { color: #a0c4ff; }
+.card.answer-side .label { color: #4ecdc4; }
+
+.card .card-content {
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.card.question-side .card-content {
+  font-size: 1.15rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  min-height: 80px;
+}
+
+.card .tap-hint {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  font-size: 0.7rem;
+  color: #bbb;
+}
+
+/* Answer markdown styling */
+.card-content h1, .card-content h2, .card-content h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 12px 0 6px;
+}
+
+.card-content p { margin: 8px 0; }
+
+.card-content ul, .card-content ol {
+  margin: 8px 0 8px 20px;
+}
+
+.card-content li { margin: 4px 0; }
+
+.card-content strong { font-weight: 700; }
+
+.card-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 10px 0;
+  font-size: 0.9rem;
+}
+
+.card-content th, .card-content td {
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.card-content th { background: #f0f0f0; font-weight: 600; }
+
+.card-content code {
+  background: #f4f4f4;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.9em;
   font-family: 'Consolas', monospace;
-  min-width: 60px;
+}
+
+.card-content pre {
+  background: #f4f4f4;
+  padding: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.card-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.card-content .mermaid-container {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.card-content .mermaid-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Buttons ── */
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding-bottom: 16px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+
+.action-btn:active { opacity: 0.8; }
+
+.btn-again {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+.btn-got-it {
+  background: #4ecdc4;
+  color: #fff;
+}
+
+.action-buttons.hidden { display: none; }
+
+/* ── Round Complete / Done ── */
+
+#round-screen, #done-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
-.hint {
-  text-align: center;
-  color: #555;
-  font-size: 0.75rem;
-  margin-top: 4px;
+#round-screen h2, #done-screen h2 {
+  color: #fff;
+  font-size: 1.3rem;
+  margin-bottom: 8px;
 }
 
-/* Keyboard hint */
-.kbd {
-  display: inline-block;
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
-  border-radius: 4px;
-  padding: 1px 6px;
-  font-family: 'Consolas', monospace;
-  font-size: 0.72rem;
+#round-screen p, #done-screen p {
+  color: #bbb;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
 }
+
+.screen-btn {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.screen-btn.primary {
+  background: #4ecdc4;
+  color: #fff;
+}
+
+.screen-btn.secondary {
+  background: #2a2d3a;
+  color: #e0e0e0;
+}
+
+.screen-btn:active { opacity: 0.8; }
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #4ecdc4;
+  margin-bottom: 4px;
+}
+
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
+
 <div class="container">
-  <div class="header">
-    <a class="back-btn" href="index.html">&larr;</a>
-    <h1>Projection</h1>
+  <!-- Topic Picker -->
+  <div id="topic-screen">
+    <h1>Projection Flashcards</h1>
+    <p class="subtitle">4F12 &mdash; Cambridge IIB</p>
+    <div id="topic-list"></div>
   </div>
-  <p class="subtitle">4F12 &middot; <span id="count">60</span> cards</p>
 
-  <div class="filters" id="filters"></div>
-
-  <div class="card-wrapper" id="cardWrapper" onclick="flip()">
-    <div class="card" id="card">
-      <div class="card-face card-front">
-        <div class="card-label">Question</div>
-        <div class="card-body" id="frontBody"></div>
-        <div class="group-tag" id="frontGroup"></div>
+  <!-- Card Screen -->
+  <div id="card-screen" class="hidden">
+    <div class="top-bar">
+      <button class="back-btn" id="back-btn">&larr; Topics</button>
+      <span class="progress-text" id="progress-text"></span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progress-bar"></div>
+    </div>
+    <div class="card-wrapper">
+      <div class="card question-side" id="card">
+        <div class="label" id="card-label">Question</div>
+        <div class="card-content" id="card-content"></div>
+        <div class="tap-hint" id="tap-hint">Tap to flip</div>
       </div>
-      <div class="card-face card-back">
-        <div class="card-label">Answer</div>
-        <div class="card-body" id="backBody"></div>
-        <div class="group-tag" id="backGroup"></div>
-      </div>
+    </div>
+    <div class="action-buttons hidden" id="action-buttons">
+      <button class="action-btn btn-again" id="btn-again">Again</button>
+      <button class="action-btn btn-got-it" id="btn-got-it">Got it</button>
     </div>
   </div>
 
-  <div class="nav">
-    <button id="prevBtn" onclick="event.stopPropagation(); prev();">&larr;</button>
-    <span class="progress" id="progress"></span>
-    <button id="nextBtn" onclick="event.stopPropagation(); next();">&rarr;</button>
+  <!-- Round Complete -->
+  <div id="round-screen" class="hidden">
+    <div class="stat-number" id="round-remaining"></div>
+    <h2>Round complete</h2>
+    <p id="round-message"></p>
+    <button class="screen-btn primary" id="round-continue">Continue</button>
+    <button class="screen-btn secondary" id="round-back">Back to topics</button>
   </div>
-  <p class="hint">Tap card to flip &middot; <span class="kbd">&larr;</span> <span class="kbd">&rarr;</span> navigate &middot; <span class="kbd">Space</span> flip</p>
+
+  <!-- All Done -->
+  <div id="done-screen" class="hidden">
+    <div class="stat-number">0</div>
+    <h2>All cards cleared</h2>
+    <p>You got every card right.</p>
+    <button class="screen-btn primary" id="done-restart">Restart topic</button>
+    <button class="screen-btn secondary" id="done-back">Back to topics</button>
+  </div>
 </div>
 
 <script>
-const ALL_CARDS = [{"group": "Camera Models", "question": "Draw and label a diagram of orthographic projection.", "answer_html": "<p style=\"color:#777; font-style:italic;\">No answer provided</p>", "answer_md": ""}, {"group": "Camera Models", "question": "State the orthographic projection mapping.", "answer_html": "<div class=\"math-display\">$$\\mathbf{x} = \\mathbf{X} - (\\mathbf{X} \\cdot \\mathbf{k})\\mathbf{k} = (\\mathbf{k} \\times \\mathbf{X}) \\times \\mathbf{k}$$</div>\n<ul>\n<li>When the optical axis is aligned with $Z$: $(x, y) = (X, Y)$ — simply drop the depth coordinate</li>\n</ul>", "answer_md": "$$\\mathbf{x} = \\mathbf{X} - (\\mathbf{X} \\cdot \\mathbf{k})\\mathbf{k} = (\\mathbf{k} \\times \\mathbf{X}) \\times \\mathbf{k}$$\n\n- When the optical axis is aligned with $Z$: $(x, y) = (X, Y)$ — simply drop the depth coordinate"}, {"group": "Camera Models", "question": "What are the assumptions of orthographic projection?", "answer_html": "<ul>\n<li>Projection rays are parallel (equivalent to the camera being infinitely far from the scene, or the scene having negligible depth variation)</li>\n<li>No perspective foreshortening — objects do not appear smaller with increasing distance from the camera</li>\n</ul>", "answer_md": "- Projection rays are parallel (equivalent to the camera being infinitely far from the scene, or the scene having negligible depth variation)\n- No perspective foreshortening — objects do not appear smaller with increasing distance from the camera"}, {"group": "Camera Models", "question": "What are the problems with orthographic projection?", "answer_html": "<ul>\n<li>Does not explain the convergence of parallel lines observed in real CCD camera images (e.g. railway tracks, buildings)</li>\n</ul>", "answer_md": "- Does not explain the convergence of parallel lines observed in real CCD camera images (e.g. railway tracks, buildings)"}, {"group": "Camera Models", "question": "Draw and label a diagram of perspective (pin-hole camera) projection.", "answer_html": "<p style=\"color:#777; font-style:italic;\">No answer provided</p>", "answer_md": ""}, {"group": "Camera Models", "question": "State the perspective projection.", "answer_html": "<div class=\"math-display\">$$u=u_0 + \\frac{k_ufX_c}{Z_c}=u_0+\\frac{k_uf(r_{11}X+r_{12}Y+r_{13}Z+T_x)}{r_{31}X+r_{32}Y+r_{33}Z+T_z}$$</div>\n<div class=\"math-display\">$$v=v_0 + \\frac{k_vfY_c}{Z_c}=v_0+\\frac{k_vf(r_{21}X+r_{22}Y+r_{23}Z+T_y)}{r_{31}X+r_{32}Y+r_{33}Z+T_z}$$</div>", "answer_md": "$$u=u_0 + \\frac{k_ufX_c}{Z_c}=u_0+\\frac{k_uf(r_{11}X+r_{12}Y+r_{13}Z+T_x)}{r_{31}X+r_{32}Y+r_{33}Z+T_z}$$\n\n$$v=v_0 + \\frac{k_vfY_c}{Z_c}=v_0+\\frac{k_vf(r_{21}X+r_{22}Y+r_{23}Z+T_y)}{r_{31}X+r_{32}Y+r_{33}Z+T_z}$$"}, {"group": "Camera Models", "question": "What are the assumptions of the perspective projection model?", "answer_html": "<ul>\n<li>Pin-hole camera (= planar perspective projection) — projecting through a single point onto a flat image plane</li>\n<li>No nonlinear distortion — no radial lens distortion or other aberrations that cause deviations from the ideal pin-hole model (a real-lens constraint)</li>\n<li>Together these ensure a line in the world projects to a line in the image</li>\n</ul>", "answer_md": "- Pin-hole camera (= planar perspective projection) — projecting through a single point onto a flat image plane\n- No nonlinear distortion — no radial lens distortion or other aberrations that cause deviations from the ideal pin-hole model (a real-lens constraint)\n- Together these ensure a line in the world projects to a line in the image"}, {"group": "Camera Models", "question": "Derive the perspective projection, identifying all internal and external camera parameters.", "answer_html": "<ul>\n<li>Rigid body motion</li>\n</ul>\n<div class=\"math-display\">$$\\mathbf{X}_c=\\mathbf{R}\\mathbf{X}+\\mathbf{T}$$</div>\n<div class=\"math-display\">$$\\tilde{\\mathbf{X}}_c = \\begin{bmatrix} \\mathbf{R} & \\mathbf{T} \\\\ 0\\ 0\\ 0 & 1 \\end{bmatrix} \\tilde{\\mathbf{X}}$$</div>\n<ul>\n<li>Projection (similar triangles)</li>\n</ul>\n<div class=\"math-display\">$$x=\\frac{fX_c}{Z_c}$$</div>\n<div class=\"math-display\">$$y=\\frac{fY_c}{Z_c}$$</div>\n<div class=\"math-display\">$$\\begin{bmatrix} sx \\\\ sy \\\\ s \\end{bmatrix} = \\begin{bmatrix} f & 0 & 0 & 0 \\\\ 0 & f & 0 & 0 \\\\ 0 & 0 & 1 & 0 \\end{bmatrix} \\begin{bmatrix} X_c \\\\ Y_c \\\\ Z_c \\\\ 1 \\end{bmatrix}$$</div>\n<ul>\n<li><strong>CCD imaging</strong> (image plane to pixel coordinates):</li>\n</ul>\n<div class=\"math-display\">$$u=u_0 + k_ux $$</div>\n<div class=\"math-display\">$$v=v_0+k_vy $$</div>\n<div class=\"math-display\">$$\\begin{bmatrix} su \\\\ sv \\\\ s \\end{bmatrix} = \\begin{bmatrix} k_u & 0 & u_0 \\\\ 0 & k_v & v_0 \\\\ 0 & 0 & 1 \\end{bmatrix} \\begin{bmatrix} sx \\\\ sy \\\\ s \\end{bmatrix}$$</div>\n<ul>\n<li><strong>Overall</strong>: $\\tilde{\\mathbf{w}} = \\mathbf{K}[\\mathbf{R} | \\mathbf{T}]\\tilde{\\mathbf{X}}$ where $\\mathbf{P} = \\mathbf{K}[\\mathbf{R} | \\mathbf{T}]$ is the $3 \\times 4$ projection matrix</li>\n<li><strong>Internal parameters</strong></li>\n<li>$f$ (focal length)</li>\n<li>$(u_0, v_0)$ (principal point)</li>\n<li>$k_u, k_v$ (pixels per unit length)</li>\n<li><strong>External parameters</strong>:</li>\n<li>$\\mathbf{R}$ (orientation, 3 DoF)</li>\n<li>$\\mathbf{T}$ (position, 3 DoF)</li>\n</ul>", "answer_md": "- Rigid body motion\n\n$$\\mathbf{X}_c=\\mathbf{R}\\mathbf{X}+\\mathbf{T}$$\n$$\\tilde{\\mathbf{X}}_c = \\begin{bmatrix} \\mathbf{R} & \\mathbf{T} \\\\ 0\\ 0\\ 0 & 1 \\end{bmatrix} \\tilde{\\mathbf{X}}$$\n\n- Projection (similar triangles)\n\n$$x=\\frac{fX_c}{Z_c}$$\n$$y=\\frac{fY_c}{Z_c}$$\n\n$$\\begin{bmatrix} sx \\\\ sy \\\\ s \\end{bmatrix} = \\begin{bmatrix} f & 0 & 0 & 0 \\\\ 0 & f & 0 & 0 \\\\ 0 & 0 & 1 & 0 \\end{bmatrix} \\begin{bmatrix} X_c \\\\ Y_c \\\\ Z_c \\\\ 1 \\end{bmatrix}$$\n\n- **CCD imaging** (image plane to pixel coordinates):\n\n$$u=u_0 + k_ux $$\n$$v=v_0+k_vy $$\n\n$$\\begin{bmatrix} su \\\\ sv \\\\ s \\end{bmatrix} = \\begin{bmatrix} k_u & 0 & u_0 \\\\ 0 & k_v & v_0 \\\\ 0 & 0 & 1 \\end{bmatrix} \\begin{bmatrix} sx \\\\ sy \\\\ s \\end{bmatrix}$$\n\n- **Overall**: $\\tilde{\\mathbf{w}} = \\mathbf{K}[\\mathbf{R} | \\mathbf{T}]\\tilde{\\mathbf{X}}$ where $\\mathbf{P} = \\mathbf{K}[\\mathbf{R} | \\mathbf{T}]$ is the $3 \\times 4$ projection matrix\n- **Internal parameters**\n  - $f$ (focal length)\n  - $(u_0, v_0)$ (principal point)\n  - $k_u, k_v$ (pixels per unit length)\n- **External parameters**: \n  - $\\mathbf{R}$ (orientation, 3 DoF)\n  - $\\mathbf{T}$ (position, 3 DoF)"}, {"group": "Camera Models", "question": "Why is the projective extension of the perspective model needed?", "answer_html": "<ul>\n<li>The perspective model decomposes $\\mathbf{P} = \\mathbf{K}[\\mathbf{R}|\\mathbf{T}]$, tying the matrix to physical camera parameters (10 DoF)</li>\n<li>The projective model treats $\\mathbf{P}$ as a <strong>general $3 \\times 4$ matrix</strong> with no assumed structure (11 DoF)</li>\n<li>This allows calibrating $\\mathbf{P}$ directly (11 unknowns, 6 points) without knowing $\\mathbf{K}$, $\\mathbf{R}$, $\\mathbf{T}$ separately</li>\n</ul>", "answer_md": "- The perspective model decomposes $\\mathbf{P} = \\mathbf{K}[\\mathbf{R}|\\mathbf{T}]$, tying the matrix to physical camera parameters (10 DoF)\n- The projective model treats $\\mathbf{P}$ as a **general $3 \\times 4$ matrix** with no assumed structure (11 DoF)\n- This allows calibrating $\\mathbf{P}$ directly (11 unknowns, 6 points) without knowing $\\mathbf{K}$, $\\mathbf{R}$, $\\mathbf{T}$ separately"}, {"group": "Camera Models", "question": "Draw and label a diagram of weak perspective projection.", "answer_html": "<p style=\"color:#777; font-style:italic;\">No answer provided</p>", "answer_md": ""}, {"group": "Camera Models", "question": "State the weak perspective projection mapping.", "answer_html": "<div class=\"math-display\">$$u=u_0 + \\frac{k_ufX_c}{Z_{av}}=u_0+\\frac{k_uf(r_{11}X+r_{12}Y+r_{13}Z+T_x)}{Z_{av}}$$</div>\n<div class=\"math-display\">$$v=v_0 + \\frac{k_vfY_c}{Z_{av}}=v_0+\\frac{k_vf(r_{21}X+r_{22}Y+r_{23}Z+T_y)}{Z_{av}}$$</div>", "answer_md": "$$u=u_0 + \\frac{k_ufX_c}{Z_{av}}=u_0+\\frac{k_uf(r_{11}X+r_{12}Y+r_{13}Z+T_x)}{Z_{av}}$$\n\n$$v=v_0 + \\frac{k_vfY_c}{Z_{av}}=v_0+\\frac{k_vf(r_{21}X+r_{22}Y+r_{23}Z+T_y)}{Z_{av}}$$"}, {"group": "Camera Models", "question": "Under what viewing conditions is weak perspective a good camera model?", "answer_html": "<ul>\n<li>The depth range $\\Delta Z$ of objects in the scene is small compared with the viewing distance $Z_A$ (i.e. $\\frac{\\Delta Z}{Z_A} \\ll 1$)</li>\n<li>Rule of thumb: viewing distance should be at least 10 times the depth range</li>\n</ul>", "answer_md": "- The depth range $\\Delta Z$ of objects in the scene is small compared with the viewing distance $Z_A$ (i.e. $\\frac{\\Delta Z}{Z_A} \\ll 1$)\n- Rule of thumb: viewing distance should be at least 10 times the depth range"}, {"group": "Camera Models", "question": "What are the advantages of the weak perspective camera model?", "answer_html": "<ul>\n<li>Projection equations become <strong>linear</strong> — $u_i = p_{11}X_i + p_{12}Y_i + p_{13}Z_i + p_{14}$</li>\n<li>Easier to calibrate (fewer points needed — only 4 points)</li>\n<li>Calibration is better conditioned (less sensitive to noise) since it uses linear least squares rather than nonlinear optimisation</li>\n</ul>", "answer_md": "- Projection equations become **linear** — $u_i = p_{11}X_i + p_{12}Y_i + p_{13}Z_i + p_{14}$\n- Easier to calibrate (fewer points needed — only 4 points)\n- Calibration is better conditioned (less sensitive to noise) since it uses linear least squares rather than nonlinear optimisation"}, {"group": "Camera Models", "question": "Derive the weak perspective projection matrix.", "answer_html": "<ul>\n<li>Under weak perspective, assume all points lie at approximately the same depth $Z_A$ from the camera</li>\n</ul>\n<ul>\n<li>The projection matrix becomes:</li>\n</ul>\n<div class=\"math-display\">$$\\begin{bmatrix} f & 0 & 0 & 0 \\\\ 0 & f & 0 & 0 \\\\ 0 & 0 & 1 & 0 \\end{bmatrix} \\to \\begin{bmatrix} f & 0 & 0 & 0 \\\\ 0 & f & 0 & 0 \\\\ 0 & 0 & 0 & Z_A \\end{bmatrix}$$</div>\n<div class=\"math-display\">$$\\begin{bmatrix} su \\\\ sv \\\\ s \\end{bmatrix} = \\begin{bmatrix} k_u f & 0 & 0 & u_0 Z_A \\\\ 0 & k_v f & 0 & v_0 Z_A \\\\ 0 & 0 & 0 & Z_A \\end{bmatrix} \\begin{bmatrix} X_c \\\\ Y_c \\\\ Z_c \\\\ 1 \\end{bmatrix}$$</div>\n<ul>\n<li>Since $s$ is constant, the bottom row is $(0, 0, 0, p_{34})$, giving a <strong>linear</strong> relationship:</li>\n</ul>\n<div class=\"math-display\">$$\\begin{bmatrix} u \\\\ v \\end{bmatrix} = [2 \\times 4] \\begin{bmatrix} X \\\\ Y \\\\ Z \\\\ 1 \\end{bmatrix}$$</div>", "answer_md": "- Under weak perspective, assume all points lie at approximately the same depth $Z_A$ from the camera\n\n- The projection matrix becomes:\n\n$$\\begin{bmatrix} f & 0 & 0 & 0 \\\\ 0 & f & 0 & 0 \\\\ 0 & 0 & 1 & 0 \\end{bmatrix} \\to \\begin{bmatrix} f & 0 & 0 & 0 \\\\ 0 & f & 0 & 0 \\\\ 0 & 0 & 0 & Z_A \\end{bmatrix}$$\n\n$$\\begin{bmatrix} su \\\\ sv \\\\ s \\end{bmatrix} = \\begin{bmatrix} k_u f & 0 & 0 & u_0 Z_A \\\\ 0 & k_v f & 0 & v_0 Z_A \\\\ 0 & 0 & 0 & Z_A \\end{bmatrix} \\begin{bmatrix} X_c \\\\ Y_c \\\\ Z_c \\\\ 1 \\end{bmatrix}$$\n\n- Since $s$ is constant, the bottom row is $(0, 0, 0, p_{34})$, giving a **linear** relationship:\n\n$$\\begin{bmatrix} u \\\\ v \\end{bmatrix} = [2 \\times 4] \\begin{bmatrix} X \\\\ Y \\\\ Z \\\\ 1 \\end{bmatrix}$$"}, {"group": "Camera Models", "question": "Derive the error introduced by the weak perspective approximation.", "answer_html": "<ul>\n<li>Under full perspective: $u = \\frac{k_u f X_c + u_0 Z_c}{Z_c}$</li>\n<li>Under weak perspective: $u_A = \\frac{k_u f X_c + u_0 Z_A}{Z_A}$</li>\n<li>The error is:</li>\n</ul>\n<div class=\"math-display\">$$u - u_A = (u - u_0)\\frac{\\Delta Z}{Z_A}$$</div>\n<div class=\"math-display\">$$v - v_A = (v - v_0)\\frac{\\Delta Z}{Z_A}$$</div>\n<p>where $\\Delta Z \\equiv Z_A - Z_c$</p>\n<ul>\n<li>The approximation is <strong>perfect at the image centre</strong> $(u_0, v_0)$ but gets progressively worse away from the centre</li>\n</ul>", "answer_md": "- Under full perspective: $u = \\frac{k_u f X_c + u_0 Z_c}{Z_c}$\n- Under weak perspective: $u_A = \\frac{k_u f X_c + u_0 Z_A}{Z_A}$\n- The error is:\n\n$$u - u_A = (u - u_0)\\frac{\\Delta Z}{Z_A}$$\n\n$$v - v_A = (v - v_0)\\frac{\\Delta Z}{Z_A}$$\n\nwhere $\\Delta Z \\equiv Z_A - Z_c$\n\n- The approximation is **perfect at the image centre** $(u_0, v_0)$ but gets progressively worse away from the centre"}, {"group": "Homogeneous Coordinates", "question": "How are 2D points represented in homogeneous coordinates? How are points at infinity represented?", "answer_html": "<ul>\n<li>A Cartesian point $(x, y)$ is represented as $\\tilde{\\mathbf{x}} = (x_1, x_2, x_3)^T = (sx, sy, s)^T$ where $s \\neq 0$</li>\n<li>Convert back to Cartesian: $x = x_1/x_3$, $y = x_2/x_3$</li>\n<li><strong>Points at infinity</strong>: $x_3 = 0$, i.e. $(x_1, x_2, 0)^T$ with $x_1 \\neq 0$ or $x_2 \\neq 0$</li>\n<li>$(0, 0, 0)^T$ is undefined</li>\n</ul>", "answer_md": "- A Cartesian point $(x, y)$ is represented as $\\tilde{\\mathbf{x}} = (x_1, x_2, x_3)^T = (sx, sy, s)^T$ where $s \\neq 0$\n- Convert back to Cartesian: $x = x_1/x_3$, $y = x_2/x_3$\n- **Points at infinity**: $x_3 = 0$, i.e. $(x_1, x_2, 0)^T$ with $x_1 \\neq 0$ or $x_2 \\neq 0$\n- $(0, 0, 0)^T$ is undefined"}, {"group": "Homogeneous Coordinates", "question": "How are lines and the line at infinity represented in homogeneous coordinates?", "answer_html": "<ul>\n<li>A line $ax + by + c = 0$ is represented as $\\mathbf{l} = (a, b, c)^T$</li>\n<li>A point $\\tilde{\\mathbf{x}}$ lies on line $\\mathbf{l}$ iff $\\mathbf{l}^T\\tilde{\\mathbf{x}} = 0$</li>\n<li><strong>Line at infinity</strong>: $\\mathbf{l} = (0, 0, c)^T$ where $c \\neq 0$</li>\n</ul>", "answer_md": "- A line $ax + by + c = 0$ is represented as $\\mathbf{l} = (a, b, c)^T$\n- A point $\\tilde{\\mathbf{x}}$ lies on line $\\mathbf{l}$ iff $\\mathbf{l}^T\\tilde{\\mathbf{x}} = 0$\n- **Line at infinity**: $\\mathbf{l} = (0, 0, c)^T$ where $c \\neq 0$"}, {"group": "Homogeneous Coordinates", "question": "How are conics represented in homogeneous coordinates?", "answer_html": "<ul>\n<li>A conic $ax^2 + bxy + cy^2 + dx + ey + f = 0$ is represented as $\\tilde{\\mathbf{x}}^T C \\tilde{\\mathbf{x}} = 0$ where:</li>\n</ul>\n<div class=\"math-display\">$$C = \\begin{bmatrix} a & b/2 & d/2 \\\\ b/2 & c & e/2 \\\\ d/2 & e/2 & f \\end{bmatrix}$$</div>", "answer_md": "- A conic $ax^2 + bxy + cy^2 + dx + ey + f = 0$ is represented as $\\tilde{\\mathbf{x}}^T C \\tilde{\\mathbf{x}} = 0$ where:\n\n$$C = \\begin{bmatrix} a & b/2 & d/2 \\\\ b/2 & c & e/2 \\\\ d/2 & e/2 & f \\end{bmatrix}$$"}, {"group": "Homogeneous Coordinates", "question": "How do you find the intersection point of two lines in homogeneous coordinates?", "answer_html": "<div class=\"math-display\">$$\\tilde{\\mathbf{x}} = \\mathbf{l}_1 \\times \\mathbf{l}_2$$</div>", "answer_md": "$$\\tilde{\\mathbf{x}} = \\mathbf{l}_1 \\times \\mathbf{l}_2$$"}, {"group": "Homogeneous Coordinates", "question": "How do you find the line through two points in homogeneous coordinates?", "answer_html": "<div class=\"math-display\">$$\\mathbf{l} = \\tilde{\\mathbf{x}}_1 \\times \\tilde{\\mathbf{x}}_2$$</div>", "answer_md": "$$\\mathbf{l} = \\tilde{\\mathbf{x}}_1 \\times \\tilde{\\mathbf{x}}_2$$"}, {"group": "Homogeneous Coordinates", "question": "How do you test if three points are collinear, or three lines are concurrent?", "answer_html": "<ul>\n<li><strong>Collinearity</strong>: $\\det[\\tilde{\\mathbf{x}}_1 \\quad \\tilde{\\mathbf{x}}_2 \\quad \\tilde{\\mathbf{x}}_3] = 0$</li>\n<li><strong>Concurrency</strong>: $\\det[\\mathbf{l}_1 \\quad \\mathbf{l}_2 \\quad \\mathbf{l}_3] = 0$</li>\n</ul>", "answer_md": "- **Collinearity**: $\\det[\\tilde{\\mathbf{x}}_1 \\quad \\tilde{\\mathbf{x}}_2 \\quad \\tilde{\\mathbf{x}}_3] = 0$\n- **Concurrency**: $\\det[\\mathbf{l}_1 \\quad \\mathbf{l}_2 \\quad \\mathbf{l}_3] = 0$"}, {"group": "Homogeneous Coordinates", "question": "How do points, lines, and conics transform under a homography $H$?", "answer_html": "<ul>\n<li><strong>Point</strong>: $\\tilde{\\mathbf{x}}' = H\\tilde{\\mathbf{x}}$</li>\n<li><strong>Line</strong>: $\\mathbf{l}' = H^{-T}\\mathbf{l}$</li>\n<li>Derivation: $\\mathbf{l}^T\\tilde{\\mathbf{x}} = 0 \\Rightarrow \\mathbf{l}^T H^{-1}\\tilde{\\mathbf{x}}' = 0 \\Rightarrow (H^{-T}\\mathbf{l})^T\\tilde{\\mathbf{x}}' = 0$</li>\n<li><strong>Conic</strong>: $C' = H^{-T} C H^{-1}$</li>\n</ul>", "answer_md": "- **Point**: $\\tilde{\\mathbf{x}}' = H\\tilde{\\mathbf{x}}$\n- **Line**: $\\mathbf{l}' = H^{-T}\\mathbf{l}$\n  - Derivation: $\\mathbf{l}^T\\tilde{\\mathbf{x}} = 0 \\Rightarrow \\mathbf{l}^T H^{-1}\\tilde{\\mathbf{x}}' = 0 \\Rightarrow (H^{-T}\\mathbf{l})^T\\tilde{\\mathbf{x}}' = 0$\n- **Conic**: $C' = H^{-T} C H^{-1}$"}, {"group": "Homogeneous Coordinates", "question": "How are 3D points represented in homogeneous coordinates? How are points at infinity represented?", "answer_html": "<ul>\n<li>A Cartesian point $(X, Y, Z)$ is represented as $\\tilde{\\mathbf{X}} = (X_1, X_2, X_3, X_4)^T = (\\lambda X, \\lambda Y, \\lambda Z, \\lambda)^T$ where $\\lambda \\neq 0$</li>\n<li>Convert back: $X = X_1/X_4$, $Y = X_2/X_4$, $Z = X_3/X_4$</li>\n<li><strong>Points at infinity</strong>: $X_4 = 0$, i.e. $(X_1, X_2, X_3, 0)^T$ — represents a direction, not a position</li>\n<li>$(0, 0, 0, 0)^T$ is undefined</li>\n</ul>\n<p><strong>Q:</strong> What is the algebraic and geometric significance of the $s$ variable?</p>\n<ul>\n<li>Algebraic = numerator</li>\n<li>Geometric = inverse depth scaling $s=p_{31}X+p_{32}Y+p_{33}Z+p_{34}=Z_{camera}$</li>\n</ul>", "answer_md": "- A Cartesian point $(X, Y, Z)$ is represented as $\\tilde{\\mathbf{X}} = (X_1, X_2, X_3, X_4)^T = (\\lambda X, \\lambda Y, \\lambda Z, \\lambda)^T$ where $\\lambda \\neq 0$\n- Convert back: $X = X_1/X_4$, $Y = X_2/X_4$, $Z = X_3/X_4$\n- **Points at infinity**: $X_4 = 0$, i.e. $(X_1, X_2, X_3, 0)^T$ — represents a direction, not a position\n- $(0, 0, 0, 0)^T$ is undefined\n\n**Q:** What is the algebraic and geometric significance of the $s$ variable?\n\n- Algebraic = numerator\n- Geometric = inverse depth scaling $s=p_{31}X+p_{32}Y+p_{33}Z+p_{34}=Z_{camera}$"}, {"group": "Homogeneous Coordinates", "question": "How are planes and the plane at infinity represented in homogeneous coordinates?", "answer_html": "<ul>\n<li>A plane $aX + bY + cZ = d$ is represented as $\\Pi = (a, b, c, -d)^T$</li>\n<li>A point $\\tilde{\\mathbf{X}}$ lies on plane $\\Pi$ iff $\\Pi^T\\tilde{\\mathbf{X}} = 0$</li>\n<li><strong>Plane at infinity</strong>: $\\Pi = (0, 0, 0, d)^T$ where $d \\neq 0$</li>\n</ul>", "answer_md": "- A plane $aX + bY + cZ = d$ is represented as $\\Pi = (a, b, c, -d)^T$\n- A point $\\tilde{\\mathbf{X}}$ lies on plane $\\Pi$ iff $\\Pi^T\\tilde{\\mathbf{X}} = 0$\n- **Plane at infinity**: $\\Pi = (0, 0, 0, d)^T$ where $d \\neq 0$"}, {"group": "Homogeneous Coordinates", "question": "What is a vanishing point?", "answer_html": "<p>The perspective projection of a point at $\\infty$ in the direction of parallel lines.</p>", "answer_md": "The perspective projection of a point at $\\infty$ in the direction of parallel lines."}, {"group": "Homogeneous Coordinates", "question": "What is the horizon?", "answer_html": "<p>The perspective projection line of parallel planes at $\\infty$.</p>", "answer_md": "The perspective projection line of parallel planes at $\\infty$."}, {"group": "Homogeneous Coordinates", "question": "Using the projection matrix, give expressions for the vanishing point of a line with direction $(b_1, b_2, b_3)$.", "answer_html": "<div class=\"math-display\">$$u_\\infty = \\frac{p_{11}b_1 + p_{12}b_2 + p_{13}b_3}{p_{31}b_1 + p_{32}b_2 + p_{33}b_3}$$</div>\n<div class=\"math-display\">$$v_\\infty = \\frac{p_{21}b_1 + p_{22}b_2 + p_{23}b_3}{p_{31}b_1 + p_{32}b_2 + p_{33}b_3}$$</div>\n<ul>\n<li>All lines with the same direction $\\mathbf{b}$ share the same vanishing point, independent of position $\\mathbf{a}$</li>\n</ul>", "answer_md": "$$u_\\infty = \\frac{p_{11}b_1 + p_{12}b_2 + p_{13}b_3}{p_{31}b_1 + p_{32}b_2 + p_{33}b_3}$$\n\n$$v_\\infty = \\frac{p_{21}b_1 + p_{22}b_2 + p_{23}b_3}{p_{31}b_1 + p_{32}b_2 + p_{33}b_3}$$\n\n- All lines with the same direction $\\mathbf{b}$ share the same vanishing point, independent of position $\\mathbf{a}$"}, {"group": "Homogeneous Coordinates", "question": "Derive the equation of the vanishing line (horizon) of a plane with normal $\\mathbf{n} = (n_x, n_y, n_z)$.", "answer_html": "<ul>\n<li>Consider a plane $\\mathbf{X}_c \\cdot \\mathbf{n} = d$</li>\n<li>Using perspective projection: $\\begin{bmatrix} x \\\\ y \\\\ f \\end{bmatrix} = \\frac{f\\mathbf{X}_c}{Z_c}$</li>\n<li>Taking the scalar product with $\\mathbf{n}$:</li>\n</ul>\n<div class=\"math-display\">$$\\begin{bmatrix} x \\\\ y \\\\ f \\end{bmatrix} \\cdot \\begin{bmatrix} n_x \\\\ n_y \\\\ n_z \\end{bmatrix} = \\frac{fd}{Z_c}$$</div>\n<ul>\n<li>As $Z_c \\to \\infty$, the right side vanishes, giving the horizon line equation:</li>\n</ul>\n<div class=\"math-display\">$$n_x x + n_y y + f n_z = 0$$</div>\n<ul>\n<li>The horizon depends <strong>only on the orientation</strong> of the plane (via $\\mathbf{n}$), not its position — so parallel planes share the same horizon line</li>\n<li><strong>Ground plane special case</strong> ($\\mathbf{n} = (0, 0, 1)$): find $VP_X$ and $VP_Y$ by projecting points at infinity along $X$ and $Y$ directions, then $\\mathbf{l} = VP_X \\times VP_Y$</li>\n</ul>", "answer_md": "- Consider a plane $\\mathbf{X}_c \\cdot \\mathbf{n} = d$\n- Using perspective projection: $\\begin{bmatrix} x \\\\ y \\\\ f \\end{bmatrix} = \\frac{f\\mathbf{X}_c}{Z_c}$\n- Taking the scalar product with $\\mathbf{n}$:\n\n$$\\begin{bmatrix} x \\\\ y \\\\ f \\end{bmatrix} \\cdot \\begin{bmatrix} n_x \\\\ n_y \\\\ n_z \\end{bmatrix} = \\frac{fd}{Z_c}$$\n\n- As $Z_c \\to \\infty$, the right side vanishes, giving the horizon line equation:\n\n$$n_x x + n_y y + f n_z = 0$$\n\n- The horizon depends **only on the orientation** of the plane (via $\\mathbf{n}$), not its position — so parallel planes share the same horizon line\n- **Ground plane special case** ($\\mathbf{n} = (0, 0, 1)$): find $VP_X$ and $VP_Y$ by projecting points at infinity along $X$ and $Y$ directions, then $\\mathbf{l} = VP_X \\times VP_Y$"}, {"group": "Homogeneous Coordinates", "question": "Why are vertical lines in Renaissance paintings usually drawn without vanishing points?", "answer_html": "<ul>\n<li>Renaissance artists generally restricted themselves to projections onto <strong>vertical planes</strong> (since pictures hung on walls)</li>\n<li>Vertical lines in the world are therefore <strong>parallel to the image plane</strong> ($b_z = 0$), so their vanishing point is at infinity — they appear parallel in the image</li>\n<li>However, Renaissance artists understood perspective theory well and would introduce vanishing points for vertical lines when painting <strong>ceiling frescos</strong>, to create the illusion of depth above</li>\n</ul>", "answer_md": "- Renaissance artists generally restricted themselves to projections onto **vertical planes** (since pictures hung on walls)\n- Vertical lines in the world are therefore **parallel to the image plane** ($b_z = 0$), so their vanishing point is at infinity — they appear parallel in the image\n- However, Renaissance artists understood perspective theory well and would introduce vanishing points for vertical lines when painting **ceiling frescos**, to create the illusion of depth above"}, {"group": "Plane Transformations", "question": "Under what conditions does the inter-image transformation become a homography?", "answer_html": "<ul>\n<li>Two conditions (either one is sufficient):</li>\n</ul>\n<ol>\n<li>Camera rotation about its optical centre with no translation ($\\mathbf{T} = 0$): $\\tilde{\\mathbf{w}} = \\mathbf{K}\\mathbf{X}$ and $\\tilde{\\mathbf{w}}' = \\mathbf{K}\\mathbf{R}\\mathbf{X}$, so $\\tilde{\\mathbf{w}}' = \\mathbf{K}\\mathbf{R}\\mathbf{K}^{-1}\\tilde{\\mathbf{w}}$. Independent of depth.</li>\n<li>All scene points lie on a plane (e.g. $Z = 0$): setting $Z = 0$ drops the third column of the $3 \\times 4$ projection matrix, giving a $3 \\times 3$ matrix per view. View 1 maps plane coordinates to image 1 via $\\tilde{\\mathbf{w}} = \\mathbf{H}_1 \\tilde{\\mathbf{X}}_{\\text{plane}}$ and view 2 via $\\tilde{\\mathbf{w}}' = \\mathbf{H}_2 \\tilde{\\mathbf{X}}_{\\text{plane}}$. Eliminating the plane coordinates gives the inter-image homography $\\tilde{\\mathbf{w}}' = \\mathbf{H}_2 \\mathbf{H}_1^{-1} \\tilde{\\mathbf{w}}$.</li>\n</ol>", "answer_md": "- Two conditions (either one is sufficient):\n  1. Camera rotation about its optical centre with no translation ($\\mathbf{T} = 0$): $\\tilde{\\mathbf{w}} = \\mathbf{K}\\mathbf{X}$ and $\\tilde{\\mathbf{w}}' = \\mathbf{K}\\mathbf{R}\\mathbf{X}$, so $\\tilde{\\mathbf{w}}' = \\mathbf{K}\\mathbf{R}\\mathbf{K}^{-1}\\tilde{\\mathbf{w}}$. Independent of depth.\n  2. All scene points lie on a plane (e.g. $Z = 0$): setting $Z = 0$ drops the third column of the $3 \\times 4$ projection matrix, giving a $3 \\times 3$ matrix per view. View 1 maps plane coordinates to image 1 via $\\tilde{\\mathbf{w}} = \\mathbf{H}_1 \\tilde{\\mathbf{X}}_{\\text{plane}}$ and view 2 via $\\tilde{\\mathbf{w}}' = \\mathbf{H}_2 \\tilde{\\mathbf{X}}_{\\text{plane}}$. Eliminating the plane coordinates gives the inter-image homography $\\tilde{\\mathbf{w}}' = \\mathbf{H}_2 \\mathbf{H}_1^{-1} \\tilde{\\mathbf{w}}$."}, {"group": "Plane Transformations", "question": "What are the degrees of freedom of a 2D projective transformation (homography), and what does each correspond to?", "answer_html": "<ul>\n<li>8 DoF total (9 matrix elements minus 1 for scale):</li>\n<li>translation (2)</li>\n<li>rotation (1)</li>\n<li>uniform scale (1)</li>\n<li>shear axis & magnitude (2)</li>\n<li>fanning/perspective (2, specifying horizon line position)</li>\n</ul>", "answer_md": "- 8 DoF total (9 matrix elements minus 1 for scale):\n  - translation (2)\n  - rotation (1)\n  - uniform scale (1)\n  - shear axis & magnitude (2)\n  - fanning/perspective (2, specifying horizon line position)"}, {"group": "Plane Transformations", "question": "What is the matrix form of a 2D homography, and how does it distort a square?", "answer_html": "<div class=\"math-display\">$$\\begin{bmatrix} su \\\\ sv \\\\ s \\end{bmatrix} = \\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\\\ p_{31} & p_{32} & p_{33} \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ 1 \\end{bmatrix}$$</div>\n<ul>\n<li>Distortion: square → arbitrary quadrilateral (parallel lines gain vanishing points)</li>\n</ul>", "answer_md": "$$\\begin{bmatrix} su \\\\ sv \\\\ s \\end{bmatrix} = \\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\\\ p_{31} & p_{32} & p_{33} \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ 1 \\end{bmatrix}$$\n\n- Distortion: square → arbitrary quadrilateral (parallel lines gain vanishing points)"}, {"group": "Plane Transformations", "question": "What geometric properties are preserved (invariant) under a projective transformation?", "answer_html": "<ul>\n<li>Incidence (collinearity) — points on a line remain on a line</li>\n<li>Cross-ratio of four collinear points</li>\n</ul>", "answer_md": "- Incidence (collinearity) — points on a line remain on a line\n- Cross-ratio of four collinear points"}, {"group": "Plane Transformations", "question": "What are the degrees of freedom of a 2D affine transformation?", "answer_html": "<ul>\n<li>6 DoF:</li>\n<li>translation (2)</li>\n<li>rotation (1)</li>\n<li>uniform scale (1)</li>\n<li>shear axis & magnitude (2)</li>\n</ul>", "answer_md": "- 6 DoF:\n  - translation (2)\n  - rotation (1)\n  - uniform scale (1)\n  - shear axis & magnitude (2)"}, {"group": "Plane Transformations", "question": "What is the matrix form of a 2D affine transformation, and how does it distort a square?", "answer_html": "<div class=\"math-display\">$$\\begin{bmatrix} u \\\\ v \\end{bmatrix} = \\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ 1 \\end{bmatrix}$$</div>\n<ul>\n<li>Distortion: square → parallelogram</li>\n</ul>", "answer_md": "$$\\begin{bmatrix} u \\\\ v \\end{bmatrix} = \\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ 1 \\end{bmatrix}$$\n\n- Distortion: square → parallelogram"}, {"group": "Plane Transformations", "question": "What additional geometric properties are preserved under affine (beyond projective)?", "answer_html": "<ul>\n<li>Parallelism</li>\n<li>Length ratios along parallel lines</li>\n<li>Centroids</li>\n</ul>", "answer_md": "- Parallelism\n- Length ratios along parallel lines\n- Centroids"}, {"group": "Plane Transformations", "question": "What are the degrees of freedom of a 2D similarity transformation?", "answer_html": "<ul>\n<li>4 DoF:</li>\n<li>translation (2)</li>\n<li>rotation (1)</li>\n<li>uniform scale (1)</li>\n</ul>", "answer_md": "- 4 DoF:\n  - translation (2)\n  - rotation (1)\n  - uniform scale (1)"}, {"group": "Plane Transformations", "question": "What is the matrix form of a 2D similarity transformation, and how does it distort a square?", "answer_html": "<div class=\"math-display\">$$\\begin{bmatrix} u \\\\ v \\end{bmatrix} = \\begin{bmatrix} s\\cos\\theta & -s\\sin\\theta & t_x \\\\ s\\sin\\theta & s\\cos\\theta & t_y \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ 1 \\end{bmatrix}$$</div>\n<ul>\n<li>Distortion: square → scaled, rotated, translated square</li>\n</ul>", "answer_md": "$$\\begin{bmatrix} u \\\\ v \\end{bmatrix} = \\begin{bmatrix} s\\cos\\theta & -s\\sin\\theta & t_x \\\\ s\\sin\\theta & s\\cos\\theta & t_y \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ 1 \\end{bmatrix}$$\n\n- Distortion: square → scaled, rotated, translated square"}, {"group": "Plane Transformations", "question": "What additional geometric properties are preserved under similarity (beyond affine)?", "answer_html": "<ul>\n<li>Angles</li>\n<li>Length ratios (not just along parallel lines)</li>\n<li>Bilateral symmetry</li>\n</ul>", "answer_md": "- Angles\n- Length ratios (not just along parallel lines)\n- Bilateral symmetry"}, {"group": "Plane Transformations", "question": "What are the degrees of freedom of a 2D Euclidean transformation?", "answer_html": "<ul>\n<li>3 DoF:</li>\n<li>translation (2)</li>\n<li>rotation (1)</li>\n</ul>", "answer_md": "- 3 DoF:\n  - translation (2)\n  - rotation (1)"}, {"group": "Plane Transformations", "question": "What is the matrix form of a 2D Euclidean transformation, and how does it distort a square?", "answer_html": "<div class=\"math-display\">$$\\begin{bmatrix} u \\\\ v \\end{bmatrix} = \\begin{bmatrix} \\cos\\theta & -\\sin\\theta & t_x \\\\ \\sin\\theta & \\cos\\theta & t_y \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ 1 \\end{bmatrix}$$</div>\n<ul>\n<li>Distortion: square → rotated, translated square (same size)</li>\n</ul>", "answer_md": "$$\\begin{bmatrix} u \\\\ v \\end{bmatrix} = \\begin{bmatrix} \\cos\\theta & -\\sin\\theta & t_x \\\\ \\sin\\theta & \\cos\\theta & t_y \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ 1 \\end{bmatrix}$$\n\n- Distortion: square → rotated, translated square (same size)"}, {"group": "Plane Transformations", "question": "What additional geometric properties are preserved under Euclidean (beyond similarity)?", "answer_html": "<ul>\n<li>Lengths (not just ratios)</li>\n</ul>", "answer_md": "- Lengths (not just ratios)"}, {"group": "Calibration", "question": "What is camera calibration?", "answer_html": "<ul>\n<li>Recovering the parameters of the projection matrix $\\mathbf{P} = \\mathbf{K}[\\mathbf{R} | \\mathbf{T}]$</li>\n<li>Intrinsic parameters (4 DoF): focal length products $fk_u$, $fk_v$, principal point $(u_0, v_0)$</li>\n<li>Extrinsic parameters (6 DoF): rotation $\\mathbf{R}$ (3 DoF), translation $\\mathbf{T}$ (3 DoF)</li>\n<li>10 DoF total (11 parameters but $f$ and $k_u, k_v$ cannot be separated)</li>\n</ul>", "answer_md": "- Recovering the parameters of the projection matrix $\\mathbf{P} = \\mathbf{K}[\\mathbf{R} | \\mathbf{T}]$\n- Intrinsic parameters (4 DoF): focal length products $fk_u$, $fk_v$, principal point $(u_0, v_0)$\n- Extrinsic parameters (6 DoF): rotation $\\mathbf{R}$ (3 DoF), translation $\\mathbf{T}$ (3 DoF)\n- 10 DoF total (11 parameters but $f$ and $k_u, k_v$ cannot be separated)"}, {"group": "Calibration", "question": "Derive the calibration equations for estimating the projection matrix from known 3D reference points.", "answer_html": "<ul>\n<li>Use RANSAC to remove outliers before calibration</li>\n<li>Starting from the projection equations:</li>\n</ul>\n<div class=\"math-display\">$$u_i = \\frac{p_{11}X_i + p_{12}Y_i + p_{13}Z_i + p_{14}}{p_{31}X_i + p_{32}Y_i + p_{33}Z_i + p_{34}}$$</div>\n<div class=\"math-display\">$$v_i = \\frac{p_{21}X_i + p_{22}Y_i + p_{23}Z_i + p_{24}}{p_{31}X_i + p_{32}Y_i + p_{33}Z_i + p_{34}}$$</div>\n<ul>\n<li>Rearrange to be linear in the unknown $p_{ij}$:</li>\n</ul>\n<div class=\"math-display\">$$\\begin{bmatrix} X_i & Y_i & Z_i & 1 & 0 & 0 & 0 & 0 & -u_iX_i & -u_iY_i & -u_iZ_i & -u_i \\\\ 0 & 0 & 0 & 0 & X_i & Y_i & Z_i & 1 & -v_iX_i & -v_iY_i & -v_iZ_i & -v_i \\end{bmatrix} \\begin{bmatrix} p_{11} \\\\ p_{12} \\\\ p_{13} \\\\ p_{14} \\\\ p_{21} \\\\ p_{22} \\\\ p_{23} \\\\ p_{24} \\\\ p_{31} \\\\ p_{32} \\\\ p_{33} \\\\ p_{34} \\end{bmatrix} = \\mathbf{0}$$</div>\n<ul>\n<li>Each point gives 2 equations in the 12 unknowns (11 DoF up to scale — fix by setting $|\\mathbf{p}| = 1$ or $p_{34} = 1$)</li>\n<li>Need $\\geq 6$ points. Stack into $2N \\times 12$ matrix: $A\\mathbf{p} \\simeq \\mathbf{0}$</li>\n<li><strong>Linear solution</strong>: find eigenvector of $A^TA$ with smallest eigenvalue (SVD)</li>\n<li><strong>Nonlinear refinement</strong>: use linear solution to initialise gradient descent minimising reprojection error:</li>\n</ul>\n<div class=\"math-display\">$$\\min_{p_{ij}} \\sum_i (u_i - \\hat{u}_i)^2 + (v_i - \\hat{v}_i)^2$$</div>", "answer_md": "- Use RANSAC to remove outliers before calibration\n- Starting from the projection equations:\n\n$$u_i = \\frac{p_{11}X_i + p_{12}Y_i + p_{13}Z_i + p_{14}}{p_{31}X_i + p_{32}Y_i + p_{33}Z_i + p_{34}}$$\n\n$$v_i = \\frac{p_{21}X_i + p_{22}Y_i + p_{23}Z_i + p_{24}}{p_{31}X_i + p_{32}Y_i + p_{33}Z_i + p_{34}}$$\n\n- Rearrange to be linear in the unknown $p_{ij}$:\n\n$$\\begin{bmatrix} X_i & Y_i & Z_i & 1 & 0 & 0 & 0 & 0 & -u_iX_i & -u_iY_i & -u_iZ_i & -u_i \\\\ 0 & 0 & 0 & 0 & X_i & Y_i & Z_i & 1 & -v_iX_i & -v_iY_i & -v_iZ_i & -v_i \\end{bmatrix} \\begin{bmatrix} p_{11} \\\\ p_{12} \\\\ p_{13} \\\\ p_{14} \\\\ p_{21} \\\\ p_{22} \\\\ p_{23} \\\\ p_{24} \\\\ p_{31} \\\\ p_{32} \\\\ p_{33} \\\\ p_{34} \\end{bmatrix} = \\mathbf{0}$$\n\n- Each point gives 2 equations in the 12 unknowns (11 DoF up to scale — fix by setting $|\\mathbf{p}| = 1$ or $p_{34} = 1$)\n- Need $\\geq 6$ points. Stack into $2N \\times 12$ matrix: $A\\mathbf{p} \\simeq \\mathbf{0}$\n- **Linear solution**: find eigenvector of $A^TA$ with smallest eigenvalue (SVD)\n- **Nonlinear refinement**: use linear solution to initialise gradient descent minimising reprojection error:\n\n$$\\min_{p_{ij}} \\sum_i (u_i - \\hat{u}_i)^2 + (v_i - \\hat{v}_i)^2$$"}, {"group": "Calibration", "question": "How is the 2D projective transformation (homography) calibrated?", "answer_html": "<ul>\n<li>Setting $Z = 0$ gives a $3 \\times 3$ matrix with 8 DoF (9 elements minus scale)</li>\n<li>Each correspondence gives 2 equations → need $\\geq 4$ points</li>\n<li>Same method: assemble $A\\mathbf{p} = \\mathbf{0}$, solve by SVD</li>\n<li>Optionally refine with nonlinear optimisation</li>\n</ul>", "answer_md": "- Setting $Z = 0$ gives a $3 \\times 3$ matrix with 8 DoF (9 elements minus scale)\n- Each correspondence gives 2 equations → need $\\geq 4$ points\n- Same method: assemble $A\\mathbf{p} = \\mathbf{0}$, solve by SVD\n- Optionally refine with nonlinear optimisation"}, {"group": "Calibration", "question": "How is a camera calibrated for observing a 1D structure (e.g. points along a line)?", "answer_html": "<ul>\n<li>The mapping is a $3 \\times 2$ matrix with 5 DoF</li>\n<li>Each point gives 2 equations → need $\\geq 3$ points</li>\n<li>Same method: assemble $A\\mathbf{p} = \\mathbf{0}$, solve by SVD</li>\n<li>Optionally refine with nonlinear optimisation</li>\n</ul>", "answer_md": "- The mapping is a $3 \\times 2$ matrix with 5 DoF\n- Each point gives 2 equations → need $\\geq 3$ points\n- Same method: assemble $A\\mathbf{p} = \\mathbf{0}$, solve by SVD\n- Optionally refine with nonlinear optimisation"}, {"group": "Calibration", "question": "Given $u$, determine the position of a point on the line using the calibrated projection matrix.", "answer_html": "<div class=\"math-display\">$$\\begin{bmatrix} su \\\\ s \\end{bmatrix}=\\begin{bmatrix} p_{11} & p_{12} \\\\ p_{31} & p_{32} \\end{bmatrix}\\begin{bmatrix} X \\\\ 1 \\end{bmatrix}$$</div>\n<div class=\"math-display\">$$u=\\frac{su}{s}=\\frac{p_{11}X+p_{12}}{p_{31}X+p_{32}}$$</div>\n<div class=\"math-display\">$$X=\\frac{p_{32}X-p_{12}}{-p_{31}u+p_{11}}$$</div>", "answer_md": "$$\\begin{bmatrix} su \\\\ s \\end{bmatrix}=\\begin{bmatrix} p_{11} & p_{12} \\\\ p_{31} & p_{32} \\end{bmatrix}\\begin{bmatrix} X \\\\ 1 \\end{bmatrix}$$\n\n$$u=\\frac{su}{s}=\\frac{p_{11}X+p_{12}}{p_{31}X+p_{32}}$$\n\n$$X=\\frac{p_{32}X-p_{12}}{-p_{31}u+p_{11}}$$"}, {"group": "Calibration", "question": "Given $u$ and $v$, determine the position of a point on the plane using the calibrated projection matrix.", "answer_html": "<div class=\"math-display\">$$\\begin{bmatrix} u \\\\ v \\\\ 1 \\end{bmatrix}=\\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\\\ p_{31} & p_{32} & p_{33} \\end{bmatrix}\\begin{bmatrix} \\lambda X \\\\ \\lambda Y \\\\ \\lambda \\end{bmatrix}$$</div>\n<div class=\"math-display\">$$\\begin{bmatrix} \\lambda X \\\\ \\lambda Y \\\\ \\lambda \\end{bmatrix}=\\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\\\ p_{31} & p_{32} & p_{33} \\end{bmatrix}^{-1}\\begin{bmatrix} u \\\\ v \\\\ 1 \\end{bmatrix}$$</div>", "answer_md": "$$\\begin{bmatrix} u \\\\ v \\\\ 1 \\end{bmatrix}=\\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\\\ p_{31} & p_{32} & p_{33} \\end{bmatrix}\\begin{bmatrix} \\lambda X \\\\ \\lambda Y \\\\ \\lambda \\end{bmatrix}$$\n\n$$\\begin{bmatrix} \\lambda X \\\\ \\lambda Y \\\\ \\lambda \\end{bmatrix}=\\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\\\ p_{31} & p_{32} & p_{33} \\end{bmatrix}^{-1}\\begin{bmatrix} u \\\\ v \\\\ 1 \\end{bmatrix}$$"}, {"group": "Calibration", "question": "For a calibrated camera, show how a measured image point $(u, v)$ defines a ray in 3D space.", "answer_html": "<div class=\"math-display\">$$u= \\frac{su}{s}=\\frac{p_{11}X+p_{12}Y+p_{13}Z+p_{14}}{p_{31}X+p_{32}Y+p_{33}Z+p_{34}}$$</div>\n<div class=\"math-display\">$$v= \\frac{sv}{s}=\\frac{p_{21}X+p_{22}Y+p_{23}Z+p_{24}}{p_{31}X+p_{32}Y+p_{33}Z+p_{34}}$$</div>\n<ul>\n<li>Rearrange the projection equations to be linear in $(X, Y, Z)$:</li>\n</ul>\n<div class=\"math-display\">$$\\text{Plane 1:} \\quad (p_{11} - up_{31})X + (p_{12} - up_{32})Y + (p_{13} - up_{33})Z + (p_{14} - up_{34}) = 0$$</div>\n<div class=\"math-display\">$$\\text{Plane 2:} \\quad (p_{21} - vp_{31})X + (p_{22} - vp_{32})Y + (p_{23} - vp_{33})Z + (p_{24} - vp_{34}) = 0$$</div>\n<ul>\n<li>These two planes are <strong>not parallel</strong> and their intersection defines a <strong>ray</strong> through the optical centre and the image point</li>\n<li>A single image point gives a ray, not a point — to recover 3D position you need:</li>\n<li><strong>Triangulation</strong> from two or more views, or</li>\n<li>At least <strong>3 point correspondences</strong> with known 3D positions (for pose)</li>\n</ul>", "answer_md": "$$u= \\frac{su}{s}=\\frac{p_{11}X+p_{12}Y+p_{13}Z+p_{14}}{p_{31}X+p_{32}Y+p_{33}Z+p_{34}}$$\n\n$$v= \\frac{sv}{s}=\\frac{p_{21}X+p_{22}Y+p_{23}Z+p_{24}}{p_{31}X+p_{32}Y+p_{33}Z+p_{34}}$$\n\n- Rearrange the projection equations to be linear in $(X, Y, Z)$:\n\n$$\\text{Plane 1:} \\quad (p_{11} - up_{31})X + (p_{12} - up_{32})Y + (p_{13} - up_{33})Z + (p_{14} - up_{34}) = 0$$\n\n$$\\text{Plane 2:} \\quad (p_{21} - vp_{31})X + (p_{22} - vp_{32})Y + (p_{23} - vp_{33})Z + (p_{24} - vp_{34}) = 0$$\n\n- These two planes are **not parallel** and their intersection defines a **ray** through the optical centre and the image point\n- A single image point gives a ray, not a point — to recover 3D position you need:\n  - **Triangulation** from two or more views, or\n  - At least **3 point correspondences** with known 3D positions (for pose)"}, {"group": "Calibration", "question": "Why are more correspondences preferred than the minimum?", "answer_html": "<ul>\n<li>Measurements are noisy — more points improve robustness via least squares</li>\n<li>The linear solution is only approximate — more data enables better nonlinear refinement</li>\n</ul>", "answer_md": "- Measurements are noisy — more points improve robustness via least squares\n- The linear solution is only approximate — more data enables better nonlinear refinement"}, {"group": "Calibration", "question": "Why is nonlinear optimisation needed when the calibration equations are linear in $p_{ij}$?", "answer_html": "<ul>\n<li>SVD minimises the <strong>algebraic error</strong> $|A\\mathbf{p}|$, which is not the same as the <strong>reprojection error</strong> $(u_i - \\hat{u}_i)^2 + (v_i - \\hat{v}_i)^2$</li>\n<li>The reprojection error is nonlinear in $p_{ij}$ because of the division by $p_{31}X + p_{32}Y + p_{33}Z + p_{34}$</li>\n<li>For <strong>weak perspective</strong>, the mapping is truly linear (no division), so linear least squares is optimal and no nonlinear refinement is needed</li>\n</ul>", "answer_md": "- SVD minimises the **algebraic error** $|A\\mathbf{p}|$, which is not the same as the **reprojection error** $(u_i - \\hat{u}_i)^2 + (v_i - \\hat{v}_i)^2$\n- The reprojection error is nonlinear in $p_{ij}$ because of the division by $p_{31}X + p_{32}Y + p_{33}Z + p_{34}$\n- For **weak perspective**, the mapping is truly linear (no division), so linear least squares is optimal and no nonlinear refinement is needed"}, {"group": "Calibration", "question": "Describe desirable properties of the calibration object.", "answer_html": "<ul>\n<li>Reference points must span a <strong>3D volume</strong> — they must <strong>not</strong> be coplanar (otherwise one column of $\\mathbf{P}$ is not constrained and the system is degenerate)</li>\n<li>Points should span different depths and cover a large field of view</li>\n<li>Should allow precise localisation of reference points (e.g. corners of a calibration pattern)</li>\n<li>Using a table of adjustable height exercises all degrees of freedom</li>\n</ul>", "answer_md": "- Reference points must span a **3D volume** — they must **not** be coplanar (otherwise one column of $\\mathbf{P}$ is not constrained and the system is degenerate)\n- Points should span different depths and cover a large field of view\n- Should allow precise localisation of reference points (e.g. corners of a calibration pattern)\n- Using a table of adjustable height exercises all degrees of freedom"}, {"group": "Calibration", "question": "Show how to recover the camera position, orientation, and focal length from the projection matrix.", "answer_html": "<ul>\n<li>We know $\\mathbf{P} = \\mathbf{K}[\\mathbf{R} | \\mathbf{T}] = [\\mathbf{K}\\mathbf{R} | \\mathbf{K}\\mathbf{T}]$, so:</li>\n</ul>\n<div class=\"math-display\">$$\\begin{bmatrix} p_{11} & p_{12} & p_{13} & p_{14} \\\\ p_{21} & p_{22} & p_{23} & p_{24} \\\\ p_{31} & p_{32} & p_{33} & p_{34} \\end{bmatrix} = \\begin{bmatrix} & \\mathbf{K}\\mathbf{R} & & \\mathbf{K}\\mathbf{T} \\end{bmatrix}$$</div>\n<ul>\n<li>Extract the left $3 \\times 3$ sub-matrix $\\mathbf{M} = \\mathbf{K}\\mathbf{R} = \\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\\\ p_{31} & p_{32} & p_{33} \\end{bmatrix}$</li>\n<li><strong>RQ decompose</strong> $\\mathbf{M}$ into $\\mathbf{K}$ (upper triangular) $\\times$ $\\mathbf{R}$ (orthogonal) — this separates the intrinsic and extrinsic parameters</li>\n<li>Recover position from the last column:</li>\n<div class=\"math-display\">$$\\mathbf{T} = \\mathbf{K}^{-1} \\begin{bmatrix} p_{14} \\\\ p_{24} \\\\ p_{34} \\end{bmatrix}$$</div>\n<li>Read off parameters from $\\mathbf{K} = \\begin{bmatrix} fk_u & 0 & u_0 \\\\ 0 & fk_v & v_0 \\\\ 0 & 0 & 1 \\end{bmatrix}$:</li>\n<li>$fk_u = K_{11}$, $fk_v = K_{22}$ — cannot decouple $f$ from $k_u, k_v$</li>\n<li>$(u_0, v_0) = (K_{13}, K_{23})$ — principal point</li>\n<li>$\\mathbf{R}$ — camera orientation (3 DoF)</li>\n<li>$\\mathbf{T}$ — camera position (3 DoF)</li>\n</ul>", "answer_md": "- We know $\\mathbf{P} = \\mathbf{K}[\\mathbf{R} | \\mathbf{T}] = [\\mathbf{K}\\mathbf{R} | \\mathbf{K}\\mathbf{T}]$, so:\n\n$$\\begin{bmatrix} p_{11} & p_{12} & p_{13} & p_{14} \\\\ p_{21} & p_{22} & p_{23} & p_{24} \\\\ p_{31} & p_{32} & p_{33} & p_{34} \\end{bmatrix} = \\begin{bmatrix} & \\mathbf{K}\\mathbf{R} & & \\mathbf{K}\\mathbf{T} \\end{bmatrix}$$\n\n- Extract the left $3 \\times 3$ sub-matrix $\\mathbf{M} = \\mathbf{K}\\mathbf{R} = \\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\\\ p_{31} & p_{32} & p_{33} \\end{bmatrix}$\n- **RQ decompose** $\\mathbf{M}$ into $\\mathbf{K}$ (upper triangular) $\\times$ $\\mathbf{R}$ (orthogonal) — this separates the intrinsic and extrinsic parameters\n- Recover position from the last column:\n$$\\mathbf{T} = \\mathbf{K}^{-1} \\begin{bmatrix} p_{14} \\\\ p_{24} \\\\ p_{34} \\end{bmatrix}$$\n- Read off parameters from $\\mathbf{K} = \\begin{bmatrix} fk_u & 0 & u_0 \\\\ 0 & fk_v & v_0 \\\\ 0 & 0 & 1 \\end{bmatrix}$:\n  - $fk_u = K_{11}$, $fk_v = K_{22}$ — cannot decouple $f$ from $k_u, k_v$\n  - $(u_0, v_0) = (K_{13}, K_{23})$ — principal point\n  - $\\mathbf{R}$ — camera orientation (3 DoF)\n  - $\\mathbf{T}$ — camera position (3 DoF)"}, {"group": "Calibration", "question": "What is the significance of nonlinear distortion on calibration?", "answer_html": "<ul>\n<li>Nonlinear distortion (e.g. radial lens distortion) is <strong>not included</strong> in the projective camera model</li>\n<li>Any residuals remaining after least squares calibration are partly due to nonlinear distortion, as well as errors in localising corners in the image and world</li>\n</ul>", "answer_md": "- Nonlinear distortion (e.g. radial lens distortion) is **not included** in the projective camera model\n- Any residuals remaining after least squares calibration are partly due to nonlinear distortion, as well as errors in localising corners in the image and world"}, {"group": "Image Mosaicking", "question": "Show that when a camera is rotated about its optical centre, all image points undergo a 2D projective transformation independent of depth.", "answer_html": "<ul>\n<li>Before rotation (camera aligned with world): $\\tilde{\\mathbf{w}} = \\mathbf{K}[I | O]\\tilde{\\mathbf{X}} = \\mathbf{K}\\mathbf{X}$, so $\\mathbf{X} = \\mathbf{K}^{-1}\\tilde{\\mathbf{w}}$</li>\n<li>After rotation by $\\mathbf{R}$ about the optical centre: $\\tilde{\\mathbf{w}}' = \\mathbf{K}[\\mathbf{R} | O]\\tilde{\\mathbf{X}} = \\mathbf{K}\\mathbf{R}\\mathbf{X}$</li>\n<li>Substituting:</li>\n</ul>\n<div class=\"math-display\">$$\\tilde{\\mathbf{w}}' = \\mathbf{K}\\mathbf{R}\\mathbf{K}^{-1}\\tilde{\\mathbf{w}}$$</div>\n<ul>\n<li>This is a $3 \\times 3$ projective transformation that depends on $\\mathbf{K}$ and $\\mathbf{R}$ but <strong>not on depth</strong> — every point in the scene transforms the same way</li>\n</ul>", "answer_md": "- Before rotation (camera aligned with world): $\\tilde{\\mathbf{w}} = \\mathbf{K}[I | O]\\tilde{\\mathbf{X}} = \\mathbf{K}\\mathbf{X}$, so $\\mathbf{X} = \\mathbf{K}^{-1}\\tilde{\\mathbf{w}}$\n- After rotation by $\\mathbf{R}$ about the optical centre: $\\tilde{\\mathbf{w}}' = \\mathbf{K}[\\mathbf{R} | O]\\tilde{\\mathbf{X}} = \\mathbf{K}\\mathbf{R}\\mathbf{X}$\n- Substituting:\n\n$$\\tilde{\\mathbf{w}}' = \\mathbf{K}\\mathbf{R}\\mathbf{K}^{-1}\\tilde{\\mathbf{w}}$$\n\n- This is a $3 \\times 3$ projective transformation that depends on $\\mathbf{K}$ and $\\mathbf{R}$ but **not on depth** — every point in the scene transforms the same way"}, {"group": "Image Mosaicking", "question": "Describe how to produce a mosaic composite image from a sequence of photographs.", "answer_html": "<ol>\n<li>Rotate the camera about the optical centre, acquiring a sequence of images with <strong>~50% overlap</strong> between consecutive frames</li>\n<li>For each consecutive pair, identify at least 4 corresponding points in the overlap region</li>\n<li>Estimate the homography $P$ using correspondences: assemble $A\\mathbf{p} = \\mathbf{0}$, solve by SVD. Use RANSAC to handle outliers</li>\n<li><strong>Warp</strong> one image into the coordinate frame of the other by finding the grey level $I(\\tilde{\\mathbf{w}})$ in the second image associated with each pixel $\\tilde{\\mathbf{w}}'$ in the first image's frame</li>\n<li><strong>Blend</strong> the overlap region to avoid visible seams</li>\n<li>Repeat for all pairs, chaining transformations to display the entire sequence in a single frame</li>\n</ol>\n<ul>\n<li><strong>Defect — parallax</strong>: if the rotation axis does not pass through the optical centre, nearby objects shift differently from distant objects, causing ghosting/blurring (the projective model assumes depth-independent transformation)</li>\n<li><strong>Defect — rolling shutter</strong>: the sensor reads out rows sequentially, so fast camera motion during exposure causes geometric distortion (straight lines appear curved)</li>\n</ul>", "answer_md": "1. Rotate the camera about the optical centre, acquiring a sequence of images with **~50% overlap** between consecutive frames\n2. For each consecutive pair, identify at least 4 corresponding points in the overlap region\n3. Estimate the homography $P$ using correspondences: assemble $A\\mathbf{p} = \\mathbf{0}$, solve by SVD. Use RANSAC to handle outliers\n4. **Warp** one image into the coordinate frame of the other by finding the grey level $I(\\tilde{\\mathbf{w}})$ in the second image associated with each pixel $\\tilde{\\mathbf{w}}'$ in the first image's frame\n5. **Blend** the overlap region to avoid visible seams\n6. Repeat for all pairs, chaining transformations to display the entire sequence in a single frame\n\n- **Defect — parallax**: if the rotation axis does not pass through the optical centre, nearby objects shift differently from distant objects, causing ghosting/blurring (the projective model assumes depth-independent transformation)\n- **Defect — rolling shutter**: the sensor reads out rows sequentially, so fast camera motion during exposure causes geometric distortion (straight lines appear curved)"}, {"group": "Image Mosaicking", "question": "How is camera pose recovered in real-time for AR?", "answer_html": "<ul>\n<li>Assume known intrinsic parameters $\\mathbf{K}$ (fixed phone camera)</li>\n<li>Detect features (corners or FAST keypoints) and track by normalised correlation between frames</li>\n<li>Use planar markers (e.g. ARtoolkit / Zappar codes) for initial calibration — need $\\geq 4$ coplanar points</li>\n<li>Estimate homography $H = \\mathbf{K}[\\mathbf{r}_1, \\mathbf{r}_2, \\mathbf{t}]$ from the marker, recover $\\mathbf{r}_3 = \\mathbf{r}_1 \\times \\mathbf{r}_2$</li>\n<li>Decompose to get camera pose ($\\mathbf{R}$, $\\mathbf{t}$); approximate orientation can also come from IMU/gyroscopes</li>\n<li>Render computer-generated content using the recovered projection matrix $\\mathbf{K}[\\mathbf{R} | \\mathbf{t}]$</li>\n</ul>", "answer_md": "- Assume known intrinsic parameters $\\mathbf{K}$ (fixed phone camera)\n- Detect features (corners or FAST keypoints) and track by normalised correlation between frames\n- Use planar markers (e.g. ARtoolkit / Zappar codes) for initial calibration — need $\\geq 4$ coplanar points\n- Estimate homography $H = \\mathbf{K}[\\mathbf{r}_1, \\mathbf{r}_2, \\mathbf{t}]$ from the marker, recover $\\mathbf{r}_3 = \\mathbf{r}_1 \\times \\mathbf{r}_2$\n- Decompose to get camera pose ($\\mathbf{R}$, $\\mathbf{t}$); approximate orientation can also come from IMU/gyroscopes\n- Render computer-generated content using the recovered projection matrix $\\mathbf{K}[\\mathbf{R} | \\mathbf{t}]$"}, {"group": "Ransac", "question": "Describe the RANSAC (Random Sample Consensus) algorithm for finding consistent matches in the presence of outliers.", "answer_html": "<ol>\n<li><strong>Select</strong> a minimal random sample of correspondences (e.g. 4 points for a homography)</li>\n<li><strong>Compute</strong> the transformation (e.g. homography $H$) from this minimal sample</li>\n<li><strong>Count inliers</strong> — the number of correspondences that are consistent with the computed transformation (i.e. reprojection error below a threshold)</li>\n<li><strong>Repeat</strong> steps 1--3 for $T$ iterations</li>\n<li><strong>Return</strong> the transformation with the maximum number of inliers</li>\n<li>Optionally re-estimate the transformation using all inliers (e.g. via least squares)</li>\n</ol>", "answer_md": "1. **Select** a minimal random sample of correspondences (e.g. 4 points for a homography)\n2. **Compute** the transformation (e.g. homography $H$) from this minimal sample\n3. **Count inliers** — the number of correspondences that are consistent with the computed transformation (i.e. reprojection error below a threshold)\n4. **Repeat** steps 1--3 for $T$ iterations\n5. **Return** the transformation with the maximum number of inliers\n6. Optionally re-estimate the transformation using all inliers (e.g. via least squares)"}, {"group": "Ransac", "question": "Estimate how many iterations $T$ of RANSAC are required to yield a good solution with probability $P_0$, given that the probability of a random match being spurious is $\\rho$.", "answer_html": "<ul>\n<li>Let $n$ be the number of points in the minimal sample (e.g. $n = 4$ for a homography)</li>\n<li>Probability that all $n$ selected points are inliers: $(1 - \\rho)^n$</li>\n<li>Probability that at least one selected point is an outlier (bad sample): $1 - (1 - \\rho)^n$</li>\n<li>Probability that all $T$ samples are bad: $[1 - (1 - \\rho)^n]^T$</li>\n<li>We require the probability of at least one good sample to be $\\geq P_0$:</li>\n</ul>\n<div class=\"math-display\">$$1 - [1 - (1 - \\rho)^n]^T \\geq P_0$$</div>\n<ul>\n<li>Solving for $T$:</li>\n</ul>\n<div class=\"math-display\">$$T \\geq \\frac{\\log(1 - P_0)}{\\log(1 - (1 - \\rho)^n)}$$</div>\n<ul>\n<li><strong>Assumptions</strong>: each point is independently drawn; outliers are randomly distributed; a single all-inlier sample suffices to compute a good transformation</li>\n</ul>", "answer_md": "- Let $n$ be the number of points in the minimal sample (e.g. $n = 4$ for a homography)\n- Probability that all $n$ selected points are inliers: $(1 - \\rho)^n$\n- Probability that at least one selected point is an outlier (bad sample): $1 - (1 - \\rho)^n$\n- Probability that all $T$ samples are bad: $[1 - (1 - \\rho)^n]^T$\n- We require the probability of at least one good sample to be $\\geq P_0$:\n\n$$1 - [1 - (1 - \\rho)^n]^T \\geq P_0$$\n\n- Solving for $T$:\n\n$$T \\geq \\frac{\\log(1 - P_0)}{\\log(1 - (1 - \\rho)^n)}$$\n\n- **Assumptions**: each point is independently drawn; outliers are randomly distributed; a single all-inlier sample suffices to compute a good transformation"}, {"group": "Ransac", "question": "Why is RANSAC preferred over standard least squares for estimating transformations from feature correspondences?", "answer_html": "<ul>\n<li>Feature matching produces <strong>outliers</strong> (incorrect correspondences) that can severely bias a least squares estimate</li>\n<li>RANSAC is <strong>robust to outliers</strong> — it finds the largest consensus set of inliers before estimating the transformation</li>\n<li>Least squares minimises total error across all points (including outliers); RANSAC first identifies which points are consistent, then fits only to those</li>\n</ul>", "answer_md": "- Feature matching produces **outliers** (incorrect correspondences) that can severely bias a least squares estimate\n- RANSAC is **robust to outliers** — it finds the largest consensus set of inliers before estimating the transformation\n- Least squares minimises total error across all points (including outliers); RANSAC first identifies which points are consistent, then fits only to those"}];
-const GROUPS = ["Camera Models", "Homogeneous Coordinates", "Plane Transformations", "Calibration", "Image Mosaicking", "Ransac"];
+// ── Data ──
+const DECKS = {"Camera Models": [{"q": "Draw and label a diagram of orthographic projection.", "a": ""}, {"q": "State the orthographic projection mapping.", "a": "$$\\mathbf{x} = \\mathbf{X} - (\\mathbf{X} \\cdot \\mathbf{k})\\mathbf{k} = (\\mathbf{k} \\times \\mathbf{X}) \\times \\mathbf{k}$$\n\n- When the optical axis is aligned with $Z$: $(x, y) = (X, Y)$ — simply drop the depth coordinate"}, {"q": "What are the assumptions of orthographic projection?", "a": "- Projection rays are parallel (equivalent to the camera being infinitely far from the scene, or the scene having negligible depth variation)\n- No perspective foreshortening — objects do not appear smaller with increasing distance from the camera"}, {"q": "What are the problems with orthographic projection?", "a": "- Does not explain the convergence of parallel lines observed in real CCD camera images (e.g. railway tracks, buildings)"}, {"q": "Draw and label a diagram of perspective (pin-hole camera) projection.", "a": ""}, {"q": "State the perspective projection.", "a": "$$u=u_0 + \\frac{k_ufX_c}{Z_c}=u_0+\\frac{k_uf(r_{11}X+r_{12}Y+r_{13}Z+T_x)}{r_{31}X+r_{32}Y+r_{33}Z+T_z}$$\n\n$$v=v_0 + \\frac{k_vfY_c}{Z_c}=v_0+\\frac{k_vf(r_{21}X+r_{22}Y+r_{23}Z+T_y)}{r_{31}X+r_{32}Y+r_{33}Z+T_z}$$"}, {"q": "What are the assumptions of the perspective projection model?", "a": "- Pin-hole camera (= planar perspective projection) — projecting through a single point onto a flat image plane\n- No nonlinear distortion — no radial lens distortion or other aberrations that cause deviations from the ideal pin-hole model (a real-lens constraint)\n- Together these ensure a line in the world projects to a line in the image"}, {"q": "Derive the perspective projection, identifying all internal and external camera parameters.", "a": "- Rigid body motion\n\n$$\\mathbf{X}_c=\\mathbf{R}\\mathbf{X}+\\mathbf{T}$$\n$$\\tilde{\\mathbf{X}}_c = \\begin{bmatrix} \\mathbf{R} & \\mathbf{T} \\\\ 0\\ 0\\ 0 & 1 \\end{bmatrix} \\tilde{\\mathbf{X}}$$\n\n- Projection (similar triangles)\n\n$$x=\\frac{fX_c}{Z_c}$$\n$$y=\\frac{fY_c}{Z_c}$$\n\n$$\\begin{bmatrix} sx \\\\ sy \\\\ s \\end{bmatrix} = \\begin{bmatrix} f & 0 & 0 & 0 \\\\ 0 & f & 0 & 0 \\\\ 0 & 0 & 1 & 0 \\end{bmatrix} \\begin{bmatrix} X_c \\\\ Y_c \\\\ Z_c \\\\ 1 \\end{bmatrix}$$\n\n- **CCD imaging** (image plane to pixel coordinates):\n\n$$u=u_0 + k_ux $$\n$$v=v_0+k_vy $$\n\n$$\\begin{bmatrix} su \\\\ sv \\\\ s \\end{bmatrix} = \\begin{bmatrix} k_u & 0 & u_0 \\\\ 0 & k_v & v_0 \\\\ 0 & 0 & 1 \\end{bmatrix} \\begin{bmatrix} sx \\\\ sy \\\\ s \\end{bmatrix}$$\n\n- **Overall**: $\\tilde{\\mathbf{w}} = \\mathbf{K}[\\mathbf{R} | \\mathbf{T}]\\tilde{\\mathbf{X}}$ where $\\mathbf{P} = \\mathbf{K}[\\mathbf{R} | \\mathbf{T}]$ is the $3 \\times 4$ projection matrix\n- **Internal parameters**\n  - $f$ (focal length)\n  - $(u_0, v_0)$ (principal point)\n  - $k_u, k_v$ (pixels per unit length)\n- **External parameters**: \n  - $\\mathbf{R}$ (orientation, 3 DoF)\n  - $\\mathbf{T}$ (position, 3 DoF)"}, {"q": "Why is the projective extension of the perspective model needed?", "a": "- The perspective model decomposes $\\mathbf{P} = \\mathbf{K}[\\mathbf{R}|\\mathbf{T}]$, tying the matrix to physical camera parameters (10 DoF)\n- The projective model treats $\\mathbf{P}$ as a **general $3 \\times 4$ matrix** with no assumed structure (11 DoF)\n- This allows calibrating $\\mathbf{P}$ directly (11 unknowns, 6 points) without knowing $\\mathbf{K}$, $\\mathbf{R}$, $\\mathbf{T}$ separately"}, {"q": "Draw and label a diagram of weak perspective projection.", "a": ""}, {"q": "State the weak perspective projection mapping.", "a": "$$u=u_0 + \\frac{k_ufX_c}{Z_{av}}=u_0+\\frac{k_uf(r_{11}X+r_{12}Y+r_{13}Z+T_x)}{Z_{av}}$$\n\n$$v=v_0 + \\frac{k_vfY_c}{Z_{av}}=v_0+\\frac{k_vf(r_{21}X+r_{22}Y+r_{23}Z+T_y)}{Z_{av}}$$"}, {"q": "Under what viewing conditions is weak perspective a good camera model?", "a": "- The depth range $\\Delta Z$ of objects in the scene is small compared with the viewing distance $Z_A$ (i.e. $\\frac{\\Delta Z}{Z_A} \\ll 1$)\n- Rule of thumb: viewing distance should be at least 10 times the depth range"}, {"q": "What are the advantages of the weak perspective camera model?", "a": "- Projection equations become **linear** — $u_i = p_{11}X_i + p_{12}Y_i + p_{13}Z_i + p_{14}$\n- Easier to calibrate (fewer points needed — only 4 points)\n- Calibration is better conditioned (less sensitive to noise) since it uses linear least squares rather than nonlinear optimisation"}, {"q": "Derive the weak perspective projection matrix.", "a": "- Under weak perspective, assume all points lie at approximately the same depth $Z_A$ from the camera\n\n- The projection matrix becomes:\n\n$$\\begin{bmatrix} f & 0 & 0 & 0 \\\\ 0 & f & 0 & 0 \\\\ 0 & 0 & 1 & 0 \\end{bmatrix} \\to \\begin{bmatrix} f & 0 & 0 & 0 \\\\ 0 & f & 0 & 0 \\\\ 0 & 0 & 0 & Z_A \\end{bmatrix}$$\n\n$$\\begin{bmatrix} su \\\\ sv \\\\ s \\end{bmatrix} = \\begin{bmatrix} k_u f & 0 & 0 & u_0 Z_A \\\\ 0 & k_v f & 0 & v_0 Z_A \\\\ 0 & 0 & 0 & Z_A \\end{bmatrix} \\begin{bmatrix} X_c \\\\ Y_c \\\\ Z_c \\\\ 1 \\end{bmatrix}$$\n\n- Since $s$ is constant, the bottom row is $(0, 0, 0, p_{34})$, giving a **linear** relationship:\n\n$$\\begin{bmatrix} u \\\\ v \\end{bmatrix} = [2 \\times 4] \\begin{bmatrix} X \\\\ Y \\\\ Z \\\\ 1 \\end{bmatrix}$$"}, {"q": "Derive the error introduced by the weak perspective approximation.", "a": "- Under full perspective: $u = \\frac{k_u f X_c + u_0 Z_c}{Z_c}$\n- Under weak perspective: $u_A = \\frac{k_u f X_c + u_0 Z_A}{Z_A}$\n- The error is:\n\n$$u - u_A = (u - u_0)\\frac{\\Delta Z}{Z_A}$$\n\n$$v - v_A = (v - v_0)\\frac{\\Delta Z}{Z_A}$$\n\nwhere $\\Delta Z \\equiv Z_A - Z_c$\n\n- The approximation is **perfect at the image centre** $(u_0, v_0)$ but gets progressively worse away from the centre"}], "Homogeneous Coordinates": [{"q": "How are 2D points represented in homogeneous coordinates? How are points at infinity represented?", "a": "- A Cartesian point $(x, y)$ is represented as $\\tilde{\\mathbf{x}} = (x_1, x_2, x_3)^T = (sx, sy, s)^T$ where $s \\neq 0$\n- Convert back to Cartesian: $x = x_1/x_3$, $y = x_2/x_3$\n- **Points at infinity**: $x_3 = 0$, i.e. $(x_1, x_2, 0)^T$ with $x_1 \\neq 0$ or $x_2 \\neq 0$\n- $(0, 0, 0)^T$ is undefined"}, {"q": "How are lines and the line at infinity represented in homogeneous coordinates?", "a": "- A line $ax + by + c = 0$ is represented as $\\mathbf{l} = (a, b, c)^T$\n- A point $\\tilde{\\mathbf{x}}$ lies on line $\\mathbf{l}$ iff $\\mathbf{l}^T\\tilde{\\mathbf{x}} = 0$\n- **Line at infinity**: $\\mathbf{l} = (0, 0, c)^T$ where $c \\neq 0$"}, {"q": "How are conics represented in homogeneous coordinates?", "a": "- A conic $ax^2 + bxy + cy^2 + dx + ey + f = 0$ is represented as $\\tilde{\\mathbf{x}}^T C \\tilde{\\mathbf{x}} = 0$ where:\n\n$$C = \\begin{bmatrix} a & b/2 & d/2 \\\\ b/2 & c & e/2 \\\\ d/2 & e/2 & f \\end{bmatrix}$$"}, {"q": "How do you find the intersection point of two lines in homogeneous coordinates?", "a": "$$\\tilde{\\mathbf{x}} = \\mathbf{l}_1 \\times \\mathbf{l}_2$$"}, {"q": "How do you find the line through two points in homogeneous coordinates?", "a": "$$\\mathbf{l} = \\tilde{\\mathbf{x}}_1 \\times \\tilde{\\mathbf{x}}_2$$"}, {"q": "How do you test if three points are collinear, or three lines are concurrent?", "a": "- **Collinearity**: $\\det[\\tilde{\\mathbf{x}}_1 \\quad \\tilde{\\mathbf{x}}_2 \\quad \\tilde{\\mathbf{x}}_3] = 0$\n- **Concurrency**: $\\det[\\mathbf{l}_1 \\quad \\mathbf{l}_2 \\quad \\mathbf{l}_3] = 0$"}, {"q": "How do points, lines, and conics transform under a homography $H$?", "a": "- **Point**: $\\tilde{\\mathbf{x}}' = H\\tilde{\\mathbf{x}}$\n- **Line**: $\\mathbf{l}' = H^{-T}\\mathbf{l}$\n  - Derivation: $\\mathbf{l}^T\\tilde{\\mathbf{x}} = 0 \\Rightarrow \\mathbf{l}^T H^{-1}\\tilde{\\mathbf{x}}' = 0 \\Rightarrow (H^{-T}\\mathbf{l})^T\\tilde{\\mathbf{x}}' = 0$\n- **Conic**: $C' = H^{-T} C H^{-1}$"}, {"q": "How are 3D points represented in homogeneous coordinates? How are points at infinity represented?", "a": "- A Cartesian point $(X, Y, Z)$ is represented as $\\tilde{\\mathbf{X}} = (X_1, X_2, X_3, X_4)^T = (\\lambda X, \\lambda Y, \\lambda Z, \\lambda)^T$ where $\\lambda \\neq 0$\n- Convert back: $X = X_1/X_4$, $Y = X_2/X_4$, $Z = X_3/X_4$\n- **Points at infinity**: $X_4 = 0$, i.e. $(X_1, X_2, X_3, 0)^T$ — represents a direction, not a position\n- $(0, 0, 0, 0)^T$ is undefined\n\n**Q:** What is the algebraic and geometric significance of the $s$ variable?\n\n- Algebraic = numerator\n- Geometric = inverse depth scaling $s=p_{31}X+p_{32}Y+p_{33}Z+p_{34}=Z_{camera}$"}, {"q": "How are planes and the plane at infinity represented in homogeneous coordinates?", "a": "- A plane $aX + bY + cZ = d$ is represented as $\\Pi = (a, b, c, -d)^T$\n- A point $\\tilde{\\mathbf{X}}$ lies on plane $\\Pi$ iff $\\Pi^T\\tilde{\\mathbf{X}} = 0$\n- **Plane at infinity**: $\\Pi = (0, 0, 0, d)^T$ where $d \\neq 0$"}, {"q": "What is a vanishing point?", "a": "The perspective projection of a point at $\\infty$ in the direction of parallel lines."}, {"q": "What is the horizon?", "a": "The perspective projection line of parallel planes at $\\infty$."}, {"q": "Using the projection matrix, give expressions for the vanishing point of a line with direction $(b_1, b_2, b_3)$.", "a": "$$u_\\infty = \\frac{p_{11}b_1 + p_{12}b_2 + p_{13}b_3}{p_{31}b_1 + p_{32}b_2 + p_{33}b_3}$$\n\n$$v_\\infty = \\frac{p_{21}b_1 + p_{22}b_2 + p_{23}b_3}{p_{31}b_1 + p_{32}b_2 + p_{33}b_3}$$\n\n- All lines with the same direction $\\mathbf{b}$ share the same vanishing point, independent of position $\\mathbf{a}$"}, {"q": "Derive the equation of the vanishing line (horizon) of a plane with normal $\\mathbf{n} = (n_x, n_y, n_z)$.", "a": "- Consider a plane $\\mathbf{X}_c \\cdot \\mathbf{n} = d$\n- Using perspective projection: $\\begin{bmatrix} x \\\\ y \\\\ f \\end{bmatrix} = \\frac{f\\mathbf{X}_c}{Z_c}$\n- Taking the scalar product with $\\mathbf{n}$:\n\n$$\\begin{bmatrix} x \\\\ y \\\\ f \\end{bmatrix} \\cdot \\begin{bmatrix} n_x \\\\ n_y \\\\ n_z \\end{bmatrix} = \\frac{fd}{Z_c}$$\n\n- As $Z_c \\to \\infty$, the right side vanishes, giving the horizon line equation:\n\n$$n_x x + n_y y + f n_z = 0$$\n\n- The horizon depends **only on the orientation** of the plane (via $\\mathbf{n}$), not its position — so parallel planes share the same horizon line\n- **Ground plane special case** ($\\mathbf{n} = (0, 0, 1)$): find $VP_X$ and $VP_Y$ by projecting points at infinity along $X$ and $Y$ directions, then $\\mathbf{l} = VP_X \\times VP_Y$"}, {"q": "Why are vertical lines in Renaissance paintings usually drawn without vanishing points?", "a": "- Renaissance artists generally restricted themselves to projections onto **vertical planes** (since pictures hung on walls)\n- Vertical lines in the world are therefore **parallel to the image plane** ($b_z = 0$), so their vanishing point is at infinity — they appear parallel in the image\n- However, Renaissance artists understood perspective theory well and would introduce vanishing points for vertical lines when painting **ceiling frescos**, to create the illusion of depth above"}], "Plane Transformations": [{"q": "Under what conditions does the inter-image transformation become a homography?", "a": "- Two conditions (either one is sufficient):\n  1. Camera rotation about its optical centre with no translation ($\\mathbf{T} = 0$): $\\tilde{\\mathbf{w}} = \\mathbf{K}\\mathbf{X}$ and $\\tilde{\\mathbf{w}}' = \\mathbf{K}\\mathbf{R}\\mathbf{X}$, so $\\tilde{\\mathbf{w}}' = \\mathbf{K}\\mathbf{R}\\mathbf{K}^{-1}\\tilde{\\mathbf{w}}$. Independent of depth.\n  2. All scene points lie on a plane (e.g. $Z = 0$): setting $Z = 0$ drops the third column of the $3 \\times 4$ projection matrix, giving a $3 \\times 3$ matrix per view. View 1 maps plane coordinates to image 1 via $\\tilde{\\mathbf{w}} = \\mathbf{H}_1 \\tilde{\\mathbf{X}}_{\\text{plane}}$ and view 2 via $\\tilde{\\mathbf{w}}' = \\mathbf{H}_2 \\tilde{\\mathbf{X}}_{\\text{plane}}$. Eliminating the plane coordinates gives the inter-image homography $\\tilde{\\mathbf{w}}' = \\mathbf{H}_2 \\mathbf{H}_1^{-1} \\tilde{\\mathbf{w}}$."}, {"q": "What are the degrees of freedom of a 2D projective transformation (homography), and what does each correspond to?", "a": "- 8 DoF total (9 matrix elements minus 1 for scale):\n  - translation (2)\n  - rotation (1)\n  - uniform scale (1)\n  - shear axis & magnitude (2)\n  - fanning/perspective (2, specifying horizon line position)"}, {"q": "What is the matrix form of a 2D homography, and how does it distort a square?", "a": "$$\\begin{bmatrix} su \\\\ sv \\\\ s \\end{bmatrix} = \\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\\\ p_{31} & p_{32} & p_{33} \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ 1 \\end{bmatrix}$$\n\n- Distortion: square → arbitrary quadrilateral (parallel lines gain vanishing points)"}, {"q": "What geometric properties are preserved (invariant) under a projective transformation?", "a": "- Incidence (collinearity) — points on a line remain on a line\n- Cross-ratio of four collinear points"}, {"q": "What are the degrees of freedom of a 2D affine transformation?", "a": "- 6 DoF:\n  - translation (2)\n  - rotation (1)\n  - uniform scale (1)\n  - shear axis & magnitude (2)"}, {"q": "What is the matrix form of a 2D affine transformation, and how does it distort a square?", "a": "$$\\begin{bmatrix} u \\\\ v \\end{bmatrix} = \\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ 1 \\end{bmatrix}$$\n\n- Distortion: square → parallelogram"}, {"q": "What additional geometric properties are preserved under affine (beyond projective)?", "a": "- Parallelism\n- Length ratios along parallel lines\n- Centroids"}, {"q": "What are the degrees of freedom of a 2D similarity transformation?", "a": "- 4 DoF:\n  - translation (2)\n  - rotation (1)\n  - uniform scale (1)"}, {"q": "What is the matrix form of a 2D similarity transformation, and how does it distort a square?", "a": "$$\\begin{bmatrix} u \\\\ v \\end{bmatrix} = \\begin{bmatrix} s\\cos\\theta & -s\\sin\\theta & t_x \\\\ s\\sin\\theta & s\\cos\\theta & t_y \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ 1 \\end{bmatrix}$$\n\n- Distortion: square → scaled, rotated, translated square"}, {"q": "What additional geometric properties are preserved under similarity (beyond affine)?", "a": "- Angles\n- Length ratios (not just along parallel lines)\n- Bilateral symmetry"}, {"q": "What are the degrees of freedom of a 2D Euclidean transformation?", "a": "- 3 DoF:\n  - translation (2)\n  - rotation (1)"}, {"q": "What is the matrix form of a 2D Euclidean transformation, and how does it distort a square?", "a": "$$\\begin{bmatrix} u \\\\ v \\end{bmatrix} = \\begin{bmatrix} \\cos\\theta & -\\sin\\theta & t_x \\\\ \\sin\\theta & \\cos\\theta & t_y \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ 1 \\end{bmatrix}$$\n\n- Distortion: square → rotated, translated square (same size)"}, {"q": "What additional geometric properties are preserved under Euclidean (beyond similarity)?", "a": "- Lengths (not just ratios)"}], "Calibration": [{"q": "What is camera calibration?", "a": "- Recovering the parameters of the projection matrix $\\mathbf{P} = \\mathbf{K}[\\mathbf{R} | \\mathbf{T}]$\n- Intrinsic parameters (4 DoF): focal length products $fk_u$, $fk_v$, principal point $(u_0, v_0)$\n- Extrinsic parameters (6 DoF): rotation $\\mathbf{R}$ (3 DoF), translation $\\mathbf{T}$ (3 DoF)\n- 10 DoF total (11 parameters but $f$ and $k_u, k_v$ cannot be separated)"}, {"q": "Derive the calibration equations for estimating the projection matrix from known 3D reference points.", "a": "- Use RANSAC to remove outliers before calibration\n- Starting from the projection equations:\n\n$$u_i = \\frac{p_{11}X_i + p_{12}Y_i + p_{13}Z_i + p_{14}}{p_{31}X_i + p_{32}Y_i + p_{33}Z_i + p_{34}}$$\n\n$$v_i = \\frac{p_{21}X_i + p_{22}Y_i + p_{23}Z_i + p_{24}}{p_{31}X_i + p_{32}Y_i + p_{33}Z_i + p_{34}}$$\n\n- Rearrange to be linear in the unknown $p_{ij}$:\n\n$$\\begin{bmatrix} X_i & Y_i & Z_i & 1 & 0 & 0 & 0 & 0 & -u_iX_i & -u_iY_i & -u_iZ_i & -u_i \\\\ 0 & 0 & 0 & 0 & X_i & Y_i & Z_i & 1 & -v_iX_i & -v_iY_i & -v_iZ_i & -v_i \\end{bmatrix} \\begin{bmatrix} p_{11} \\\\ p_{12} \\\\ p_{13} \\\\ p_{14} \\\\ p_{21} \\\\ p_{22} \\\\ p_{23} \\\\ p_{24} \\\\ p_{31} \\\\ p_{32} \\\\ p_{33} \\\\ p_{34} \\end{bmatrix} = \\mathbf{0}$$\n\n- Each point gives 2 equations in the 12 unknowns (11 DoF up to scale — fix by setting $|\\mathbf{p}| = 1$ or $p_{34} = 1$)\n- Need $\\geq 6$ points. Stack into $2N \\times 12$ matrix: $A\\mathbf{p} \\simeq \\mathbf{0}$\n- **Linear solution**: find eigenvector of $A^TA$ with smallest eigenvalue (SVD)\n- **Nonlinear refinement**: use linear solution to initialise gradient descent minimising reprojection error:\n\n$$\\min_{p_{ij}} \\sum_i (u_i - \\hat{u}_i)^2 + (v_i - \\hat{v}_i)^2$$"}, {"q": "How is the 2D projective transformation (homography) calibrated?", "a": "- Setting $Z = 0$ gives a $3 \\times 3$ matrix with 8 DoF (9 elements minus scale)\n- Each correspondence gives 2 equations → need $\\geq 4$ points\n- Same method: assemble $A\\mathbf{p} = \\mathbf{0}$, solve by SVD\n- Optionally refine with nonlinear optimisation"}, {"q": "How is a camera calibrated for observing a 1D structure (e.g. points along a line)?", "a": "- The mapping is a $3 \\times 2$ matrix with 5 DoF\n- Each point gives 2 equations → need $\\geq 3$ points\n- Same method: assemble $A\\mathbf{p} = \\mathbf{0}$, solve by SVD\n- Optionally refine with nonlinear optimisation"}, {"q": "Given $u$, determine the position of a point on the line using the calibrated projection matrix.", "a": "$$\\begin{bmatrix} su \\\\ s \\end{bmatrix}=\\begin{bmatrix} p_{11} & p_{12} \\\\ p_{31} & p_{32} \\end{bmatrix}\\begin{bmatrix} X \\\\ 1 \\end{bmatrix}$$\n\n$$u=\\frac{su}{s}=\\frac{p_{11}X+p_{12}}{p_{31}X+p_{32}}$$\n\n$$X=\\frac{p_{32}X-p_{12}}{-p_{31}u+p_{11}}$$"}, {"q": "Given $u$ and $v$, determine the position of a point on the plane using the calibrated projection matrix.", "a": "$$\\begin{bmatrix} u \\\\ v \\\\ 1 \\end{bmatrix}=\\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\\\ p_{31} & p_{32} & p_{33} \\end{bmatrix}\\begin{bmatrix} \\lambda X \\\\ \\lambda Y \\\\ \\lambda \\end{bmatrix}$$\n\n$$\\begin{bmatrix} \\lambda X \\\\ \\lambda Y \\\\ \\lambda \\end{bmatrix}=\\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\\\ p_{31} & p_{32} & p_{33} \\end{bmatrix}^{-1}\\begin{bmatrix} u \\\\ v \\\\ 1 \\end{bmatrix}$$"}, {"q": "For a calibrated camera, show how a measured image point $(u, v)$ defines a ray in 3D space.", "a": "$$u= \\frac{su}{s}=\\frac{p_{11}X+p_{12}Y+p_{13}Z+p_{14}}{p_{31}X+p_{32}Y+p_{33}Z+p_{34}}$$\n\n$$v= \\frac{sv}{s}=\\frac{p_{21}X+p_{22}Y+p_{23}Z+p_{24}}{p_{31}X+p_{32}Y+p_{33}Z+p_{34}}$$\n\n- Rearrange the projection equations to be linear in $(X, Y, Z)$:\n\n$$\\text{Plane 1:} \\quad (p_{11} - up_{31})X + (p_{12} - up_{32})Y + (p_{13} - up_{33})Z + (p_{14} - up_{34}) = 0$$\n\n$$\\text{Plane 2:} \\quad (p_{21} - vp_{31})X + (p_{22} - vp_{32})Y + (p_{23} - vp_{33})Z + (p_{24} - vp_{34}) = 0$$\n\n- These two planes are **not parallel** and their intersection defines a **ray** through the optical centre and the image point\n- A single image point gives a ray, not a point — to recover 3D position you need:\n  - **Triangulation** from two or more views, or\n  - At least **3 point correspondences** with known 3D positions (for pose)"}, {"q": "Why are more correspondences preferred than the minimum?", "a": "- Measurements are noisy — more points improve robustness via least squares\n- The linear solution is only approximate — more data enables better nonlinear refinement"}, {"q": "Why is nonlinear optimisation needed when the calibration equations are linear in $p_{ij}$?", "a": "- SVD minimises the **algebraic error** $|A\\mathbf{p}|$, which is not the same as the **reprojection error** $(u_i - \\hat{u}_i)^2 + (v_i - \\hat{v}_i)^2$\n- The reprojection error is nonlinear in $p_{ij}$ because of the division by $p_{31}X + p_{32}Y + p_{33}Z + p_{34}$\n- For **weak perspective**, the mapping is truly linear (no division), so linear least squares is optimal and no nonlinear refinement is needed"}, {"q": "Describe desirable properties of the calibration object.", "a": "- Reference points must span a **3D volume** — they must **not** be coplanar (otherwise one column of $\\mathbf{P}$ is not constrained and the system is degenerate)\n- Points should span different depths and cover a large field of view\n- Should allow precise localisation of reference points (e.g. corners of a calibration pattern)\n- Using a table of adjustable height exercises all degrees of freedom"}, {"q": "Show how to recover the camera position, orientation, and focal length from the projection matrix.", "a": "- We know $\\mathbf{P} = \\mathbf{K}[\\mathbf{R} | \\mathbf{T}] = [\\mathbf{K}\\mathbf{R} | \\mathbf{K}\\mathbf{T}]$, so:\n\n$$\\begin{bmatrix} p_{11} & p_{12} & p_{13} & p_{14} \\\\ p_{21} & p_{22} & p_{23} & p_{24} \\\\ p_{31} & p_{32} & p_{33} & p_{34} \\end{bmatrix} = \\begin{bmatrix} & \\mathbf{K}\\mathbf{R} & & \\mathbf{K}\\mathbf{T} \\end{bmatrix}$$\n\n- Extract the left $3 \\times 3$ sub-matrix $\\mathbf{M} = \\mathbf{K}\\mathbf{R} = \\begin{bmatrix} p_{11} & p_{12} & p_{13} \\\\ p_{21} & p_{22} & p_{23} \\\\ p_{31} & p_{32} & p_{33} \\end{bmatrix}$\n- **RQ decompose** $\\mathbf{M}$ into $\\mathbf{K}$ (upper triangular) $\\times$ $\\mathbf{R}$ (orthogonal) — this separates the intrinsic and extrinsic parameters\n- Recover position from the last column:\n$$\\mathbf{T} = \\mathbf{K}^{-1} \\begin{bmatrix} p_{14} \\\\ p_{24} \\\\ p_{34} \\end{bmatrix}$$\n- Read off parameters from $\\mathbf{K} = \\begin{bmatrix} fk_u & 0 & u_0 \\\\ 0 & fk_v & v_0 \\\\ 0 & 0 & 1 \\end{bmatrix}$:\n  - $fk_u = K_{11}$, $fk_v = K_{22}$ — cannot decouple $f$ from $k_u, k_v$\n  - $(u_0, v_0) = (K_{13}, K_{23})$ — principal point\n  - $\\mathbf{R}$ — camera orientation (3 DoF)\n  - $\\mathbf{T}$ — camera position (3 DoF)"}, {"q": "What is the significance of nonlinear distortion on calibration?", "a": "- Nonlinear distortion (e.g. radial lens distortion) is **not included** in the projective camera model\n- Any residuals remaining after least squares calibration are partly due to nonlinear distortion, as well as errors in localising corners in the image and world"}], "Image Mosaicking": [{"q": "Show that when a camera is rotated about its optical centre, all image points undergo a 2D projective transformation independent of depth.", "a": "- Before rotation (camera aligned with world): $\\tilde{\\mathbf{w}} = \\mathbf{K}[I | O]\\tilde{\\mathbf{X}} = \\mathbf{K}\\mathbf{X}$, so $\\mathbf{X} = \\mathbf{K}^{-1}\\tilde{\\mathbf{w}}$\n- After rotation by $\\mathbf{R}$ about the optical centre: $\\tilde{\\mathbf{w}}' = \\mathbf{K}[\\mathbf{R} | O]\\tilde{\\mathbf{X}} = \\mathbf{K}\\mathbf{R}\\mathbf{X}$\n- Substituting:\n\n$$\\tilde{\\mathbf{w}}' = \\mathbf{K}\\mathbf{R}\\mathbf{K}^{-1}\\tilde{\\mathbf{w}}$$\n\n- This is a $3 \\times 3$ projective transformation that depends on $\\mathbf{K}$ and $\\mathbf{R}$ but **not on depth** — every point in the scene transforms the same way"}, {"q": "Describe how to produce a mosaic composite image from a sequence of photographs.", "a": "1. Rotate the camera about the optical centre, acquiring a sequence of images with **~50% overlap** between consecutive frames\n2. For each consecutive pair, identify at least 4 corresponding points in the overlap region\n3. Estimate the homography $P$ using correspondences: assemble $A\\mathbf{p} = \\mathbf{0}$, solve by SVD. Use RANSAC to handle outliers\n4. **Warp** one image into the coordinate frame of the other by finding the grey level $I(\\tilde{\\mathbf{w}})$ in the second image associated with each pixel $\\tilde{\\mathbf{w}}'$ in the first image's frame\n5. **Blend** the overlap region to avoid visible seams\n6. Repeat for all pairs, chaining transformations to display the entire sequence in a single frame\n\n- **Defect — parallax**: if the rotation axis does not pass through the optical centre, nearby objects shift differently from distant objects, causing ghosting/blurring (the projective model assumes depth-independent transformation)\n- **Defect — rolling shutter**: the sensor reads out rows sequentially, so fast camera motion during exposure causes geometric distortion (straight lines appear curved)"}, {"q": "How is camera pose recovered in real-time for AR?", "a": "- Assume known intrinsic parameters $\\mathbf{K}$ (fixed phone camera)\n- Detect features (corners or FAST keypoints) and track by normalised correlation between frames\n- Use planar markers (e.g. ARtoolkit / Zappar codes) for initial calibration — need $\\geq 4$ coplanar points\n- Estimate homography $H = \\mathbf{K}[\\mathbf{r}_1, \\mathbf{r}_2, \\mathbf{t}]$ from the marker, recover $\\mathbf{r}_3 = \\mathbf{r}_1 \\times \\mathbf{r}_2$\n- Decompose to get camera pose ($\\mathbf{R}$, $\\mathbf{t}$); approximate orientation can also come from IMU/gyroscopes\n- Render computer-generated content using the recovered projection matrix $\\mathbf{K}[\\mathbf{R} | \\mathbf{t}]$"}], "Ransac": [{"q": "Describe the RANSAC (Random Sample Consensus) algorithm for finding consistent matches in the presence of outliers.", "a": "1. **Select** a minimal random sample of correspondences (e.g. 4 points for a homography)\n2. **Compute** the transformation (e.g. homography $H$) from this minimal sample\n3. **Count inliers** — the number of correspondences that are consistent with the computed transformation (i.e. reprojection error below a threshold)\n4. **Repeat** steps 1--3 for $T$ iterations\n5. **Return** the transformation with the maximum number of inliers\n6. Optionally re-estimate the transformation using all inliers (e.g. via least squares)"}, {"q": "Estimate how many iterations $T$ of RANSAC are required to yield a good solution with probability $P_0$, given that the probability of a random match being spurious is $\\rho$.", "a": "- Let $n$ be the number of points in the minimal sample (e.g. $n = 4$ for a homography)\n- Probability that all $n$ selected points are inliers: $(1 - \\rho)^n$\n- Probability that at least one selected point is an outlier (bad sample): $1 - (1 - \\rho)^n$\n- Probability that all $T$ samples are bad: $[1 - (1 - \\rho)^n]^T$\n- We require the probability of at least one good sample to be $\\geq P_0$:\n\n$$1 - [1 - (1 - \\rho)^n]^T \\geq P_0$$\n\n- Solving for $T$:\n\n$$T \\geq \\frac{\\log(1 - P_0)}{\\log(1 - (1 - \\rho)^n)}$$\n\n- **Assumptions**: each point is independently drawn; outliers are randomly distributed; a single all-inlier sample suffices to compute a good transformation"}, {"q": "Why is RANSAC preferred over standard least squares for estimating transformations from feature correspondences?", "a": "- Feature matching produces **outliers** (incorrect correspondences) that can severely bias a least squares estimate\n- RANSAC is **robust to outliers** — it finds the largest consensus set of inliers before estimating the transformation\n- Least squares minimises total error across all points (including outliers); RANSAC first identifies which points are consistent, then fits only to those"}]};
 
-let activeGroup = null; // null = all
-let filtered = ALL_CARDS.slice();
-let idx = 0;
+let currentTopic = '';
+let totalCards = 0;
+let clearedCards = 0;
+let pile = [];
+let again = [];
+let cardIndex = 0;
+let flipped = false;
 
-function initFilters() {
-  const el = document.getElementById('filters');
-  // "All" pill
-  const all = document.createElement('span');
-  all.className = 'pill active';
-  all.textContent = 'All';
-  all.dataset.group = '';
-  all.onclick = () => selectGroup(null);
-  el.appendChild(all);
+// ── DOM refs ──
+const topicScreen   = document.getElementById('topic-screen');
+const cardScreen    = document.getElementById('card-screen');
+const roundScreen   = document.getElementById('round-screen');
+const doneScreen    = document.getElementById('done-screen');
+const topicList     = document.getElementById('topic-list');
+const card          = document.getElementById('card');
+const cardLabel     = document.getElementById('card-label');
+const cardContent   = document.getElementById('card-content');
+const tapHint       = document.getElementById('tap-hint');
+const actionButtons = document.getElementById('action-buttons');
+const progressText  = document.getElementById('progress-text');
+const progressBar   = document.getElementById('progress-bar');
 
-  GROUPS.forEach(g => {
-    const p = document.createElement('span');
-    p.className = 'pill';
-    p.textContent = g;
-    p.dataset.group = g;
-    p.onclick = () => selectGroup(g);
-    el.appendChild(p);
+// ── Init ──
+try { mermaid.initialize({ startOnLoad: false, theme: 'default' }); } catch(e) {}
+
+function init() {
+  topicList.innerHTML = '';
+  const names = Object.keys(DECKS);
+  names.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'topic-btn';
+    btn.innerHTML = `<span class="topic-name">${esc(name)}</span><span class="topic-count">${DECKS[name].length} cards</span>`;
+    btn.addEventListener('click', () => startTopic(name));
+    topicList.appendChild(btn);
   });
 }
 
-function selectGroup(group) {
-  activeGroup = group;
-  filtered = group ? ALL_CARDS.filter(c => c.group === group) : ALL_CARDS.slice();
-  idx = 0;
-
-  document.querySelectorAll('.pill').forEach(p => {
-    p.classList.toggle('active', group === null ? p.dataset.group === '' : p.dataset.group === group);
-  });
-  document.getElementById('count').textContent = filtered.length;
-  render();
+// ── Navigation ──
+function showScreen(screen) {
+  [topicScreen, cardScreen, roundScreen, doneScreen].forEach(s => s.classList.add('hidden'));
+  screen.classList.remove('hidden');
 }
 
-function render() {
-  if (filtered.length === 0) {
-    document.getElementById('frontBody').innerHTML = '<span style="color:#777;">No cards in this group.</span>';
-    document.getElementById('backBody').innerHTML = '';
-    document.getElementById('frontGroup').textContent = '';
-    document.getElementById('backGroup').textContent = '';
-    document.getElementById('progress').textContent = '0 / 0';
+function startTopic(name) {
+  currentTopic = name;
+  totalCards = DECKS[name].length;
+  clearedCards = 0;
+  pile = shuffle([...DECKS[name]]);
+  again = [];
+  cardIndex = 0;
+  showScreen(cardScreen);
+  showCard();
+}
+
+function goToTopics() {
+  showScreen(topicScreen);
+}
+
+// ── Card Display ──
+function showCard() {
+  if (cardIndex >= pile.length) {
+    endRound();
     return;
   }
-  const c = filtered[idx];
-  // Unflip
-  document.getElementById('card').classList.remove('flipped');
+  flipped = false;
+  const c = pile[cardIndex];
+  card.className = 'card question-side';
+  cardLabel.textContent = 'Question';
+  cardContent.innerHTML = esc(c.q);
+  tapHint.textContent = 'Tap or press Space to flip';
+  actionButtons.classList.add('hidden');
+  updateProgress();
+  card.scrollTop = 0;
 
-  document.getElementById('frontBody').innerHTML = c.question;
-  document.getElementById('backBody').innerHTML = c.answer_html;
-  document.getElementById('frontGroup').textContent = c.group;
-  document.getElementById('backGroup').textContent = c.group;
-  document.getElementById('progress').textContent = (idx + 1) + ' / ' + filtered.length;
-  document.getElementById('prevBtn').disabled = idx === 0;
-  document.getElementById('nextBtn').disabled = idx === filtered.length - 1;
+  // Render KaTeX on question side
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(cardContent, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ],
+      throwOnError: false
+    });
+  }
+}
+
+function flipCard() {
+  if (flipped) return;
+  flipped = true;
+  const c = pile[cardIndex];
+  card.className = 'card answer-side';
+  cardLabel.textContent = 'Answer';
+  tapHint.textContent = '';
+
+  // Render markdown
+  const rawHtml = (typeof marked !== 'undefined' && marked.parse) ? marked.parse(c.a) : c.a.replace(/\n/g, '<br>');
+  cardContent.innerHTML = rawHtml;
 
   // Render KaTeX
-  renderMathInElement(document.getElementById('frontBody'), {
-    delimiters: [
-      {left: '$$', right: '$$', display: true},
-      {left: '$', right: '$', display: false}
-    ],
-    throwOnError: false
-  });
-  renderMathInElement(document.getElementById('backBody'), {
-    delimiters: [
-      {left: '$$', right: '$$', display: true},
-      {left: '$', right: '$', display: false}
-    ],
-    throwOnError: false
-  });
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(cardContent, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ],
+      throwOnError: false
+    });
+  }
+
+  // Render Mermaid
+  if (typeof mermaid !== 'undefined' && mermaid.render) {
+    const codeBlocks = cardContent.querySelectorAll('code.language-mermaid');
+    codeBlocks.forEach((block, i) => {
+      const pre = block.parentElement;
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+      const id = 'mermaid-' + Date.now() + '-' + i;
+      try {
+        mermaid.render(id, block.textContent.trim()).then(({ svg }) => {
+          container.innerHTML = svg;
+          pre.replaceWith(container);
+        }).catch(() => {});
+      } catch(e) {}
+    });
+  }
+
+  actionButtons.classList.remove('hidden');
+  card.scrollTop = 0;
 }
 
-function flip() {
-  document.getElementById('card').classList.toggle('flipped');
+function markGotIt() {
+  clearedCards++;
+  cardIndex++;
+  showCard();
 }
 
-function prev() {
-  if (idx > 0) { idx--; render(); }
+function markAgain() {
+  again.push(pile[cardIndex]);
+  cardIndex++;
+  showCard();
 }
 
-function next() {
-  if (idx < filtered.length - 1) { idx++; render(); }
+function endRound() {
+  if (again.length === 0) {
+    showScreen(doneScreen);
+  } else {
+    document.getElementById('round-remaining').textContent = again.length;
+    document.getElementById('round-message').textContent =
+      again.length + ' card' + (again.length === 1 ? '' : 's') + ' to review. ' + clearedCards + ' of ' + totalCards + ' cleared.';
+    showScreen(roundScreen);
+  }
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowLeft') prev();
-  else if (e.key === 'ArrowRight') next();
-  else if (e.key === ' ') { e.preventDefault(); flip(); }
-});
+function nextRound() {
+  pile = shuffle([...again]);
+  again = [];
+  cardIndex = 0;
+  showScreen(cardScreen);
+  showCard();
+}
 
-// Touch swipe
-let touchStartX = 0;
-document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
-document.addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].screenX - touchStartX;
-  if (Math.abs(dx) > 50) {
-    if (dx > 0) prev(); else next();
+function restartTopic() {
+  startTopic(currentTopic);
+}
+
+// ── Progress ──
+function updateProgress() {
+  progressText.textContent = clearedCards + ' of ' + totalCards + ' cleared';
+  const pct = totalCards > 0 ? (clearedCards / totalCards) * 100 : 0;
+  progressBar.style.width = pct + '%';
+}
+
+// ── Utilities ──
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ── Event Listeners ──
+card.addEventListener('click', flipCard);
+document.getElementById('btn-got-it').addEventListener('click', markGotIt);
+document.getElementById('btn-again').addEventListener('click', markAgain);
+document.getElementById('back-btn').addEventListener('click', goToTopics);
+document.getElementById('round-continue').addEventListener('click', nextRound);
+document.getElementById('round-back').addEventListener('click', goToTopics);
+document.getElementById('done-restart').addEventListener('click', restartTopic);
+document.getElementById('done-back').addEventListener('click', goToTopics);
+
+document.addEventListener('keydown', (e) => {
+  if (cardScreen.classList.contains('hidden')) return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (!flipped) flipCard();
+  } else if (e.code === 'ArrowLeft' && flipped) {
+    e.preventDefault();
+    markAgain();
+  } else if (e.code === 'ArrowRight' && flipped) {
+    e.preventDefault();
+    markGotIt();
   }
 });
 
-initFilters();
-render();
+// ── Start ──
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 </script>
 </body>
 </html>

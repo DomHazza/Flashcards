@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>4F12 Introduction — Flashcards</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>4F12 Introduction Flashcards</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,368 +17,593 @@ body {
   background: #0f1117;
   color: #e0e0e0;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
 }
 
 .container {
-  max-width: 700px;
+  max-width: 500px;
   margin: 0 auto;
-  padding: 20px 16px 100px;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 4px;
-}
-
-.back-btn {
-  color: #a0c4ff;
-  text-decoration: none;
-  font-size: 1.3rem;
-  line-height: 1;
-  padding: 4px;
-}
-
-h1 {
-  color: #fff;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
-.subtitle {
-  color: #777;
-  font-size: 0.8rem;
-  margin-bottom: 16px;
-  padding-left: 36px;
-}
-
-/* Filter pills */
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 18px;
-}
-
-.pill {
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
-  border-radius: 20px;
-  padding: 6px 14px;
-  font-size: 0.78rem;
-  color: #bbb;
-  cursor: pointer;
-  transition: all 0.15s;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
-
-.pill:hover { border-color: #a0c4ff; color: #e0e0e0; }
-.pill.active { background: #a0c4ff; color: #0f1117; border-color: #a0c4ff; font-weight: 600; }
-
-/* Card */
-.card-wrapper {
-  perspective: 1000px;
-  min-height: 220px;
-  margin-bottom: 16px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.card {
-  position: relative;
-  width: 100%;
-  min-height: 220px;
-  transition: transform 0.45s cubic-bezier(.4,.2,.2,1);
-  transform-style: preserve-3d;
-}
-
-.card.flipped { transform: rotateX(180deg); }
-
-.card-face {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  min-height: 220px;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  border-radius: 12px;
-  padding: 24px 22px;
+  padding: 28px 16px;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
 
-.card-front {
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
+/* ── Topic Picker ── */
+
+#topic-screen h1 {
+  color: #fff;
+  font-size: 1.4rem;
+  margin-bottom: 4px;
 }
 
-.card-back {
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
-  transform: rotateX(180deg);
+#topic-screen .subtitle {
+  color: #777;
+  font-size: 0.85rem;
+  margin-bottom: 24px;
 }
 
-.card-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.topic-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: #1a1d27;
+  border: 1px solid #2a2d3a;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+
+.topic-btn:active { background: #252838; }
+
+.topic-name {
+  color: #e0e0e0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.topic-count {
+  color: #777;
+  font-size: 0.85rem;
+}
+
+/* ── Card Screen ── */
+
+#card-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 12px;
 }
 
-.card-front .card-label { color: #a0c4ff; }
-.card-back .card-label { color: #4ecdc4; }
-
-.card-front .card-body {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: #fff;
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.card-back .card-body {
-  font-size: 0.92rem;
-  line-height: 1.65;
-  color: #e0e0e0;
-  flex: 1;
-  overflow-y: auto;
-}
-
-.card-back .card-body ul,
-.card-back .card-body ol {
-  margin-left: 18px;
-  margin-bottom: 8px;
-}
-
-.card-back .card-body li {
-  margin-bottom: 5px;
-}
-
-.card-back .card-body p {
-  margin-bottom: 8px;
-}
-
-.card-back .card-body code {
-  background: #252838;
-  padding: 1px 5px;
-  border-radius: 3px;
-  font-family: 'Consolas', monospace;
-  font-size: 0.88em;
-}
-
-.card-back .card-body pre {
-  font-family: 'Consolas', monospace;
-}
-
-.math-display {
-  margin: 10px 0;
-  overflow-x: auto;
-}
-
-.group-tag {
-  font-size: 0.68rem;
-  color: #777;
-  margin-top: 10px;
-  text-align: right;
-}
-
-/* Navigation */
-.nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 10px;
-}
-
-.nav button {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid #2a2d3a;
-  background: #1a1d27;
+.back-btn {
+  background: none;
+  border: none;
   color: #a0c4ff;
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.15s;
+  padding: 6px 0;
   -webkit-tap-highlight-color: transparent;
 }
 
-.nav button:hover { background: #252838; }
-.nav button:disabled { opacity: 0.3; cursor: default; }
-
-.progress {
-  color: #777;
+.progress-text {
+  color: #a0c4ff;
   font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 4px;
+  background: #2a2d3a;
+  border-radius: 2px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #4ecdc4;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ── The Card ── */
+
+.card-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+
+.card {
+  background: #fff;
+  color: #1a1a1a;
+  border-radius: 12px;
+  padding: 28px 24px;
+  min-height: 200px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  position: relative;
+  overflow-y: auto;
+  max-height: 65vh;
+}
+
+.card .label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  color: #999;
+}
+
+.card.question-side .label { color: #a0c4ff; }
+.card.answer-side .label { color: #4ecdc4; }
+
+.card .card-content {
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.card.question-side .card-content {
+  font-size: 1.15rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  min-height: 80px;
+}
+
+.card .tap-hint {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  font-size: 0.7rem;
+  color: #bbb;
+}
+
+/* Answer markdown styling */
+.card-content h1, .card-content h2, .card-content h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 12px 0 6px;
+}
+
+.card-content p { margin: 8px 0; }
+
+.card-content ul, .card-content ol {
+  margin: 8px 0 8px 20px;
+}
+
+.card-content li { margin: 4px 0; }
+
+.card-content strong { font-weight: 700; }
+
+.card-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 10px 0;
+  font-size: 0.9rem;
+}
+
+.card-content th, .card-content td {
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.card-content th { background: #f0f0f0; font-weight: 600; }
+
+.card-content code {
+  background: #f4f4f4;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.9em;
   font-family: 'Consolas', monospace;
-  min-width: 60px;
+}
+
+.card-content pre {
+  background: #f4f4f4;
+  padding: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.card-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.card-content .mermaid-container {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.card-content .mermaid-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Buttons ── */
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding-bottom: 16px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+
+.action-btn:active { opacity: 0.8; }
+
+.btn-again {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+.btn-got-it {
+  background: #4ecdc4;
+  color: #fff;
+}
+
+.action-buttons.hidden { display: none; }
+
+/* ── Round Complete / Done ── */
+
+#round-screen, #done-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
-.hint {
-  text-align: center;
-  color: #555;
-  font-size: 0.75rem;
-  margin-top: 4px;
+#round-screen h2, #done-screen h2 {
+  color: #fff;
+  font-size: 1.3rem;
+  margin-bottom: 8px;
 }
 
-/* Keyboard hint */
-.kbd {
-  display: inline-block;
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
-  border-radius: 4px;
-  padding: 1px 6px;
-  font-family: 'Consolas', monospace;
-  font-size: 0.72rem;
+#round-screen p, #done-screen p {
+  color: #bbb;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
 }
+
+.screen-btn {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.screen-btn.primary {
+  background: #4ecdc4;
+  color: #fff;
+}
+
+.screen-btn.secondary {
+  background: #2a2d3a;
+  color: #e0e0e0;
+}
+
+.screen-btn:active { opacity: 0.8; }
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #4ecdc4;
+  margin-bottom: 4px;
+}
+
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
+
 <div class="container">
-  <div class="header">
-    <a class="back-btn" href="index.html">&larr;</a>
-    <h1>Introduction</h1>
+  <!-- Topic Picker -->
+  <div id="topic-screen">
+    <h1>Introduction Flashcards</h1>
+    <p class="subtitle">4F12 &mdash; Cambridge IIB</p>
+    <div id="topic-list"></div>
   </div>
-  <p class="subtitle">4F12 &middot; <span id="count">3</span> cards</p>
 
-  <div class="filters" id="filters"></div>
-
-  <div class="card-wrapper" id="cardWrapper" onclick="flip()">
-    <div class="card" id="card">
-      <div class="card-face card-front">
-        <div class="card-label">Question</div>
-        <div class="card-body" id="frontBody"></div>
-        <div class="group-tag" id="frontGroup"></div>
+  <!-- Card Screen -->
+  <div id="card-screen" class="hidden">
+    <div class="top-bar">
+      <button class="back-btn" id="back-btn">&larr; Topics</button>
+      <span class="progress-text" id="progress-text"></span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progress-bar"></div>
+    </div>
+    <div class="card-wrapper">
+      <div class="card question-side" id="card">
+        <div class="label" id="card-label">Question</div>
+        <div class="card-content" id="card-content"></div>
+        <div class="tap-hint" id="tap-hint">Tap to flip</div>
       </div>
-      <div class="card-face card-back">
-        <div class="card-label">Answer</div>
-        <div class="card-body" id="backBody"></div>
-        <div class="group-tag" id="backGroup"></div>
-      </div>
+    </div>
+    <div class="action-buttons hidden" id="action-buttons">
+      <button class="action-btn btn-again" id="btn-again">Again</button>
+      <button class="action-btn btn-got-it" id="btn-got-it">Got it</button>
     </div>
   </div>
 
-  <div class="nav">
-    <button id="prevBtn" onclick="event.stopPropagation(); prev();">&larr;</button>
-    <span class="progress" id="progress"></span>
-    <button id="nextBtn" onclick="event.stopPropagation(); next();">&rarr;</button>
+  <!-- Round Complete -->
+  <div id="round-screen" class="hidden">
+    <div class="stat-number" id="round-remaining"></div>
+    <h2>Round complete</h2>
+    <p id="round-message"></p>
+    <button class="screen-btn primary" id="round-continue">Continue</button>
+    <button class="screen-btn secondary" id="round-back">Back to topics</button>
   </div>
-  <p class="hint">Tap card to flip &middot; <span class="kbd">&larr;</span> <span class="kbd">&rarr;</span> navigate &middot; <span class="kbd">Space</span> flip</p>
+
+  <!-- All Done -->
+  <div id="done-screen" class="hidden">
+    <div class="stat-number">0</div>
+    <h2>All cards cleared</h2>
+    <p>You got every card right.</p>
+    <button class="screen-btn primary" id="done-restart">Restart topic</button>
+    <button class="screen-btn secondary" id="done-back">Back to topics</button>
+  </div>
 </div>
 
 <script>
-const ALL_CARDS = [{"group": "Image Intensity Variables", "question": "What factors influence the intensity $I(x, y)$ of a monochrome CCD image?", "answer_html": "<ol>\n<li>The position of the camera</li>\n<li>The properties of the lens and the CCD</li>\n<li>The shape of the structures in the scene</li>\n<li>The position and distribution of light sources</li>\n<li>The reflectance properties of the visible surfaces</li>\n</ol>", "answer_md": "1. The position of the camera\n2. The properties of the lens and the CCD\n3. The shape of the structures in the scene\n4. The position and distribution of light sources\n5. The reflectance properties of the visible surfaces"}, {"group": "Image Intensity Variables", "question": "Why are raw pixel intensities rarely used directly in CV algorithms?", "answer_html": "<ul>\n<li>Raw pixel values are sensitive to changes in lighting brightness and contrast: $I' = \\alpha I + \\beta$</li>\n<li>They depend on lighting (position and distribution) and camera optics (intrinsic properties)</li>\n<li>Small changes in illumination or viewpoint can cause large changes in pixel values, making them unreliable as features</li>\n</ul>", "answer_md": "- Raw pixel values are sensitive to changes in lighting brightness and contrast: $I' = \\alpha I + \\beta$\n- They depend on lighting (position and distribution) and camera optics (intrinsic properties)\n- Small changes in illumination or viewpoint can cause large changes in pixel values, making them unreliable as features"}, {"group": "Image Intensity Variables", "question": "How can images be made more invariant to lighting changes?", "answer_html": "<ol>\n<li><strong>Edge detection / image gradients</strong> — use edges or SIFT descriptors, which respond to relative intensity changes rather than absolute values</li>\n<li><strong>Intensity normalisation</strong> — normalise pixel values as $\\left(\\frac{I - \\mu}{\\sigma}\\right)$, as used in NCC matching</li>\n</ol>", "answer_md": "1. **Edge detection / image gradients** — use edges or SIFT descriptors, which respond to relative intensity changes rather than absolute values\n2. **Intensity normalisation** — normalise pixel values as $\\left(\\frac{I - \\mu}{\\sigma}\\right)$, as used in NCC matching"}];
-const GROUPS = ["Image Intensity Variables"];
+// ── Data ──
+const DECKS = {"Image Intensity Variables": [{"q": "What factors influence the intensity $I(x, y)$ of a monochrome CCD image?", "a": "1. The position of the camera\n2. The properties of the lens and the CCD\n3. The shape of the structures in the scene\n4. The position and distribution of light sources\n5. The reflectance properties of the visible surfaces"}, {"q": "Why are raw pixel intensities rarely used directly in CV algorithms?", "a": "- Raw pixel values are sensitive to changes in lighting brightness and contrast: $I' = \\alpha I + \\beta$\n- They depend on lighting (position and distribution) and camera optics (intrinsic properties)\n- Small changes in illumination or viewpoint can cause large changes in pixel values, making them unreliable as features"}, {"q": "How can images be made more invariant to lighting changes?", "a": "1. **Edge detection / image gradients** — use edges or SIFT descriptors, which respond to relative intensity changes rather than absolute values\n2. **Intensity normalisation** — normalise pixel values as $\\left(\\frac{I - \\mu}{\\sigma}\\right)$, as used in NCC matching"}]};
 
-let activeGroup = null; // null = all
-let filtered = ALL_CARDS.slice();
-let idx = 0;
+let currentTopic = '';
+let totalCards = 0;
+let clearedCards = 0;
+let pile = [];
+let again = [];
+let cardIndex = 0;
+let flipped = false;
 
-function initFilters() {
-  const el = document.getElementById('filters');
-  // "All" pill
-  const all = document.createElement('span');
-  all.className = 'pill active';
-  all.textContent = 'All';
-  all.dataset.group = '';
-  all.onclick = () => selectGroup(null);
-  el.appendChild(all);
+// ── DOM refs ──
+const topicScreen   = document.getElementById('topic-screen');
+const cardScreen    = document.getElementById('card-screen');
+const roundScreen   = document.getElementById('round-screen');
+const doneScreen    = document.getElementById('done-screen');
+const topicList     = document.getElementById('topic-list');
+const card          = document.getElementById('card');
+const cardLabel     = document.getElementById('card-label');
+const cardContent   = document.getElementById('card-content');
+const tapHint       = document.getElementById('tap-hint');
+const actionButtons = document.getElementById('action-buttons');
+const progressText  = document.getElementById('progress-text');
+const progressBar   = document.getElementById('progress-bar');
 
-  GROUPS.forEach(g => {
-    const p = document.createElement('span');
-    p.className = 'pill';
-    p.textContent = g;
-    p.dataset.group = g;
-    p.onclick = () => selectGroup(g);
-    el.appendChild(p);
+// ── Init ──
+try { mermaid.initialize({ startOnLoad: false, theme: 'default' }); } catch(e) {}
+
+function init() {
+  topicList.innerHTML = '';
+  const names = Object.keys(DECKS);
+  names.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'topic-btn';
+    btn.innerHTML = `<span class="topic-name">${esc(name)}</span><span class="topic-count">${DECKS[name].length} cards</span>`;
+    btn.addEventListener('click', () => startTopic(name));
+    topicList.appendChild(btn);
   });
 }
 
-function selectGroup(group) {
-  activeGroup = group;
-  filtered = group ? ALL_CARDS.filter(c => c.group === group) : ALL_CARDS.slice();
-  idx = 0;
-
-  document.querySelectorAll('.pill').forEach(p => {
-    p.classList.toggle('active', group === null ? p.dataset.group === '' : p.dataset.group === group);
-  });
-  document.getElementById('count').textContent = filtered.length;
-  render();
+// ── Navigation ──
+function showScreen(screen) {
+  [topicScreen, cardScreen, roundScreen, doneScreen].forEach(s => s.classList.add('hidden'));
+  screen.classList.remove('hidden');
 }
 
-function render() {
-  if (filtered.length === 0) {
-    document.getElementById('frontBody').innerHTML = '<span style="color:#777;">No cards in this group.</span>';
-    document.getElementById('backBody').innerHTML = '';
-    document.getElementById('frontGroup').textContent = '';
-    document.getElementById('backGroup').textContent = '';
-    document.getElementById('progress').textContent = '0 / 0';
+function startTopic(name) {
+  currentTopic = name;
+  totalCards = DECKS[name].length;
+  clearedCards = 0;
+  pile = shuffle([...DECKS[name]]);
+  again = [];
+  cardIndex = 0;
+  showScreen(cardScreen);
+  showCard();
+}
+
+function goToTopics() {
+  showScreen(topicScreen);
+}
+
+// ── Card Display ──
+function showCard() {
+  if (cardIndex >= pile.length) {
+    endRound();
     return;
   }
-  const c = filtered[idx];
-  // Unflip
-  document.getElementById('card').classList.remove('flipped');
+  flipped = false;
+  const c = pile[cardIndex];
+  card.className = 'card question-side';
+  cardLabel.textContent = 'Question';
+  cardContent.innerHTML = esc(c.q);
+  tapHint.textContent = 'Tap or press Space to flip';
+  actionButtons.classList.add('hidden');
+  updateProgress();
+  card.scrollTop = 0;
 
-  document.getElementById('frontBody').innerHTML = c.question;
-  document.getElementById('backBody').innerHTML = c.answer_html;
-  document.getElementById('frontGroup').textContent = c.group;
-  document.getElementById('backGroup').textContent = c.group;
-  document.getElementById('progress').textContent = (idx + 1) + ' / ' + filtered.length;
-  document.getElementById('prevBtn').disabled = idx === 0;
-  document.getElementById('nextBtn').disabled = idx === filtered.length - 1;
+  // Render KaTeX on question side
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(cardContent, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ],
+      throwOnError: false
+    });
+  }
+}
+
+function flipCard() {
+  if (flipped) return;
+  flipped = true;
+  const c = pile[cardIndex];
+  card.className = 'card answer-side';
+  cardLabel.textContent = 'Answer';
+  tapHint.textContent = '';
+
+  // Render markdown
+  const rawHtml = (typeof marked !== 'undefined' && marked.parse) ? marked.parse(c.a) : c.a.replace(/\n/g, '<br>');
+  cardContent.innerHTML = rawHtml;
 
   // Render KaTeX
-  renderMathInElement(document.getElementById('frontBody'), {
-    delimiters: [
-      {left: '$$', right: '$$', display: true},
-      {left: '$', right: '$', display: false}
-    ],
-    throwOnError: false
-  });
-  renderMathInElement(document.getElementById('backBody'), {
-    delimiters: [
-      {left: '$$', right: '$$', display: true},
-      {left: '$', right: '$', display: false}
-    ],
-    throwOnError: false
-  });
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(cardContent, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ],
+      throwOnError: false
+    });
+  }
+
+  // Render Mermaid
+  if (typeof mermaid !== 'undefined' && mermaid.render) {
+    const codeBlocks = cardContent.querySelectorAll('code.language-mermaid');
+    codeBlocks.forEach((block, i) => {
+      const pre = block.parentElement;
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+      const id = 'mermaid-' + Date.now() + '-' + i;
+      try {
+        mermaid.render(id, block.textContent.trim()).then(({ svg }) => {
+          container.innerHTML = svg;
+          pre.replaceWith(container);
+        }).catch(() => {});
+      } catch(e) {}
+    });
+  }
+
+  actionButtons.classList.remove('hidden');
+  card.scrollTop = 0;
 }
 
-function flip() {
-  document.getElementById('card').classList.toggle('flipped');
+function markGotIt() {
+  clearedCards++;
+  cardIndex++;
+  showCard();
 }
 
-function prev() {
-  if (idx > 0) { idx--; render(); }
+function markAgain() {
+  again.push(pile[cardIndex]);
+  cardIndex++;
+  showCard();
 }
 
-function next() {
-  if (idx < filtered.length - 1) { idx++; render(); }
+function endRound() {
+  if (again.length === 0) {
+    showScreen(doneScreen);
+  } else {
+    document.getElementById('round-remaining').textContent = again.length;
+    document.getElementById('round-message').textContent =
+      again.length + ' card' + (again.length === 1 ? '' : 's') + ' to review. ' + clearedCards + ' of ' + totalCards + ' cleared.';
+    showScreen(roundScreen);
+  }
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowLeft') prev();
-  else if (e.key === 'ArrowRight') next();
-  else if (e.key === ' ') { e.preventDefault(); flip(); }
-});
+function nextRound() {
+  pile = shuffle([...again]);
+  again = [];
+  cardIndex = 0;
+  showScreen(cardScreen);
+  showCard();
+}
 
-// Touch swipe
-let touchStartX = 0;
-document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
-document.addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].screenX - touchStartX;
-  if (Math.abs(dx) > 50) {
-    if (dx > 0) prev(); else next();
+function restartTopic() {
+  startTopic(currentTopic);
+}
+
+// ── Progress ──
+function updateProgress() {
+  progressText.textContent = clearedCards + ' of ' + totalCards + ' cleared';
+  const pct = totalCards > 0 ? (clearedCards / totalCards) * 100 : 0;
+  progressBar.style.width = pct + '%';
+}
+
+// ── Utilities ──
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ── Event Listeners ──
+card.addEventListener('click', flipCard);
+document.getElementById('btn-got-it').addEventListener('click', markGotIt);
+document.getElementById('btn-again').addEventListener('click', markAgain);
+document.getElementById('back-btn').addEventListener('click', goToTopics);
+document.getElementById('round-continue').addEventListener('click', nextRound);
+document.getElementById('round-back').addEventListener('click', goToTopics);
+document.getElementById('done-restart').addEventListener('click', restartTopic);
+document.getElementById('done-back').addEventListener('click', goToTopics);
+
+document.addEventListener('keydown', (e) => {
+  if (cardScreen.classList.contains('hidden')) return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (!flipped) flipCard();
+  } else if (e.code === 'ArrowLeft' && flipped) {
+    e.preventDefault();
+    markAgain();
+  } else if (e.code === 'ArrowRight' && flipped) {
+    e.preventDefault();
+    markGotIt();
   }
 });
 
-initFilters();
-render();
+// ── Start ──
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 </script>
 </body>
 </html>

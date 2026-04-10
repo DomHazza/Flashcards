@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>4F12 Image Structure — Flashcards</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>4F12 Image Structure Flashcards</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,368 +17,593 @@ body {
   background: #0f1117;
   color: #e0e0e0;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
 }
 
 .container {
-  max-width: 700px;
+  max-width: 500px;
   margin: 0 auto;
-  padding: 20px 16px 100px;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 4px;
-}
-
-.back-btn {
-  color: #a0c4ff;
-  text-decoration: none;
-  font-size: 1.3rem;
-  line-height: 1;
-  padding: 4px;
-}
-
-h1 {
-  color: #fff;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
-.subtitle {
-  color: #777;
-  font-size: 0.8rem;
-  margin-bottom: 16px;
-  padding-left: 36px;
-}
-
-/* Filter pills */
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 18px;
-}
-
-.pill {
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
-  border-radius: 20px;
-  padding: 6px 14px;
-  font-size: 0.78rem;
-  color: #bbb;
-  cursor: pointer;
-  transition: all 0.15s;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
-
-.pill:hover { border-color: #a0c4ff; color: #e0e0e0; }
-.pill.active { background: #a0c4ff; color: #0f1117; border-color: #a0c4ff; font-weight: 600; }
-
-/* Card */
-.card-wrapper {
-  perspective: 1000px;
-  min-height: 220px;
-  margin-bottom: 16px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.card {
-  position: relative;
-  width: 100%;
-  min-height: 220px;
-  transition: transform 0.45s cubic-bezier(.4,.2,.2,1);
-  transform-style: preserve-3d;
-}
-
-.card.flipped { transform: rotateX(180deg); }
-
-.card-face {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  min-height: 220px;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  border-radius: 12px;
-  padding: 24px 22px;
+  padding: 28px 16px;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
 
-.card-front {
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
+/* ── Topic Picker ── */
+
+#topic-screen h1 {
+  color: #fff;
+  font-size: 1.4rem;
+  margin-bottom: 4px;
 }
 
-.card-back {
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
-  transform: rotateX(180deg);
+#topic-screen .subtitle {
+  color: #777;
+  font-size: 0.85rem;
+  margin-bottom: 24px;
 }
 
-.card-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.topic-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: #1a1d27;
+  border: 1px solid #2a2d3a;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+
+.topic-btn:active { background: #252838; }
+
+.topic-name {
+  color: #e0e0e0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.topic-count {
+  color: #777;
+  font-size: 0.85rem;
+}
+
+/* ── Card Screen ── */
+
+#card-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 12px;
 }
 
-.card-front .card-label { color: #a0c4ff; }
-.card-back .card-label { color: #4ecdc4; }
-
-.card-front .card-body {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: #fff;
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.card-back .card-body {
-  font-size: 0.92rem;
-  line-height: 1.65;
-  color: #e0e0e0;
-  flex: 1;
-  overflow-y: auto;
-}
-
-.card-back .card-body ul,
-.card-back .card-body ol {
-  margin-left: 18px;
-  margin-bottom: 8px;
-}
-
-.card-back .card-body li {
-  margin-bottom: 5px;
-}
-
-.card-back .card-body p {
-  margin-bottom: 8px;
-}
-
-.card-back .card-body code {
-  background: #252838;
-  padding: 1px 5px;
-  border-radius: 3px;
-  font-family: 'Consolas', monospace;
-  font-size: 0.88em;
-}
-
-.card-back .card-body pre {
-  font-family: 'Consolas', monospace;
-}
-
-.math-display {
-  margin: 10px 0;
-  overflow-x: auto;
-}
-
-.group-tag {
-  font-size: 0.68rem;
-  color: #777;
-  margin-top: 10px;
-  text-align: right;
-}
-
-/* Navigation */
-.nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 10px;
-}
-
-.nav button {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid #2a2d3a;
-  background: #1a1d27;
+.back-btn {
+  background: none;
+  border: none;
   color: #a0c4ff;
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.15s;
+  padding: 6px 0;
   -webkit-tap-highlight-color: transparent;
 }
 
-.nav button:hover { background: #252838; }
-.nav button:disabled { opacity: 0.3; cursor: default; }
-
-.progress {
-  color: #777;
+.progress-text {
+  color: #a0c4ff;
   font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 4px;
+  background: #2a2d3a;
+  border-radius: 2px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #4ecdc4;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ── The Card ── */
+
+.card-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+
+.card {
+  background: #fff;
+  color: #1a1a1a;
+  border-radius: 12px;
+  padding: 28px 24px;
+  min-height: 200px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  position: relative;
+  overflow-y: auto;
+  max-height: 65vh;
+}
+
+.card .label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  color: #999;
+}
+
+.card.question-side .label { color: #a0c4ff; }
+.card.answer-side .label { color: #4ecdc4; }
+
+.card .card-content {
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.card.question-side .card-content {
+  font-size: 1.15rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  min-height: 80px;
+}
+
+.card .tap-hint {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  font-size: 0.7rem;
+  color: #bbb;
+}
+
+/* Answer markdown styling */
+.card-content h1, .card-content h2, .card-content h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 12px 0 6px;
+}
+
+.card-content p { margin: 8px 0; }
+
+.card-content ul, .card-content ol {
+  margin: 8px 0 8px 20px;
+}
+
+.card-content li { margin: 4px 0; }
+
+.card-content strong { font-weight: 700; }
+
+.card-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 10px 0;
+  font-size: 0.9rem;
+}
+
+.card-content th, .card-content td {
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.card-content th { background: #f0f0f0; font-weight: 600; }
+
+.card-content code {
+  background: #f4f4f4;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.9em;
   font-family: 'Consolas', monospace;
-  min-width: 60px;
+}
+
+.card-content pre {
+  background: #f4f4f4;
+  padding: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.card-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.card-content .mermaid-container {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.card-content .mermaid-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Buttons ── */
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding-bottom: 16px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+
+.action-btn:active { opacity: 0.8; }
+
+.btn-again {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+.btn-got-it {
+  background: #4ecdc4;
+  color: #fff;
+}
+
+.action-buttons.hidden { display: none; }
+
+/* ── Round Complete / Done ── */
+
+#round-screen, #done-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
-.hint {
-  text-align: center;
-  color: #555;
-  font-size: 0.75rem;
-  margin-top: 4px;
+#round-screen h2, #done-screen h2 {
+  color: #fff;
+  font-size: 1.3rem;
+  margin-bottom: 8px;
 }
 
-/* Keyboard hint */
-.kbd {
-  display: inline-block;
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
-  border-radius: 4px;
-  padding: 1px 6px;
-  font-family: 'Consolas', monospace;
-  font-size: 0.72rem;
+#round-screen p, #done-screen p {
+  color: #bbb;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
 }
+
+.screen-btn {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.screen-btn.primary {
+  background: #4ecdc4;
+  color: #fff;
+}
+
+.screen-btn.secondary {
+  background: #2a2d3a;
+  color: #e0e0e0;
+}
+
+.screen-btn:active { opacity: 0.8; }
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #4ecdc4;
+  margin-bottom: 4px;
+}
+
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
+
 <div class="container">
-  <div class="header">
-    <a class="back-btn" href="index.html">&larr;</a>
-    <h1>Image Structure</h1>
+  <!-- Topic Picker -->
+  <div id="topic-screen">
+    <h1>Image Structure Flashcards</h1>
+    <p class="subtitle">4F12 &mdash; Cambridge IIB</p>
+    <div id="topic-list"></div>
   </div>
-  <p class="subtitle">4F12 &middot; <span id="count">49</span> cards</p>
 
-  <div class="filters" id="filters"></div>
-
-  <div class="card-wrapper" id="cardWrapper" onclick="flip()">
-    <div class="card" id="card">
-      <div class="card-face card-front">
-        <div class="card-label">Question</div>
-        <div class="card-body" id="frontBody"></div>
-        <div class="group-tag" id="frontGroup"></div>
+  <!-- Card Screen -->
+  <div id="card-screen" class="hidden">
+    <div class="top-bar">
+      <button class="back-btn" id="back-btn">&larr; Topics</button>
+      <span class="progress-text" id="progress-text"></span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progress-bar"></div>
+    </div>
+    <div class="card-wrapper">
+      <div class="card question-side" id="card">
+        <div class="label" id="card-label">Question</div>
+        <div class="card-content" id="card-content"></div>
+        <div class="tap-hint" id="tap-hint">Tap to flip</div>
       </div>
-      <div class="card-face card-back">
-        <div class="card-label">Answer</div>
-        <div class="card-body" id="backBody"></div>
-        <div class="group-tag" id="backGroup"></div>
-      </div>
+    </div>
+    <div class="action-buttons hidden" id="action-buttons">
+      <button class="action-btn btn-again" id="btn-again">Again</button>
+      <button class="action-btn btn-got-it" id="btn-got-it">Got it</button>
     </div>
   </div>
 
-  <div class="nav">
-    <button id="prevBtn" onclick="event.stopPropagation(); prev();">&larr;</button>
-    <span class="progress" id="progress"></span>
-    <button id="nextBtn" onclick="event.stopPropagation(); next();">&rarr;</button>
+  <!-- Round Complete -->
+  <div id="round-screen" class="hidden">
+    <div class="stat-number" id="round-remaining"></div>
+    <h2>Round complete</h2>
+    <p id="round-message"></p>
+    <button class="screen-btn primary" id="round-continue">Continue</button>
+    <button class="screen-btn secondary" id="round-back">Back to topics</button>
   </div>
-  <p class="hint">Tap card to flip &middot; <span class="kbd">&larr;</span> <span class="kbd">&rarr;</span> navigate &middot; <span class="kbd">Space</span> flip</p>
+
+  <!-- All Done -->
+  <div id="done-screen" class="hidden">
+    <div class="stat-number">0</div>
+    <h2>All cards cleared</h2>
+    <p>You got every card right.</p>
+    <button class="screen-btn primary" id="done-restart">Restart topic</button>
+    <button class="screen-btn secondary" id="done-back">Back to topics</button>
+  </div>
 </div>
 
 <script>
-const ALL_CARDS = [{"group": "Edge Detection", "question": "Why is edge detection commonly used in CV applications?", "answer_html": "<ul>\n<li>An edge is an intensity discontinuity in 1 direction</li>\n<li>Edges are invariant to lighting changes</li>\n<li>This means extracting the edges provides a significant data reduction while preserving useful information content (it is possible to recognise objects from line drawings)</li>\n</ul>", "answer_md": "- An edge is an intensity discontinuity in 1 direction\n- Edges are invariant to lighting changes\n- This means extracting the edges provides a significant data reduction while preserving useful information content (it is possible to recognise objects from line drawings)"}, {"group": "Edge Detection", "question": "Describe the 1D edge detection algorithm via derivatives and thresholds.", "answer_html": "<ol>\n<li>Convolve with derivative of Gaussian kernel to provide smoothing and differentiation simultaneously: $s'(x) = g'_\\sigma(x) * I(x)$</li>\n<li>Find the maximum and minimum values of $s'(x)$</li>\n<li>Use thresholding on the magnitude of the extrema to mark edges</li>\n</ol>", "answer_md": "1. Convolve with derivative of Gaussian kernel to provide smoothing and differentiation simultaneously: $s'(x) = g'_\\sigma(x) * I(x)$\n2. Find the maximum and minimum values of $s'(x)$\n3. Use thresholding on the magnitude of the extrema to mark edges"}, {"group": "Edge Detection", "question": "Prove the derivative of convolution theorem: $\\frac{d}{dx}[g_\\sigma * I] = g'_\\sigma * I$", "answer_html": "<div class=\"math-display\">$$s'(x) = \\frac{d}{dx}[g_\\sigma(x) * I(x)] = \\frac{d}{dx}\\left[\\int_{-\\infty}^{\\infty} g(x - u) I(u) \\, du\\right]$$</div>\n<div class=\"math-display\">$$= \\int_{-\\infty}^{\\infty} \\frac{d}{dx}[g(x - u)] I(u) \\, du$$</div>\n<div class=\"math-display\">$$= \\int_{-\\infty}^{\\infty} g'(x - u) I(u) \\, du = g'_\\sigma(x) * I(x)$$</div>", "answer_md": "$$s'(x) = \\frac{d}{dx}[g_\\sigma(x) * I(x)] = \\frac{d}{dx}\\left[\\int_{-\\infty}^{\\infty} g(x - u) I(u) \\, du\\right]$$\n\n$$= \\int_{-\\infty}^{\\infty} \\frac{d}{dx}[g(x - u)] I(u) \\, du$$\n\n$$= \\int_{-\\infty}^{\\infty} g'(x - u) I(u) \\, du = g'_\\sigma(x) * I(x)$$"}, {"group": "Edge Detection", "question": "Describe the 1D edge detection algorithm via Laplacians and zero-crossings.", "answer_html": "<ol>\n<li>Convolve with Laplacian of a Gaussian kernel: $s''(x) = g''_\\sigma(x) * I(x)$</li>\n<li>Find zero-crossings</li>\n</ol>", "answer_md": "1. Convolve with Laplacian of a Gaussian kernel: $s''(x) = g''_\\sigma(x) * I(x)$\n2. Find zero-crossings"}, {"group": "Edge Detection", "question": "How is the Laplacian used differently in edge detection vs blob detection?", "answer_html": "<ul>\n<li>Edge detection = find <strong>zero-crossings</strong> in the response of the Laplacian convolved with the smoothed image</li>\n<li>Blob detection = find the <strong>minimum and maximum points</strong> instead</li>\n</ul>", "answer_md": "- Edge detection = find **zero-crossings** in the response of the Laplacian convolved with the smoothed image\n- Blob detection = find the **minimum and maximum points** instead"}, {"group": "Edge Detection", "question": "Describe the 2D edge detection algorithm via derivatives and thresholds, including how to recover edge position and orientation.", "answer_html": "<ol>\n<li>Convolve with 2D Gaussian kernel</li>\n<li>Compute derivative</li>\n<li><strong>Non-maximal suppression</strong> — edge elements placed where $|\\nabla S|$ is greater than $|\\nabla S|$ in the directions $\\pm \\nabla S$, to ensure all edgels are located at ridge points of the surface $|\\nabla S|$</li>\n<li><strong>Thresholding</strong> — only retain edgels where $|\\nabla S|$ is above a certain value</li>\n</ol>\n<ul>\n<li>Edge magnitude: $|\\nabla S| = \\sqrt{S_x^2 + S_y^2}$</li>\n<li>Edge orientation: $\\theta = \\arctan(S_y / S_x)$</li>\n</ul>", "answer_md": "1. Convolve with 2D Gaussian kernel\n2. Compute derivative\n3. **Non-maximal suppression** — edge elements placed where $|\\nabla S|$ is greater than $|\\nabla S|$ in the directions $\\pm \\nabla S$, to ensure all edgels are located at ridge points of the surface $|\\nabla S|$\n4. **Thresholding** — only retain edgels where $|\\nabla S|$ is above a certain value\n\n- Edge magnitude: $|\\nabla S| = \\sqrt{S_x^2 + S_y^2}$\n- Edge orientation: $\\theta = \\arctan(S_y / S_x)$"}, {"group": "Edge Detection", "question": "What is non-maximal suppression and why is it needed in edge detection?", "answer_html": "<ul>\n<li>Edges from thresholding alone are thick (multiple pixels wide)</li>\n<li>Non-maximal suppression thins edges to single-pixel width by only keeping a pixel if $|\\nabla S|$ at that pixel is greater than $|\\nabla S|$ at its neighbours in the directions $\\pm \\nabla S$ (i.e. along the gradient direction)</li>\n<li>This ensures edgels are located at ridge points of the surface $|\\nabla S|$</li>\n</ul>", "answer_md": "- Edges from thresholding alone are thick (multiple pixels wide)\n- Non-maximal suppression thins edges to single-pixel width by only keeping a pixel if $|\\nabla S|$ at that pixel is greater than $|\\nabla S|$ at its neighbours in the directions $\\pm \\nabla S$ (i.e. along the gradient direction)\n- This ensures edgels are located at ridge points of the surface $|\\nabla S|$"}, {"group": "Edge Detection", "question": "Describe the 2D edge detection algorithm via Laplacians and zero-crossings.", "answer_html": "<ol>\n<li>Convolve with the Laplacian of a 2D Gaussian: $s''(x,y) = \\nabla^2 G_\\sigma(x,y) * I(x,y)$</li>\n<li>Find the zero-crossings</li>\n</ol>", "answer_md": "1. Convolve with the Laplacian of a 2D Gaussian: $s''(x,y) = \\nabla^2 G_\\sigma(x,y) * I(x,y)$\n2. Find the zero-crossings"}, {"group": "Edge Detection", "question": "Why are integer-valued filters preferred to float-valued filters in practice?", "answer_html": "<ul>\n<li>Integer operations are more efficient and avoid issues with floating point precision</li>\n</ul>", "answer_md": "- Integer operations are more efficient and avoid issues with floating point precision"}, {"group": "Edge Detection", "question": "Why is smoothing necessary before differentiation?", "answer_html": "<ul>\n<li>Differentiation amplifies high-frequency noise ($\\frac{dI}{dx} \\xrightarrow{FT} j\\omega I(j\\omega)$)</li>\n<li>Low-pass filtering with a Gaussian removes high-frequency noise before differentiation</li>\n<li>Also provides scale selection — removes frequencies above $\\omega_c$</li>\n</ul>", "answer_md": "- Differentiation amplifies high-frequency noise ($\\frac{dI}{dx} \\xrightarrow{FT} j\\omega I(j\\omega)$)\n- Low-pass filtering with a Gaussian removes high-frequency noise before differentiation\n- Also provides scale selection — removes frequencies above $\\omega_c$"}, {"group": "Edge Detection", "question": "Why is the Gaussian a suitable low-pass filter?", "answer_html": "<div class=\"math-display\">$$g_\\sigma(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{x^2}{2\\sigma^2}} \\xrightarrow{FT} G(\\omega) = e^{-\\frac{\\omega^2 \\sigma^2}{2}}$$</div>\n<ul>\n<li>$G(\\omega)$ is an unnormalised Gaussian that decays to zero for large $\\omega$, so it attenuates high frequencies</li>\n<li>$G(0) = 1$, so the filter doesn't change the average brightness of the image</li>\n</ul>", "answer_md": "$$g_\\sigma(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{x^2}{2\\sigma^2}} \\xrightarrow{FT} G(\\omega) = e^{-\\frac{\\omega^2 \\sigma^2}{2}}$$\n\n- $G(\\omega)$ is an unnormalised Gaussian that decays to zero for large $\\omega$, so it attenuates high frequencies\n- $G(0) = 1$, so the filter doesn't change the average brightness of the image"}, {"group": "Edge Detection", "question": "What is the effect of $\\sigma$ on the frequency response?", "answer_html": "<ul>\n<li>$G(\\omega)$ is a Gaussian with $\\sigma' = \\frac{1}{\\sigma}$</li>\n<li>Cut-off frequency $\\omega_c \\propto \\frac{1}{\\sigma}$</li>\n<li>Large $\\sigma$ → small cut-off frequency → more smoothing</li>\n<li>Small $\\sigma$ → large cut-off frequency → less smoothing</li>\n</ul>", "answer_md": "- $G(\\omega)$ is a Gaussian with $\\sigma' = \\frac{1}{\\sigma}$\n- Cut-off frequency $\\omega_c \\propto \\frac{1}{\\sigma}$\n- Large $\\sigma$ → small cut-off frequency → more smoothing\n- Small $\\sigma$ → large cut-off frequency → less smoothing"}, {"group": "Edge Detection", "question": "What property of the Gaussian smoothing kernel coefficients ensures that regions of uniform intensity are unaffected by smoothing?", "answer_html": "<ul>\n<li>The sum of the coefficients is one</li>\n<li>Equivalently, $G(0) = 1$, so the filter doesn't change the average brightness</li>\n</ul>", "answer_md": "- The sum of the coefficients is one\n- Equivalently, $G(0) = 1$, so the filter doesn't change the average brightness"}, {"group": "Edge Detection", "question": "What factors affect the choice of $\\sigma$?", "answer_html": "<ul>\n<li><strong>Scale</strong>: modest smoothing (small $\\sigma$) brings out edges at a fine scale; more smoothing (larger $\\sigma$) identifies edges at larger scales, suppressing finer detail</li>\n<li><strong>Noise</strong>: smoothing suppresses noise, but a kernel large enough to suppress noise may also suppress fine detail</li>\n<li><strong>Computation</strong>: large $\\sigma$ means a large kernel and computationally expensive convolutions</li>\n</ul>", "answer_md": "- **Scale**: modest smoothing (small $\\sigma$) brings out edges at a fine scale; more smoothing (larger $\\sigma$) identifies edges at larger scales, suppressing finer detail\n- **Noise**: smoothing suppresses noise, but a kernel large enough to suppress noise may also suppress fine detail\n- **Computation**: large $\\sigma$ means a large kernel and computationally expensive convolutions"}, {"group": "Edge Detection", "question": "How is the Gaussian kernel truncated for efficient computation?", "answer_html": "<ul>\n<li>Discard samples where the value is less than $\\frac{1}{1000}$ of the peak value</li>\n<li>For $\\sigma = 1$: $e^{-8} < \\frac{1}{1000}$, so $n = 3$ and kernel size is $2n + 1 = 7$</li>\n</ul>", "answer_md": "- Discard samples where the value is less than $\\frac{1}{1000}$ of the peak value\n- For $\\sigma = 1$: $e^{-8} < \\frac{1}{1000}$, so $n = 3$ and kernel size is $2n + 1 = 7$"}, {"group": "Edge Detection", "question": "Derive the kernel size for a given $\\sigma$.", "answer_html": "<ul>\n<li>Discard the sample $(n+1)$ pixels from the centre when its value is less than $\\frac{1}{1000}$ of the peak. The normalising coefficient $\\frac{1}{\\sigma\\sqrt{2\\pi}}$ cancels in the ratio $\\frac{g_\\sigma(n+1)}{g_\\sigma(0)}$, giving:</li>\n</ul>\n<div class=\"math-display\">$$\\frac{g_\\sigma(n+1)}{g_\\sigma(0)} = \\exp\\left[-\\frac{(n + 1)^2}{2\\sigma^2}\\right] < \\frac{1}{1000}$$</div>\n<div class=\"math-display\">$$\\Leftrightarrow n > 3.7\\sigma - 1$$</div>\n<ul>\n<li>So $n$ is the nearest integer to $3.7\\sigma - 0.5$, and the kernel size is $2n + 1$</li>\n</ul>", "answer_md": "- Discard the sample $(n+1)$ pixels from the centre when its value is less than $\\frac{1}{1000}$ of the peak. The normalising coefficient $\\frac{1}{\\sigma\\sqrt{2\\pi}}$ cancels in the ratio $\\frac{g_\\sigma(n+1)}{g_\\sigma(0)}$, giving:\n\n$$\\frac{g_\\sigma(n+1)}{g_\\sigma(0)} = \\exp\\left[-\\frac{(n + 1)^2}{2\\sigma^2}\\right] < \\frac{1}{1000}$$\n\n$$\\Leftrightarrow n > 3.7\\sigma - 1$$\n\n- So $n$ is the nearest integer to $3.7\\sigma - 0.5$, and the kernel size is $2n + 1$"}, {"group": "Edge Detection", "question": "Show that 2D Gaussian convolution decomposes into two 1D convolutions.", "answer_html": "<div class=\"math-display\">$$G_\\sigma(x, y) * I(x, y) = \\frac{1}{2\\pi\\sigma^2} \\int \\int I(x - u, y - v) \\exp\\left(-\\frac{u^2 + v^2}{2\\sigma^2}\\right) du \\, dv$$</div>\n<div class=\"math-display\">$$= \\frac{1}{\\sqrt{2\\pi}\\sigma} \\int \\exp\\left(-\\frac{u^2}{2\\sigma^2}\\right) \\left[\\frac{1}{\\sqrt{2\\pi}\\sigma} \\int I(x - u, y - v) \\exp\\left(-\\frac{v^2}{2\\sigma^2}\\right) dv\\right] du$$</div>\n<div class=\"math-display\">$$= g_\\sigma(x) * [g_\\sigma(y) * I(x, y)]$$</div>\n<ul>\n<li>As a discrete summation:</li>\n</ul>\n<div class=\"math-display\">$$S(x,y) = \\sum_{u=-n}^{n} \\sum_{v=-n}^{n} g_\\sigma(u) \\; g_\\sigma(v) \\; I(x-u, y-v)$$</div>\n<ul>\n<li>where $g_\\sigma(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{x^2}{2\\sigma^2}}$ sampled at $N = 2n+1$ discrete values</li>\n</ul>", "answer_md": "$$G_\\sigma(x, y) * I(x, y) = \\frac{1}{2\\pi\\sigma^2} \\int \\int I(x - u, y - v) \\exp\\left(-\\frac{u^2 + v^2}{2\\sigma^2}\\right) du \\, dv$$\n\n$$= \\frac{1}{\\sqrt{2\\pi}\\sigma} \\int \\exp\\left(-\\frac{u^2}{2\\sigma^2}\\right) \\left[\\frac{1}{\\sqrt{2\\pi}\\sigma} \\int I(x - u, y - v) \\exp\\left(-\\frac{v^2}{2\\sigma^2}\\right) dv\\right] du$$\n\n$$= g_\\sigma(x) * [g_\\sigma(y) * I(x, y)]$$\n\n- As a discrete summation:\n\n$$S(x,y) = \\sum_{u=-n}^{n} \\sum_{v=-n}^{n} g_\\sigma(u) \\; g_\\sigma(v) \\; I(x-u, y-v)$$\n\n- where $g_\\sigma(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{x^2}{2\\sigma^2}}$ sampled at $N = 2n+1$ discrete values"}, {"group": "Edge Detection", "question": "What is the computational advantage of decomposing into two 1D convolutions?", "answer_html": "<ul>\n<li>A 2D convolution with kernel size $N \\times N$ requires $N^2$ multiply-and-add operations per pixel</li>\n<li>Two 1D convolutions require $2N$ operations per pixel</li>\n<li>Speed-up factor: $\\frac{N^2}{2N} = \\frac{N}{2}$</li>\n</ul>", "answer_md": "- A 2D convolution with kernel size $N \\times N$ requires $N^2$ multiply-and-add operations per pixel\n- Two 1D convolutions require $2N$ operations per pixel\n- Speed-up factor: $\\frac{N^2}{2N} = \\frac{N}{2}$"}, {"group": "Edge Detection", "question": "How many operations per pixel are needed for smoothing + differentiation?", "answer_html": "<ul>\n<li>Convolving with $\\frac{\\partial G_\\sigma}{\\partial x}$ decomposes as: $g'_\\sigma(x) <em> [g_\\sigma(y) </em> I(x,y)]$</li>\n<li>Similarly for $\\frac{\\partial G_\\sigma}{\\partial y}$: $g_\\sigma(x) <em> [g'_\\sigma(y) </em> I(x,y)]$</li>\n<li>Each 1D convolution costs $4n + 1$ operations per pixel (where kernel size is $2n+1$)</li>\n<li>Four 1D convolutions total: $2 \\times 2 \\times (4n+1) = 16n + 4$ operations per pixel</li>\n</ul>", "answer_md": "- Convolving with $\\frac{\\partial G_\\sigma}{\\partial x}$ decomposes as: $g'_\\sigma(x) * [g_\\sigma(y) * I(x,y)]$\n- Similarly for $\\frac{\\partial G_\\sigma}{\\partial y}$: $g_\\sigma(x) * [g'_\\sigma(y) * I(x,y)]$\n- Each 1D convolution costs $4n + 1$ operations per pixel (where kernel size is $2n+1$)\n- Four 1D convolutions total: $2 \\times 2 \\times (4n+1) = 16n + 4$ operations per pixel"}, {"group": "Edge Detection", "question": "Show that repeated Gaussian convolution is equivalent to a single Gaussian of summed variances.", "answer_html": "<ul>\n<li>The Fourier transform of a Gaussian is:</li>\n</ul>\n<div class=\"math-display\">$$g_\\sigma(x) \\leftrightarrow G_\\sigma(\\omega) = \\exp\\left(-\\frac{\\omega^2\\sigma^2}{2}\\right)$$</div>\n<ul>\n<li>Convolution in space = multiplication in frequency:</li>\n</ul>\n<div class=\"math-display\">$$g_{\\sigma_2} * g_{\\sigma_1} \\leftrightarrow G_{\\sigma_2}(\\omega) \\times G_{\\sigma_1}(\\omega) = \\exp\\left(-\\frac{\\omega^2\\sigma_2^2}{2}\\right) \\times \\exp\\left(-\\frac{\\omega^2\\sigma_1^2}{2}\\right)$$</div>\n<div class=\"math-display\">$$= \\exp\\left(-\\frac{\\omega^2(\\sigma_1^2 + \\sigma_2^2)}{2}\\right)$$</div>\n<ul>\n<li>This is the FT of a Gaussian with variance $\\sigma_1^2 + \\sigma_2^2$</li>\n<li>Generalises: repeated convolution with Gaussians of $\\sigma_i$ is equivalent to a single Gaussian of variance $\\sum_i \\sigma_i^2$</li>\n</ul>", "answer_md": "- The Fourier transform of a Gaussian is:\n\n$$g_\\sigma(x) \\leftrightarrow G_\\sigma(\\omega) = \\exp\\left(-\\frac{\\omega^2\\sigma^2}{2}\\right)$$\n\n- Convolution in space = multiplication in frequency:\n\n$$g_{\\sigma_2} * g_{\\sigma_1} \\leftrightarrow G_{\\sigma_2}(\\omega) \\times G_{\\sigma_1}(\\omega) = \\exp\\left(-\\frac{\\omega^2\\sigma_2^2}{2}\\right) \\times \\exp\\left(-\\frac{\\omega^2\\sigma_1^2}{2}\\right)$$\n\n$$= \\exp\\left(-\\frac{\\omega^2(\\sigma_1^2 + \\sigma_2^2)}{2}\\right)$$\n\n- This is the FT of a Gaussian with variance $\\sigma_1^2 + \\sigma_2^2$\n- Generalises: repeated convolution with Gaussians of $\\sigma_i$ is equivalent to a single Gaussian of variance $\\sum_i \\sigma_i^2$"}, {"group": "Edge Detection", "question": "Derive the discrete 1D first-order derivative kernel.", "answer_html": "<ul>\n<li>Taylor expansion:</li>\n</ul>\n<div class=\"math-display\">$$S(x + \\Delta x, y) \\simeq S(x,y) + \\Delta x \\frac{\\partial S}{\\partial x}$$</div>\n<div class=\"math-display\">$$S(x - \\Delta x, y) \\simeq S(x,y) - \\Delta x \\frac{\\partial S}{\\partial x}$$</div>\n<ul>\n<li>Subtracting:</li>\n</ul>\n<div class=\"math-display\">$$\\frac{\\partial S}{\\partial x} \\simeq \\frac{S(x + \\Delta x, y) - S(x - \\Delta x, y)}{2\\Delta x}$$</div>\n<ul>\n<li>With $\\Delta x = 1$, the convolution kernel is $\\boxed{\\frac{1}{2} \\quad 0 \\quad -\\frac{1}{2}}$</li>\n</ul>\n<ul>\n<li>Similarly: $\\frac{\\partial S}{\\partial y} \\simeq \\frac{S(x, y+1) - S(x, y-1)}{2}$ with kernel $\\begin{bmatrix} \\frac{1}{2} \\\\ 0 \\\\ -\\frac{1}{2} \\end{bmatrix}$</li>\n</ul>", "answer_md": "- Taylor expansion:\n\n$$S(x + \\Delta x, y) \\simeq S(x,y) + \\Delta x \\frac{\\partial S}{\\partial x}$$\n\n$$S(x - \\Delta x, y) \\simeq S(x,y) - \\Delta x \\frac{\\partial S}{\\partial x}$$\n\n- Subtracting:\n\n$$\\frac{\\partial S}{\\partial x} \\simeq \\frac{S(x + \\Delta x, y) - S(x - \\Delta x, y)}{2\\Delta x}$$\n\n- With $\\Delta x = 1$, the convolution kernel is $\\boxed{\\frac{1}{2} \\quad 0 \\quad -\\frac{1}{2}}$\n\n- Similarly: $\\frac{\\partial S}{\\partial y} \\simeq \\frac{S(x, y+1) - S(x, y-1)}{2}$ with kernel $\\begin{bmatrix} \\frac{1}{2} \\\\ 0 \\\\ -\\frac{1}{2} \\end{bmatrix}$"}, {"group": "Edge Detection", "question": "Derive the 2D first-order derivative kernels.", "answer_html": "<ul>\n<li>The 1D first-order derivative kernel is $[\\frac{1}{2}, 0, -\\frac{1}{2}]$</li>\n<li>Applying horizontally for $\\frac{\\partial S}{\\partial x}$:</li>\n</ul>\n<div class=\"math-display\">$$\\begin{bmatrix} 0 & 0 & 0 \\\\ \\frac{1}{2} & 0 & -\\frac{1}{2} \\\\ 0 & 0 & 0 \\end{bmatrix}$$</div>\n<ul>\n<li>Applying vertically for $\\frac{\\partial S}{\\partial y}$:</li>\n</ul>\n<div class=\"math-display\">$$\\begin{bmatrix} 0 & \\frac{1}{2} & 0 \\\\ 0 & 0 & 0 \\\\ 0 & -\\frac{1}{2} & 0 \\end{bmatrix}$$</div>", "answer_md": "- The 1D first-order derivative kernel is $[\\frac{1}{2}, 0, -\\frac{1}{2}]$\n- Applying horizontally for $\\frac{\\partial S}{\\partial x}$:\n\n$$\\begin{bmatrix} 0 & 0 & 0 \\\\ \\frac{1}{2} & 0 & -\\frac{1}{2} \\\\ 0 & 0 & 0 \\end{bmatrix}$$\n\n- Applying vertically for $\\frac{\\partial S}{\\partial y}$:\n\n$$\\begin{bmatrix} 0 & \\frac{1}{2} & 0 \\\\ 0 & 0 & 0 \\\\ 0 & -\\frac{1}{2} & 0 \\end{bmatrix}$$"}, {"group": "Edge Detection", "question": "Derive the discrete 1D second-order derivative kernel.", "answer_html": "<ul>\n<li>From first-order Taylor expansions: $\\frac{dI}{dx}|_{(x)} \\approx I(x) - I(x-1)$</li>\n<li>Hence:</li>\n</ul>\n<div class=\"math-display\">$$\\frac{d^2 I}{dx^2}|_{(x)} \\approx (I(x+1) - I(x)) - (I(x) - I(x-1)) = I(x+1) - 2I(x) + I(x-1)$$</div>\n<ul>\n<li>The convolution kernel is $\\boxed{1 \\quad -2 \\quad 1}$</li>\n</ul>", "answer_md": "- From first-order Taylor expansions: $\\frac{dI}{dx}|_{(x)} \\approx I(x) - I(x-1)$\n- Hence:\n\n$$\\frac{d^2 I}{dx^2}|_{(x)} \\approx (I(x+1) - I(x)) - (I(x) - I(x-1)) = I(x+1) - 2I(x) + I(x-1)$$\n\n- The convolution kernel is $\\boxed{1 \\quad -2 \\quad 1}$"}, {"group": "Edge Detection", "question": "Derive a $3 \\times 3$ discrete approximation to the 2D Laplacian.", "answer_html": "<div class=\"math-display\">$$\\nabla^2 I|_{(x,y)} = \\frac{\\partial^2 I}{\\partial x^2}|_{(x,y)} + \\frac{\\partial^2 I}{\\partial y^2}|_{(x,y)}$$</div>\n<ul>\n<li>The 1D second derivative kernel is $[1, -2, 1]$</li>\n<li>Applying horizontally and vertically and summing gives:</li>\n</ul>\n<div class=\"math-display\">$$\\begin{bmatrix} 0 & 1 & 0 \\\\ 1 & -4 & 1 \\\\ 0 & 1 & 0 \\end{bmatrix}$$</div>", "answer_md": "$$\\nabla^2 I|_{(x,y)} = \\frac{\\partial^2 I}{\\partial x^2}|_{(x,y)} + \\frac{\\partial^2 I}{\\partial y^2}|_{(x,y)}$$\n\n- The 1D second derivative kernel is $[1, -2, 1]$\n- Applying horizontally and vertically and summing gives:\n\n$$\\begin{bmatrix} 0 & 1 & 0 \\\\ 1 & -4 & 1 \\\\ 0 & 1 & 0 \\end{bmatrix}$$"}, {"group": "Corner Detection", "question": "Why corners?", "answer_html": "<ul>\n<li>Corner = intensity discontinuity in 2 directions</li>\n<li>Corners are invariant to lighting changes like edges</li>\n<li>Corners are better for tracking moving objects across frames - the motion of an edge is ambiguous (aperture problem)</li>\n</ul>", "answer_md": "- Corner = intensity discontinuity in 2 directions\n- Corners are invariant to lighting changes like edges\n- Corners are better for tracking moving objects across frames - the motion of an edge is ambiguous (aperture problem)"}, {"group": "Corner Detection", "question": "Describe the cross-correlation method for corner detection.", "answer_html": "<ol>\n<li>Calculate the normalised cross-correlation for each pixel</li>\n</ol>\n<div class=\"math-display\">$$c(x, y) = \\frac{\\displaystyle\\sum_{u=-n}^{n} \\sum_{v=-n}^{n} P(u, v) \\, I(x + u, y + v)}{\\sqrt{\\displaystyle\\sum_{u=-n}^{n} \\sum_{v=-n}^{n} P^2(u, v) \\displaystyle\\sum_{u=-n}^{n} \\sum_{v=-n}^{n} I^2(x + u, y + v)}}$$</div>\n<ol>\n<li>A patch with a peak in correlation is a corner</li>\n</ol>", "answer_md": "1. Calculate the normalised cross-correlation for each pixel\n\n$$c(x, y) = \\frac{\\displaystyle\\sum_{u=-n}^{n} \\sum_{v=-n}^{n} P(u, v) \\, I(x + u, y + v)}{\\sqrt{\\displaystyle\\sum_{u=-n}^{n} \\sum_{v=-n}^{n} P^2(u, v) \\displaystyle\\sum_{u=-n}^{n} \\sum_{v=-n}^{n} I^2(x + u, y + v)}}$$\n\n2. A patch with a peak in correlation is a corner"}, {"group": "Corner Detection", "question": "Justify the cross-correlation method.", "answer_html": "<ol>\n<li>The correlation of two patches is a measure of their similarity (it involves computing the cosine of the angle between them via the dot product)</li>\n<li>Cross-correlation involves calculating the correlation of one patch $p(u,v)$ of size $n$ with all the other patches in the image</li>\n<li>If the cross-correlation function decreases in both the x and y directions about the original point then there is a 2D discontinuity in intensity (= a corner)</li>\n</ol>", "answer_md": "1. The correlation of two patches is a measure of their similarity (it involves computing the cosine of the angle between them via the dot product)\n2. Cross-correlation involves calculating the correlation of one patch $p(u,v)$ of size $n$ with all the other patches in the image\n3. If the cross-correlation function decreases in both the x and y directions about the original point then there is a 2D discontinuity in intensity (= a corner)"}, {"group": "Corner Detection", "question": "Describe the Harris corner detection algorithm.", "answer_html": "<ol>\n<li>Smooth the image with Gaussian $G_{\\sigma_D}$ to get $S(x,y)$</li>\n<li>Compute derivatives $S_x = \\partial S / \\partial x$ and $S_y = \\partial S / \\partial y$</li>\n<li>Compute three gradient images: $S_x^2$, $S_y^2$, $S_x S_y$</li>\n<li>Smooth each with Gaussian $G_{\\sigma_I}$ ($\\sigma_I > \\sigma_D$) to get $\\langle S_x^2 \\rangle$, $\\langle S_y^2 \\rangle$, $\\langle S_x S_y \\rangle$</li>\n<li>Assemble $A = \\begin{bmatrix} \\langle S_x^2 \\rangle & \\langle S_x S_y \\rangle \\\\ \\langle S_x S_y \\rangle & \\langle S_y^2 \\rangle \\end{bmatrix}$ at every pixel</li>\n<li>Determine $R = \\det(A) - \\kappa (\\text{Trace}(A))^2$ where $\\kappa \\approx 0.04 - 0.06$</li>\n<li>Threshold $R$, and non-maximum suppression</li>\n</ol>", "answer_md": "1. Smooth the image with Gaussian $G_{\\sigma_D}$ to get $S(x,y)$\n2. Compute derivatives $S_x = \\partial S / \\partial x$ and $S_y = \\partial S / \\partial y$\n3. Compute three gradient images: $S_x^2$, $S_y^2$, $S_x S_y$\n4. Smooth each with Gaussian $G_{\\sigma_I}$ ($\\sigma_I > \\sigma_D$) to get $\\langle S_x^2 \\rangle$, $\\langle S_y^2 \\rangle$, $\\langle S_x S_y \\rangle$\n5. Assemble $A = \\begin{bmatrix} \\langle S_x^2 \\rangle & \\langle S_x S_y \\rangle \\\\ \\langle S_x S_y \\rangle & \\langle S_y^2 \\rangle \\end{bmatrix}$ at every pixel\n6. Determine $R = \\det(A) - \\kappa (\\text{Trace}(A))^2$ where $\\kappa \\approx 0.04 - 0.06$\n7. Threshold $R$, and non-maximum suppression"}, {"group": "Corner Detection", "question": "Why use $R = \\det(A) - \\kappa(\\text{Trace}(A))^2$ instead of computing eigenvalues directly?", "answer_html": "<ul>\n<li>Computing eigenvalues requires solving a quadratic at every pixel — expensive</li>\n<li>$\\det(A) = \\lambda_1 \\lambda_2$ and $\\text{Trace}(A) = \\lambda_1 + \\lambda_2$ are cheap to compute from the matrix entries</li>\n<li>$R = \\lambda_1 \\lambda_2 - \\kappa(\\lambda_1 + \\lambda_2)^2$ — large $R$ requires both eigenvalues to be large (corner), since $\\det$ is small if either eigenvalue is small</li>\n<li>$\\kappa \\approx 0.04 - 0.06$ penalises cases where one eigenvalue dominates (edges), making the detector \"edge-phobic\"</li>\n</ul>", "answer_md": "- Computing eigenvalues requires solving a quadratic at every pixel — expensive\n- $\\det(A) = \\lambda_1 \\lambda_2$ and $\\text{Trace}(A) = \\lambda_1 + \\lambda_2$ are cheap to compute from the matrix entries\n- $R = \\lambda_1 \\lambda_2 - \\kappa(\\lambda_1 + \\lambda_2)^2$ — large $R$ requires both eigenvalues to be large (corner), since $\\det$ is small if either eigenvalue is small\n- $\\kappa \\approx 0.04 - 0.06$ penalises cases where one eigenvalue dominates (edges), making the detector \"edge-phobic\""}, {"group": "Corner Detection", "question": "How do the eigenvalues of $A$ relate to edges, corners, and flat regions?", "answer_html": "<ul>\n<li>$\\lambda_1 \\leq \\frac{\\mathbf{n}^T A \\mathbf{n}}{\\mathbf{n}^T \\mathbf{n}} \\leq \\lambda_2$</li>\n<li><strong>No structure</strong> (flat): $\\lambda_1 \\approx \\lambda_2 \\approx 0$</li>\n<li><strong>1D structure</strong> (edge): $\\lambda_1 \\approx 0$, $\\lambda_2$ large</li>\n<li><strong>2D structure</strong> (corner): $\\lambda_1$ and $\\lambda_2$ both large and distinct</li>\n</ul>", "answer_md": "- $\\lambda_1 \\leq \\frac{\\mathbf{n}^T A \\mathbf{n}}{\\mathbf{n}^T \\mathbf{n}} \\leq \\lambda_2$\n- **No structure** (flat): $\\lambda_1 \\approx \\lambda_2 \\approx 0$\n- **1D structure** (edge): $\\lambda_1 \\approx 0$, $\\lambda_2$ large\n- **2D structure** (corner): $\\lambda_1$ and $\\lambda_2$ both large and distinct"}, {"group": "Corner Detection", "question": "Why must $\\sigma_I > \\sigma_D$?", "answer_html": "<ul>\n<li>$\\sigma_D$ sets the scale at which gradients are computed (local, fine)</li>\n<li>$\\sigma_I$ sets the neighbourhood over which we aggregate gradients to characterise structure (coarser)</li>\n<li>If $\\sigma_I \\leq \\sigma_D$, the integration window would be smaller than the blur from derivative smoothing — we'd see gradient information from a single blurred point, not how gradients vary spatially</li>\n<li>Need spatial variation in gradient direction across the window to distinguish corners (multiple directions) from edges (one direction)</li>\n</ul>", "answer_md": "- $\\sigma_D$ sets the scale at which gradients are computed (local, fine)\n- $\\sigma_I$ sets the neighbourhood over which we aggregate gradients to characterise structure (coarser)\n- If $\\sigma_I \\leq \\sigma_D$, the integration window would be smaller than the blur from derivative smoothing — we'd see gradient information from a single blurred point, not how gradients vary spatially\n- Need spatial variation in gradient direction across the window to distinguish corners (multiple directions) from edges (one direction)"}, {"group": "Corner Detection", "question": "Given the weighted SSD $C(\\mathbf{n}) = \\sum_W w(\\mathbf{x})(S(\\mathbf{x}+\\mathbf{n}) - S(\\mathbf{x}))^2$, derive $C(\\mathbf{n}) \\approx \\mathbf{n}^T A \\mathbf{n}$ and identify the autocorrelation matrix $A$.", "answer_html": "<div class=\"math-display\">$$C(\\mathbf{n}) = \\sum_W w(\\mathbf{x}) (S(\\mathbf{x}+\\mathbf{n}) - S(\\mathbf{x}))^2$$</div>\n<div class=\"math-display\">$$\\simeq \\sum_W w(\\mathbf{x}) [\\nabla S \\cdot \\mathbf{n}]^2 \\quad \\text{by Taylor series expansion}$$</div>\n<div class=\"math-display\">$$\\simeq \\sum_W w(\\mathbf{x}) (\\mathbf{n}^T \\nabla S^T \\nabla S \\; \\mathbf{n})$$</div>\n<ul>\n<li>Set $w(\\mathbf{x}) = G_{\\sigma_I}(\\mathbf{x})$ — emphasises pixels near the centre of the window</li>\n</ul>\n<div class=\"math-display\">$$\\simeq \\mathbf{n}^T \\begin{bmatrix} \\langle S_x S_x \\rangle & \\langle S_x S_y \\rangle \\\\ \\langle S_y S_x \\rangle & \\langle S_y S_y \\rangle \\end{bmatrix} \\mathbf{n}$$</div>\n<div class=\"math-display\">$$\\boxed{C(\\mathbf{n}) \\simeq \\mathbf{n}^T A \\mathbf{n}}$$</div>", "answer_md": "$$C(\\mathbf{n}) = \\sum_W w(\\mathbf{x}) (S(\\mathbf{x}+\\mathbf{n}) - S(\\mathbf{x}))^2$$\n\n$$\\simeq \\sum_W w(\\mathbf{x}) [\\nabla S \\cdot \\mathbf{n}]^2 \\quad \\text{by Taylor series expansion}$$\n\n$$\\simeq \\sum_W w(\\mathbf{x}) (\\mathbf{n}^T \\nabla S^T \\nabla S \\; \\mathbf{n})$$\n\n- Set $w(\\mathbf{x}) = G_{\\sigma_I}(\\mathbf{x})$ — emphasises pixels near the centre of the window\n\n$$\\simeq \\mathbf{n}^T \\begin{bmatrix} \\langle S_x S_x \\rangle & \\langle S_x S_y \\rangle \\\\ \\langle S_y S_x \\rangle & \\langle S_y S_y \\rangle \\end{bmatrix} \\mathbf{n}$$\n\n$$\\boxed{C(\\mathbf{n}) \\simeq \\mathbf{n}^T A \\mathbf{n}}$$"}, {"group": "Blob Detection", "question": "Why blobs?", "answer_html": "<ul>\n<li>Scale invariance — blobs establish scale that edges/corners cannot</li>\n<li>Compare 2 objects & check if they are the same — blob is less likely to be affected by object background than edges/corners because it is in the middle of an object</li>\n</ul>", "answer_md": "- Scale invariance — blobs establish scale that edges/corners cannot\n- Compare 2 objects & check if they are the same — blob is less likely to be affected by object background than edges/corners because it is in the middle of an object"}, {"group": "Blob Detection", "question": "Describe the blob detection method.", "answer_html": "<ol>\n<li>Build image pyramid of smoothed images $S(x, y, \\sigma_i) = G_{\\sigma_i} * I$</li>\n<li>Compute DoG images by subtracting neighbouring levels: $S(x, y, \\sigma_{i+1}) - S(x, y, \\sigma_i)$</li>\n<li>Find max/min of DoG image over position $(x, y)$ and scale $\\sigma_i$ by comparing 26 neighbours (3×3 grid at scales $\\sigma_{i-1}$, $\\sigma_i$, $\\sigma_{i+1}$)</li>\n<li>The max/min response gives the blob centre $(x, y)$ and the $\\sigma_i$ of max/min gives the scale</li>\n<li>Radius of blob $= \\sqrt{2} \\; \\sigma_i$</li>\n</ol>\n<p>fig_1.jpg</p>", "answer_md": "1. Build image pyramid of smoothed images $S(x, y, \\sigma_i) = G_{\\sigma_i} * I$\n2. Compute DoG images by subtracting neighbouring levels: $S(x, y, \\sigma_{i+1}) - S(x, y, \\sigma_i)$\n3. Find max/min of DoG image over position $(x, y)$ and scale $\\sigma_i$ by comparing 26 neighbours (3×3 grid at scales $\\sigma_{i-1}$, $\\sigma_i$, $\\sigma_{i+1}$)\n4. The max/min response gives the blob centre $(x, y)$ and the $\\sigma_i$ of max/min gives the scale\n5. Radius of blob $= \\sqrt{2} \\; \\sigma_i$\n\nfig_1.jpg"}, {"group": "Blob Detection", "question": "Show that the LoG is a band-pass filter.", "answer_html": "<ul>\n<li>The FT of the Laplacian of the Gaussian is:</li>\n</ul>\n<div class=\"math-display\">$$\\frac{d^2 g_\\sigma(x)}{dx^2} \\xrightarrow{FT} -\\omega^2 G_{\\sigma'}(\\omega)$$</div>\n<ul>\n<li>Behaves as $-\\omega^2$ near the origin (suppresses DC) and decays to zero for large $\\omega$ (Gaussian envelope)</li>\n<li>This gives a band-pass shape with peak at $\\omega \\propto \\frac{1}{\\sigma}$</li>\n</ul>", "answer_md": "- The FT of the Laplacian of the Gaussian is:\n\n$$\\frac{d^2 g_\\sigma(x)}{dx^2} \\xrightarrow{FT} -\\omega^2 G_{\\sigma'}(\\omega)$$\n\n- Behaves as $-\\omega^2$ near the origin (suppresses DC) and decays to zero for large $\\omega$ (Gaussian envelope)\n- This gives a band-pass shape with peak at $\\omega \\propto \\frac{1}{\\sigma}$"}, {"group": "Blob Detection", "question": "Derive the blob radius.", "answer_html": "<ul>\n<li>The 2D LoG is $\\nabla^2 G_\\sigma(x,y) \\propto \\left(\\frac{r^2}{\\sigma^2} - 2\\right) e^{-r^2/2\\sigma^2}$ where $r^2 = x^2 + y^2$</li>\n<li>The zero-crossing occurs when $\\frac{r^2}{\\sigma^2} - 2 = 0$, i.e. $r = \\sqrt{2}\\sigma$</li>\n<li>A blob of radius $R$ gives maximum LoG response when $R = \\sqrt{2}\\sigma_i$</li>\n</ul>", "answer_md": "- The 2D LoG is $\\nabla^2 G_\\sigma(x,y) \\propto \\left(\\frac{r^2}{\\sigma^2} - 2\\right) e^{-r^2/2\\sigma^2}$ where $r^2 = x^2 + y^2$\n- The zero-crossing occurs when $\\frac{r^2}{\\sigma^2} - 2 = 0$, i.e. $r = \\sqrt{2}\\sigma$\n- A blob of radius $R$ gives maximum LoG response when $R = \\sqrt{2}\\sigma_i$"}, {"group": "Blob Detection", "question": "Why must the LoG response be multiplied by $\\sigma^2$ when comparing across scales?", "answer_html": "<ul>\n<li>The LoG response magnitude decreases with increasing $\\sigma$ because the Gaussian becomes wider and flatter, spreading the response over a larger area</li>\n<li>Without normalisation, smaller-scale blobs would always have stronger responses, making cross-scale comparison impossible</li>\n<li>Multiplying by $\\sigma^2$ compensates for this decay, so blobs at different scales produce comparable response magnitudes</li>\n<li>Note: the DoG already includes this normalisation implicitly since $G(k\\sigma) - G(\\sigma) \\approx (k-1)\\sigma^2 \\nabla^2 G$</li>\n</ul>", "answer_md": "- The LoG response magnitude decreases with increasing $\\sigma$ because the Gaussian becomes wider and flatter, spreading the response over a larger area\n- Without normalisation, smaller-scale blobs would always have stronger responses, making cross-scale comparison impossible\n- Multiplying by $\\sigma^2$ compensates for this decay, so blobs at different scales produce comparable response magnitudes\n- Note: the DoG already includes this normalisation implicitly since $G(k\\sigma) - G(\\sigma) \\approx (k-1)\\sigma^2 \\nabla^2 G$"}, {"group": "Blob Detection", "question": "Show that the DoG is a band-pass filter.", "answer_html": "<ul>\n<li>In the Fourier domain:</li>\n</ul>\n<div class=\"math-display\">$$g_\\sigma(x) \\xrightarrow{FT} e^{-\\frac{\\omega^2 \\sigma^2}{2}}, \\quad g_{k\\sigma}(x) \\xrightarrow{FT} e^{-\\frac{\\omega^2 k^2 \\sigma^2}{2}}$$</div>\n<ul>\n<li>Both are low-pass filters. Their difference:</li>\n</ul>\n<div class=\"math-display\">$$|DOG(\\omega)| = e^{-\\frac{\\omega^2 k^2 \\sigma^2}{2}} - e^{-\\frac{\\omega^2 \\sigma^2}{2}}$$</div>\n<ul>\n<li>Difference of two low-pass filters is a band-pass filter, with peak centred at $\\frac{1}{\\sigma_i}$</li>\n</ul>", "answer_md": "- In the Fourier domain:\n\n$$g_\\sigma(x) \\xrightarrow{FT} e^{-\\frac{\\omega^2 \\sigma^2}{2}}, \\quad g_{k\\sigma}(x) \\xrightarrow{FT} e^{-\\frac{\\omega^2 k^2 \\sigma^2}{2}}$$\n\n- Both are low-pass filters. Their difference:\n\n$$|DOG(\\omega)| = e^{-\\frac{\\omega^2 k^2 \\sigma^2}{2}} - e^{-\\frac{\\omega^2 \\sigma^2}{2}}$$\n\n- Difference of two low-pass filters is a band-pass filter, with peak centred at $\\frac{1}{\\sigma_i}$"}, {"group": "Blob Detection", "question": "Show that the DoG approximates the scale-normalised LoG.", "answer_html": "<ol>\n<li>Taylor expand $G(x, y, k\\sigma)$ around $\\sigma$, treating $G$ as a function of $\\sigma$:</li>\n</ol>\n<div class=\"math-display\">$$G(k\\sigma) \\approx G(\\sigma) + (k-1)\\sigma \\frac{\\partial G}{\\partial \\sigma}$$</div>\n<ol>\n<li>Therefore:</li>\n</ol>\n<div class=\"math-display\">$$G(k\\sigma) - G(\\sigma) \\approx (k-1)\\sigma \\frac{\\partial G}{\\partial \\sigma}$$</div>\n<ol>\n<li>Show that $\\sigma \\frac{\\partial G}{\\partial \\sigma} = \\sigma^2 \\nabla^2 G$. With $r^2 = x^2 + y^2$:</li>\n</ol>\n<div class=\"math-display\">$$\\frac{\\partial G}{\\partial \\sigma} = \\frac{1}{2\\pi\\sigma^3} e^{-\\frac{r^2}{2\\sigma^2}} \\left(\\frac{r^2}{\\sigma^2} - 2\\right)$$</div>\n<div class=\"math-display\">$$\\nabla^2 G = \\frac{1}{2\\pi\\sigma^4} e^{-\\frac{r^2}{2\\sigma^2}} \\left(\\frac{r^2}{\\sigma^2} - 2\\right)$$</div>\n<div class=\"math-display\">$$\\Rightarrow \\sigma \\frac{\\partial G}{\\partial \\sigma} = \\sigma^2 \\nabla^2 G$$</div>\n<ol>\n<li>Substituting:</li>\n</ol>\n<div class=\"math-display\">$$\\boxed{G(x, y, k\\sigma) - G(x, y, \\sigma) \\approx (k-1)\\sigma^2 \\nabla^2 G(x, y, \\sigma)}$$</div>\n<ul>\n<li>This means we can compute blob responses by subtracting neighbouring smoothed images in the pyramid, avoiding differentiation</li>\n</ul>", "answer_md": "1. Taylor expand $G(x, y, k\\sigma)$ around $\\sigma$, treating $G$ as a function of $\\sigma$:\n\n$$G(k\\sigma) \\approx G(\\sigma) + (k-1)\\sigma \\frac{\\partial G}{\\partial \\sigma}$$\n\n2. Therefore:\n\n$$G(k\\sigma) - G(\\sigma) \\approx (k-1)\\sigma \\frac{\\partial G}{\\partial \\sigma}$$\n\n3. Show that $\\sigma \\frac{\\partial G}{\\partial \\sigma} = \\sigma^2 \\nabla^2 G$. With $r^2 = x^2 + y^2$:\n\n$$\\frac{\\partial G}{\\partial \\sigma} = \\frac{1}{2\\pi\\sigma^3} e^{-\\frac{r^2}{2\\sigma^2}} \\left(\\frac{r^2}{\\sigma^2} - 2\\right)$$\n\n$$\\nabla^2 G = \\frac{1}{2\\pi\\sigma^4} e^{-\\frac{r^2}{2\\sigma^2}} \\left(\\frac{r^2}{\\sigma^2} - 2\\right)$$\n\n$$\\Rightarrow \\sigma \\frac{\\partial G}{\\partial \\sigma} = \\sigma^2 \\nabla^2 G$$\n\n4. Substituting:\n\n$$\\boxed{G(x, y, k\\sigma) - G(x, y, \\sigma) \\approx (k-1)\\sigma^2 \\nabla^2 G(x, y, \\sigma)}$$\n\n- This means we can compute blob responses by subtracting neighbouring smoothed images in the pyramid, avoiding differentiation"}, {"group": "Blob Detection", "question": "Describe the image pyramid for efficient multi-scale smoothing.", "answer_html": "<ol>\n<li>Generate smoothed images at logarithmically spaced scales: $\\sigma_i = 2^{i/s}\\sigma_0$ with $s$ images per octave</li>\n<li>Implement all Gaussian blurs as $2 \\times$ 1D convolutions</li>\n<li>Use incremental blurs within each octave: $g(\\sigma_{i+1}) = g(\\sigma_i) * g(\\sigma_K)$ with small kernels $\\sigma_K = \\sigma_i\\sqrt{2^{2/s}-1}$</li>\n<li>After $s$ blurs, $\\sigma$ has doubled — subsample image to $\\frac{1}{4}$ size (Nyquist)</li>\n<li>Apply the same family of $\\sigma_K$ kernels to the smaller image — equivalent to large $\\sigma$ on the full-size image</li>\n</ol>", "answer_md": "1. Generate smoothed images at logarithmically spaced scales: $\\sigma_i = 2^{i/s}\\sigma_0$ with $s$ images per octave\n2. Implement all Gaussian blurs as $2 \\times$ 1D convolutions\n3. Use incremental blurs within each octave: $g(\\sigma_{i+1}) = g(\\sigma_i) * g(\\sigma_K)$ with small kernels $\\sigma_K = \\sigma_i\\sqrt{2^{2/s}-1}$\n4. After $s$ blurs, $\\sigma$ has doubled — subsample image to $\\frac{1}{4}$ size (Nyquist)\n5. Apply the same family of $\\sigma_K$ kernels to the smaller image — equivalent to large $\\sigma$ on the full-size image"}, {"group": "Blob Detection", "question": "Derive the incremental blur kernel $\\sigma_K$ for computing $S(\\sigma_{i+1})$ from $S(\\sigma_i)$.", "answer_html": "<ul>\n<li>By the reproducing property of the Gaussian: $G(\\sigma_1) * G(\\sigma_2) = G(\\sqrt{\\sigma_1^2 + \\sigma_2^2})$</li>\n<li>We want $G(\\sigma_{i+1}) = G(\\sigma_i) * G(\\sigma_{K_i})$, so:</li>\n</ul>\n<div class=\"math-display\">$$\\sigma_{K_i} = \\sqrt{\\sigma_{i+1}^2 - \\sigma_i^2}$$</div>\n<ul>\n<li>With $\\sigma_{i+1} = 2^{1/s} \\sigma_i$:</li>\n</ul>\n<div class=\"math-display\">$$\\sigma_{K_i} = \\sigma_i \\sqrt{2^{2/s} - 1}$$</div>\n<ul>\n<li>This is efficient because we use small incremental blur kernels instead of large ones</li>\n</ul>", "answer_md": "- By the reproducing property of the Gaussian: $G(\\sigma_1) * G(\\sigma_2) = G(\\sqrt{\\sigma_1^2 + \\sigma_2^2})$\n- We want $G(\\sigma_{i+1}) = G(\\sigma_i) * G(\\sigma_{K_i})$, so:\n\n$$\\sigma_{K_i} = \\sqrt{\\sigma_{i+1}^2 - \\sigma_i^2}$$\n\n- With $\\sigma_{i+1} = 2^{1/s} \\sigma_i$:\n\n$$\\sigma_{K_i} = \\sigma_i \\sqrt{2^{2/s} - 1}$$\n\n- This is efficient because we use small incremental blur kernels instead of large ones"}, {"group": "Blob Detection", "question": "Why can we subsample the image after $\\sigma$ doubles?", "answer_html": "<ul>\n<li>After $s$ incremental blurs, $\\sigma$ has doubled ($\\sigma_{i+s} = 2\\sigma_0$)</li>\n<li>The smoothing has removed all frequencies above $\\omega_c \\propto \\frac{1}{2\\sigma_0}$</li>\n<li>By the Nyquist sampling theorem, we can subsample by a factor of 2 (reducing image to $\\frac{1}{4}$ size) without aliasing</li>\n<li>We then apply the same family of small incremental blur kernels $\\sigma_K$ to the smaller image — equivalent to large $\\sigma$ on the full-size image</li>\n</ul>", "answer_md": "- After $s$ incremental blurs, $\\sigma$ has doubled ($\\sigma_{i+s} = 2\\sigma_0$)\n- The smoothing has removed all frequencies above $\\omega_c \\propto \\frac{1}{2\\sigma_0}$\n- By the Nyquist sampling theorem, we can subsample by a factor of 2 (reducing image to $\\frac{1}{4}$ size) without aliasing\n- We then apply the same family of small incremental blur kernels $\\sigma_K$ to the smaller image — equivalent to large $\\sigma$ on the full-size image"}, {"group": "Keypoint Detection", "question": "What is meant by invariance and distinctiveness in feature matching?", "answer_html": "<ul>\n<li><strong>Invariance:</strong> a feature $f$ is invariant to a transformation $g$ if $f(\\mathbf{x}) = f(g(\\mathbf{x}))$</li>\n<li><strong>Distinctiveness:</strong> a feature $f$ is distinctive to a transformation $g$ if $f(\\mathbf{x}) \\neq f(g(\\mathbf{x}))$</li>\n<li>There is a tension between the two — we want invariance to nuisance factors (occlusion, viewpoint, illumination) but distinctiveness to the unique characteristics of the visual feature (shape)</li>\n</ul>", "answer_md": "- **Invariance:** a feature $f$ is invariant to a transformation $g$ if $f(\\mathbf{x}) = f(g(\\mathbf{x}))$\n- **Distinctiveness:** a feature $f$ is distinctive to a transformation $g$ if $f(\\mathbf{x}) \\neq f(g(\\mathbf{x}))$\n- There is a tension between the two — we want invariance to nuisance factors (occlusion, viewpoint, illumination) but distinctiveness to the unique characteristics of the visual feature (shape)"}, {"group": "Keypoint Detection", "question": "Describe the intensity descriptor for patch matching.", "answer_html": "<ul>\n<li>Store the intensity values in a 16×16 patch as a 256D vector</li>\n<li>Zero-mean and normalise to unit length:</li>\n</ul>\n<div class=\"math-display\">$$\\mathbf{X}_{NC} = \\frac{I(i,j) - \\mu}{\\sigma}$$</div>\n<ul>\n<li>Compare patches via dot product of normalised vectors (equivalent to NCC)</li>\n</ul>", "answer_md": "- Store the intensity values in a 16×16 patch as a 256D vector\n- Zero-mean and normalise to unit length:\n\n$$\\mathbf{X}_{NC} = \\frac{I(i,j) - \\mu}{\\sigma}$$\n\n- Compare patches via dot product of normalised vectors (equivalent to NCC)"}, {"group": "Keypoint Detection", "question": "Compare the intensity descriptor with SIFT.", "answer_html": "<ul>\n<li><strong>Intensity descriptor:</strong> very simple to compute, 256D, but poor if scale and orientation are incorrect</li>\n<li><strong>SIFT:</strong> invariant to scale, orientation and lighting; robust to small geometric/perspective distortion; poor at boundaries</li>\n</ul>", "answer_md": "- **Intensity descriptor:** very simple to compute, 256D, but poor if scale and orientation are incorrect\n- **SIFT:** invariant to scale, orientation and lighting; robust to small geometric/perspective distortion; poor at boundaries"}, {"group": "Keypoint Detection", "question": "Describe the main steps in computing the SIFT descriptor.", "answer_html": "<ol>\n<li>Sample 16×16 pixels from $S(x, y, \\sigma_i)$ at blob centre, aligned with dominant orientation (invariance to <strong>scale</strong> and <strong>rotation</strong>)</li>\n<li>Compute gradients $\\nabla S$ at each pixel (invariance to <strong>brightness</strong>)</li>\n<li>Weight gradients by Gaussian $g(1.5\\sigma_i)$ centred on blob centre (invariance to <strong>occlusion</strong> by emphasising pixels away from the boundaries)</li>\n<li>Split patch into 4×4 grid of cells</li>\n<li>In each cell, produce a histogram of oriented gradients (HOG) in 8 directions (45° bins), accumulating gradient magnitudes</li>\n<li>Concatenate to give 128D vector ($8 \\times 16$)</li>\n<li>Normalise to unit length (invariance to <strong>contrast</strong>)</li>\n<li>Truncate any entry above 0.2 to 0.2 (reduce effect of strong gradients/highlights)</li>\n<li>Renormalise to unit vector (invariance to <strong>nonlinear illumination</strong>)</li>\n</ol>", "answer_md": "1. Sample 16×16 pixels from $S(x, y, \\sigma_i)$ at blob centre, aligned with dominant orientation (invariance to **scale** and **rotation**)\n2. Compute gradients $\\nabla S$ at each pixel (invariance to **brightness**)\n3. Weight gradients by Gaussian $g(1.5\\sigma_i)$ centred on blob centre (invariance to **occlusion** by emphasising pixels away from the boundaries)\n4. Split patch into 4×4 grid of cells\n5. In each cell, produce a histogram of oriented gradients (HOG) in 8 directions (45° bins), accumulating gradient magnitudes\n6. Concatenate to give 128D vector ($8 \\times 16$)\n7. Normalise to unit length (invariance to **contrast**)\n8. Truncate any entry above 0.2 to 0.2 (reduce effect of strong gradients/highlights)\n9. Renormalise to unit vector (invariance to **nonlinear illumination**)"}, {"group": "Keypoint Detection", "question": "What are the limitations of SIFT?", "answer_html": "<ul>\n<li>HOGs and spatial binning into 16 cells provide some tolerance for small viewpoint changes only (up to ~30°)</li>\n<li>Large viewpoint changes (strong perspective/out-of-plane rotations)</li>\n<li>Features on occluding boundaries</li>\n</ul>", "answer_md": "- HOGs and spatial binning into 16 cells provide some tolerance for small viewpoint changes only (up to ~30°)\n- Large viewpoint changes (strong perspective/out-of-plane rotations)\n- Features on occluding boundaries"}, {"group": "Keypoint Detection", "question": "How are SIFT descriptors used to find correspondences between images?", "answer_html": "<ol>\n<li>Compute SIFT descriptor for each keypoint in both images</li>\n<li>For each descriptor $\\mathbf{x}$ in image 1, find the nearest neighbour $\\mathbf{x}_1$ and second nearest neighbour $\\mathbf{x}_2$ in image 2 using Euclidean distance</li>\n<li>Accept match if:</li>\n</ol>\n<div class=\"math-display\">$$\\frac{D(\\mathbf{x}, \\mathbf{x}_1)}{D(\\mathbf{x}, \\mathbf{x}_2)} < 0.7$$</div>\n<ul>\n<li>This avoids ambiguous matches — a good match should be uniquely close, not one of many similar features</li>\n<li>Efficiently implemented using a k-d tree for nearest neighbour search ($O(\\log N)$)</li>\n</ul>", "answer_md": "1. Compute SIFT descriptor for each keypoint in both images\n2. For each descriptor $\\mathbf{x}$ in image 1, find the nearest neighbour $\\mathbf{x}_1$ and second nearest neighbour $\\mathbf{x}_2$ in image 2 using Euclidean distance\n3. Accept match if:\n\n$$\\frac{D(\\mathbf{x}, \\mathbf{x}_1)}{D(\\mathbf{x}, \\mathbf{x}_2)} < 0.7$$\n\n- This avoids ambiguous matches — a good match should be uniquely close, not one of many similar features\n- Efficiently implemented using a k-d tree for nearest neighbour search ($O(\\log N)$)"}, {"group": "Keypoint Detection", "question": "How is the 16×16 patch sampled at appropriate scale and orientation?", "answer_html": "<ol>\n<li>Find scale of blob $\\sigma_i$ (search 26 neighbours for local max in DoG pyramid)</li>\n<li>Sample 16×16 pixels around blob centre from $S(x, y, \\sigma_i)$</li>\n<li>Compute gradients $\\nabla S_{\\sigma_i}(x, y)$ in this patch</li>\n<li>Build histogram of gradient magnitudes in 10° bins (36 bins), weighted by $g(1.5\\sigma_i)$</li>\n<li>Smooth the 36-bin histogram with a Gaussian kernel to reduce noise and ensure a robust peak</li>\n<li>Find peak of smoothed histogram — this is the dominant orientation $\\theta_i$</li>\n<li>Refine by fitting a parabola to the peak bin and its two neighbours</li>\n<li>If no clear single peak, create multiple copies of keypoint with different orientations</li>\n<li>Resample 16×16 pixels at scale $\\sigma_i$ aligned with dominant orientation $\\theta_i$</li>\n</ol>", "answer_md": "1. Find scale of blob $\\sigma_i$ (search 26 neighbours for local max in DoG pyramid)\n2. Sample 16×16 pixels around blob centre from $S(x, y, \\sigma_i)$\n3. Compute gradients $\\nabla S_{\\sigma_i}(x, y)$ in this patch\n4. Build histogram of gradient magnitudes in 10° bins (36 bins), weighted by $g(1.5\\sigma_i)$\n5. Smooth the 36-bin histogram with a Gaussian kernel to reduce noise and ensure a robust peak\n6. Find peak of smoothed histogram — this is the dominant orientation $\\theta_i$\n7. Refine by fitting a parabola to the peak bin and its two neighbours\n8. If no clear single peak, create multiple copies of keypoint with different orientations\n9. Resample 16×16 pixels at scale $\\sigma_i$ aligned with dominant orientation $\\theta_i$"}];
-const GROUPS = ["Edge Detection", "Corner Detection", "Blob Detection", "Keypoint Detection"];
+// ── Data ──
+const DECKS = {"Edge Detection": [{"q": "Why is edge detection commonly used in CV applications?", "a": "- An edge is an intensity discontinuity in 1 direction\n- Edges are invariant to lighting changes\n- This means extracting the edges provides a significant data reduction while preserving useful information content (it is possible to recognise objects from line drawings)"}, {"q": "Describe the 1D edge detection algorithm via derivatives and thresholds.", "a": "1. Convolve with derivative of Gaussian kernel to provide smoothing and differentiation simultaneously: $s'(x) = g'_\\sigma(x) * I(x)$\n2. Find the maximum and minimum values of $s'(x)$\n3. Use thresholding on the magnitude of the extrema to mark edges"}, {"q": "Prove the derivative of convolution theorem: $\\frac{d}{dx}[g_\\sigma * I] = g'_\\sigma * I$", "a": "$$s'(x) = \\frac{d}{dx}[g_\\sigma(x) * I(x)] = \\frac{d}{dx}\\left[\\int_{-\\infty}^{\\infty} g(x - u) I(u) \\, du\\right]$$\n\n$$= \\int_{-\\infty}^{\\infty} \\frac{d}{dx}[g(x - u)] I(u) \\, du$$\n\n$$= \\int_{-\\infty}^{\\infty} g'(x - u) I(u) \\, du = g'_\\sigma(x) * I(x)$$"}, {"q": "Describe the 1D edge detection algorithm via Laplacians and zero-crossings.", "a": "1. Convolve with Laplacian of a Gaussian kernel: $s''(x) = g''_\\sigma(x) * I(x)$\n2. Find zero-crossings"}, {"q": "How is the Laplacian used differently in edge detection vs blob detection?", "a": "- Edge detection = find **zero-crossings** in the response of the Laplacian convolved with the smoothed image\n- Blob detection = find the **minimum and maximum points** instead"}, {"q": "Describe the 2D edge detection algorithm via derivatives and thresholds, including how to recover edge position and orientation.", "a": "1. Convolve with 2D Gaussian kernel\n2. Compute derivative\n3. **Non-maximal suppression** — edge elements placed where $|\\nabla S|$ is greater than $|\\nabla S|$ in the directions $\\pm \\nabla S$, to ensure all edgels are located at ridge points of the surface $|\\nabla S|$\n4. **Thresholding** — only retain edgels where $|\\nabla S|$ is above a certain value\n\n- Edge magnitude: $|\\nabla S| = \\sqrt{S_x^2 + S_y^2}$\n- Edge orientation: $\\theta = \\arctan(S_y / S_x)$"}, {"q": "What is non-maximal suppression and why is it needed in edge detection?", "a": "- Edges from thresholding alone are thick (multiple pixels wide)\n- Non-maximal suppression thins edges to single-pixel width by only keeping a pixel if $|\\nabla S|$ at that pixel is greater than $|\\nabla S|$ at its neighbours in the directions $\\pm \\nabla S$ (i.e. along the gradient direction)\n- This ensures edgels are located at ridge points of the surface $|\\nabla S|$"}, {"q": "Describe the 2D edge detection algorithm via Laplacians and zero-crossings.", "a": "1. Convolve with the Laplacian of a 2D Gaussian: $s''(x,y) = \\nabla^2 G_\\sigma(x,y) * I(x,y)$\n2. Find the zero-crossings"}, {"q": "Why are integer-valued filters preferred to float-valued filters in practice?", "a": "- Integer operations are more efficient and avoid issues with floating point precision"}, {"q": "Why is smoothing necessary before differentiation?", "a": "- Differentiation amplifies high-frequency noise ($\\frac{dI}{dx} \\xrightarrow{FT} j\\omega I(j\\omega)$)\n- Low-pass filtering with a Gaussian removes high-frequency noise before differentiation\n- Also provides scale selection — removes frequencies above $\\omega_c$"}, {"q": "Why is the Gaussian a suitable low-pass filter?", "a": "$$g_\\sigma(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{x^2}{2\\sigma^2}} \\xrightarrow{FT} G(\\omega) = e^{-\\frac{\\omega^2 \\sigma^2}{2}}$$\n\n- $G(\\omega)$ is an unnormalised Gaussian that decays to zero for large $\\omega$, so it attenuates high frequencies\n- $G(0) = 1$, so the filter doesn't change the average brightness of the image"}, {"q": "What is the effect of $\\sigma$ on the frequency response?", "a": "- $G(\\omega)$ is a Gaussian with $\\sigma' = \\frac{1}{\\sigma}$\n- Cut-off frequency $\\omega_c \\propto \\frac{1}{\\sigma}$\n- Large $\\sigma$ → small cut-off frequency → more smoothing\n- Small $\\sigma$ → large cut-off frequency → less smoothing"}, {"q": "What property of the Gaussian smoothing kernel coefficients ensures that regions of uniform intensity are unaffected by smoothing?", "a": "- The sum of the coefficients is one\n- Equivalently, $G(0) = 1$, so the filter doesn't change the average brightness"}, {"q": "What factors affect the choice of $\\sigma$?", "a": "- **Scale**: modest smoothing (small $\\sigma$) brings out edges at a fine scale; more smoothing (larger $\\sigma$) identifies edges at larger scales, suppressing finer detail\n- **Noise**: smoothing suppresses noise, but a kernel large enough to suppress noise may also suppress fine detail\n- **Computation**: large $\\sigma$ means a large kernel and computationally expensive convolutions"}, {"q": "How is the Gaussian kernel truncated for efficient computation?", "a": "- Discard samples where the value is less than $\\frac{1}{1000}$ of the peak value\n- For $\\sigma = 1$: $e^{-8} < \\frac{1}{1000}$, so $n = 3$ and kernel size is $2n + 1 = 7$"}, {"q": "Derive the kernel size for a given $\\sigma$.", "a": "- Discard the sample $(n+1)$ pixels from the centre when its value is less than $\\frac{1}{1000}$ of the peak. The normalising coefficient $\\frac{1}{\\sigma\\sqrt{2\\pi}}$ cancels in the ratio $\\frac{g_\\sigma(n+1)}{g_\\sigma(0)}$, giving:\n\n$$\\frac{g_\\sigma(n+1)}{g_\\sigma(0)} = \\exp\\left[-\\frac{(n + 1)^2}{2\\sigma^2}\\right] < \\frac{1}{1000}$$\n\n$$\\Leftrightarrow n > 3.7\\sigma - 1$$\n\n- So $n$ is the nearest integer to $3.7\\sigma - 0.5$, and the kernel size is $2n + 1$"}, {"q": "Show that 2D Gaussian convolution decomposes into two 1D convolutions.", "a": "$$G_\\sigma(x, y) * I(x, y) = \\frac{1}{2\\pi\\sigma^2} \\int \\int I(x - u, y - v) \\exp\\left(-\\frac{u^2 + v^2}{2\\sigma^2}\\right) du \\, dv$$\n\n$$= \\frac{1}{\\sqrt{2\\pi}\\sigma} \\int \\exp\\left(-\\frac{u^2}{2\\sigma^2}\\right) \\left[\\frac{1}{\\sqrt{2\\pi}\\sigma} \\int I(x - u, y - v) \\exp\\left(-\\frac{v^2}{2\\sigma^2}\\right) dv\\right] du$$\n\n$$= g_\\sigma(x) * [g_\\sigma(y) * I(x, y)]$$\n\n- As a discrete summation:\n\n$$S(x,y) = \\sum_{u=-n}^{n} \\sum_{v=-n}^{n} g_\\sigma(u) \\; g_\\sigma(v) \\; I(x-u, y-v)$$\n\n- where $g_\\sigma(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{x^2}{2\\sigma^2}}$ sampled at $N = 2n+1$ discrete values"}, {"q": "What is the computational advantage of decomposing into two 1D convolutions?", "a": "- A 2D convolution with kernel size $N \\times N$ requires $N^2$ multiply-and-add operations per pixel\n- Two 1D convolutions require $2N$ operations per pixel\n- Speed-up factor: $\\frac{N^2}{2N} = \\frac{N}{2}$"}, {"q": "How many operations per pixel are needed for smoothing + differentiation?", "a": "- Convolving with $\\frac{\\partial G_\\sigma}{\\partial x}$ decomposes as: $g'_\\sigma(x) * [g_\\sigma(y) * I(x,y)]$\n- Similarly for $\\frac{\\partial G_\\sigma}{\\partial y}$: $g_\\sigma(x) * [g'_\\sigma(y) * I(x,y)]$\n- Each 1D convolution costs $4n + 1$ operations per pixel (where kernel size is $2n+1$)\n- Four 1D convolutions total: $2 \\times 2 \\times (4n+1) = 16n + 4$ operations per pixel"}, {"q": "Show that repeated Gaussian convolution is equivalent to a single Gaussian of summed variances.", "a": "- The Fourier transform of a Gaussian is:\n\n$$g_\\sigma(x) \\leftrightarrow G_\\sigma(\\omega) = \\exp\\left(-\\frac{\\omega^2\\sigma^2}{2}\\right)$$\n\n- Convolution in space = multiplication in frequency:\n\n$$g_{\\sigma_2} * g_{\\sigma_1} \\leftrightarrow G_{\\sigma_2}(\\omega) \\times G_{\\sigma_1}(\\omega) = \\exp\\left(-\\frac{\\omega^2\\sigma_2^2}{2}\\right) \\times \\exp\\left(-\\frac{\\omega^2\\sigma_1^2}{2}\\right)$$\n\n$$= \\exp\\left(-\\frac{\\omega^2(\\sigma_1^2 + \\sigma_2^2)}{2}\\right)$$\n\n- This is the FT of a Gaussian with variance $\\sigma_1^2 + \\sigma_2^2$\n- Generalises: repeated convolution with Gaussians of $\\sigma_i$ is equivalent to a single Gaussian of variance $\\sum_i \\sigma_i^2$"}, {"q": "Derive the discrete 1D first-order derivative kernel.", "a": "- Taylor expansion:\n\n$$S(x + \\Delta x, y) \\simeq S(x,y) + \\Delta x \\frac{\\partial S}{\\partial x}$$\n\n$$S(x - \\Delta x, y) \\simeq S(x,y) - \\Delta x \\frac{\\partial S}{\\partial x}$$\n\n- Subtracting:\n\n$$\\frac{\\partial S}{\\partial x} \\simeq \\frac{S(x + \\Delta x, y) - S(x - \\Delta x, y)}{2\\Delta x}$$\n\n- With $\\Delta x = 1$, the convolution kernel is $\\boxed{\\frac{1}{2} \\quad 0 \\quad -\\frac{1}{2}}$\n\n- Similarly: $\\frac{\\partial S}{\\partial y} \\simeq \\frac{S(x, y+1) - S(x, y-1)}{2}$ with kernel $\\begin{bmatrix} \\frac{1}{2} \\\\ 0 \\\\ -\\frac{1}{2} \\end{bmatrix}$"}, {"q": "Derive the 2D first-order derivative kernels.", "a": "- The 1D first-order derivative kernel is $[\\frac{1}{2}, 0, -\\frac{1}{2}]$\n- Applying horizontally for $\\frac{\\partial S}{\\partial x}$:\n\n$$\\begin{bmatrix} 0 & 0 & 0 \\\\ \\frac{1}{2} & 0 & -\\frac{1}{2} \\\\ 0 & 0 & 0 \\end{bmatrix}$$\n\n- Applying vertically for $\\frac{\\partial S}{\\partial y}$:\n\n$$\\begin{bmatrix} 0 & \\frac{1}{2} & 0 \\\\ 0 & 0 & 0 \\\\ 0 & -\\frac{1}{2} & 0 \\end{bmatrix}$$"}, {"q": "Derive the discrete 1D second-order derivative kernel.", "a": "- From first-order Taylor expansions: $\\frac{dI}{dx}|_{(x)} \\approx I(x) - I(x-1)$\n- Hence:\n\n$$\\frac{d^2 I}{dx^2}|_{(x)} \\approx (I(x+1) - I(x)) - (I(x) - I(x-1)) = I(x+1) - 2I(x) + I(x-1)$$\n\n- The convolution kernel is $\\boxed{1 \\quad -2 \\quad 1}$"}, {"q": "Derive a $3 \\times 3$ discrete approximation to the 2D Laplacian.", "a": "$$\\nabla^2 I|_{(x,y)} = \\frac{\\partial^2 I}{\\partial x^2}|_{(x,y)} + \\frac{\\partial^2 I}{\\partial y^2}|_{(x,y)}$$\n\n- The 1D second derivative kernel is $[1, -2, 1]$\n- Applying horizontally and vertically and summing gives:\n\n$$\\begin{bmatrix} 0 & 1 & 0 \\\\ 1 & -4 & 1 \\\\ 0 & 1 & 0 \\end{bmatrix}$$"}], "Corner Detection": [{"q": "Why corners?", "a": "- Corner = intensity discontinuity in 2 directions\n- Corners are invariant to lighting changes like edges\n- Corners are better for tracking moving objects across frames - the motion of an edge is ambiguous (aperture problem)"}, {"q": "Describe the cross-correlation method for corner detection.", "a": "1. Calculate the normalised cross-correlation for each pixel\n\n$$c(x, y) = \\frac{\\displaystyle\\sum_{u=-n}^{n} \\sum_{v=-n}^{n} P(u, v) \\, I(x + u, y + v)}{\\sqrt{\\displaystyle\\sum_{u=-n}^{n} \\sum_{v=-n}^{n} P^2(u, v) \\displaystyle\\sum_{u=-n}^{n} \\sum_{v=-n}^{n} I^2(x + u, y + v)}}$$\n\n2. A patch with a peak in correlation is a corner"}, {"q": "Justify the cross-correlation method.", "a": "1. The correlation of two patches is a measure of their similarity (it involves computing the cosine of the angle between them via the dot product)\n2. Cross-correlation involves calculating the correlation of one patch $p(u,v)$ of size $n$ with all the other patches in the image\n3. If the cross-correlation function decreases in both the x and y directions about the original point then there is a 2D discontinuity in intensity (= a corner)"}, {"q": "Describe the Harris corner detection algorithm.", "a": "1. Smooth the image with Gaussian $G_{\\sigma_D}$ to get $S(x,y)$\n2. Compute derivatives $S_x = \\partial S / \\partial x$ and $S_y = \\partial S / \\partial y$\n3. Compute three gradient images: $S_x^2$, $S_y^2$, $S_x S_y$\n4. Smooth each with Gaussian $G_{\\sigma_I}$ ($\\sigma_I > \\sigma_D$) to get $\\langle S_x^2 \\rangle$, $\\langle S_y^2 \\rangle$, $\\langle S_x S_y \\rangle$\n5. Assemble $A = \\begin{bmatrix} \\langle S_x^2 \\rangle & \\langle S_x S_y \\rangle \\\\ \\langle S_x S_y \\rangle & \\langle S_y^2 \\rangle \\end{bmatrix}$ at every pixel\n6. Determine $R = \\det(A) - \\kappa (\\text{Trace}(A))^2$ where $\\kappa \\approx 0.04 - 0.06$\n7. Threshold $R$, and non-maximum suppression"}, {"q": "Why use $R = \\det(A) - \\kappa(\\text{Trace}(A))^2$ instead of computing eigenvalues directly?", "a": "- Computing eigenvalues requires solving a quadratic at every pixel — expensive\n- $\\det(A) = \\lambda_1 \\lambda_2$ and $\\text{Trace}(A) = \\lambda_1 + \\lambda_2$ are cheap to compute from the matrix entries\n- $R = \\lambda_1 \\lambda_2 - \\kappa(\\lambda_1 + \\lambda_2)^2$ — large $R$ requires both eigenvalues to be large (corner), since $\\det$ is small if either eigenvalue is small\n- $\\kappa \\approx 0.04 - 0.06$ penalises cases where one eigenvalue dominates (edges), making the detector \"edge-phobic\""}, {"q": "How do the eigenvalues of $A$ relate to edges, corners, and flat regions?", "a": "- $\\lambda_1 \\leq \\frac{\\mathbf{n}^T A \\mathbf{n}}{\\mathbf{n}^T \\mathbf{n}} \\leq \\lambda_2$\n- **No structure** (flat): $\\lambda_1 \\approx \\lambda_2 \\approx 0$\n- **1D structure** (edge): $\\lambda_1 \\approx 0$, $\\lambda_2$ large\n- **2D structure** (corner): $\\lambda_1$ and $\\lambda_2$ both large and distinct"}, {"q": "Why must $\\sigma_I > \\sigma_D$?", "a": "- $\\sigma_D$ sets the scale at which gradients are computed (local, fine)\n- $\\sigma_I$ sets the neighbourhood over which we aggregate gradients to characterise structure (coarser)\n- If $\\sigma_I \\leq \\sigma_D$, the integration window would be smaller than the blur from derivative smoothing — we'd see gradient information from a single blurred point, not how gradients vary spatially\n- Need spatial variation in gradient direction across the window to distinguish corners (multiple directions) from edges (one direction)"}, {"q": "Given the weighted SSD $C(\\mathbf{n}) = \\sum_W w(\\mathbf{x})(S(\\mathbf{x}+\\mathbf{n}) - S(\\mathbf{x}))^2$, derive $C(\\mathbf{n}) \\approx \\mathbf{n}^T A \\mathbf{n}$ and identify the autocorrelation matrix $A$.", "a": "$$C(\\mathbf{n}) = \\sum_W w(\\mathbf{x}) (S(\\mathbf{x}+\\mathbf{n}) - S(\\mathbf{x}))^2$$\n\n$$\\simeq \\sum_W w(\\mathbf{x}) [\\nabla S \\cdot \\mathbf{n}]^2 \\quad \\text{by Taylor series expansion}$$\n\n$$\\simeq \\sum_W w(\\mathbf{x}) (\\mathbf{n}^T \\nabla S^T \\nabla S \\; \\mathbf{n})$$\n\n- Set $w(\\mathbf{x}) = G_{\\sigma_I}(\\mathbf{x})$ — emphasises pixels near the centre of the window\n\n$$\\simeq \\mathbf{n}^T \\begin{bmatrix} \\langle S_x S_x \\rangle & \\langle S_x S_y \\rangle \\\\ \\langle S_y S_x \\rangle & \\langle S_y S_y \\rangle \\end{bmatrix} \\mathbf{n}$$\n\n$$\\boxed{C(\\mathbf{n}) \\simeq \\mathbf{n}^T A \\mathbf{n}}$$"}], "Blob Detection": [{"q": "Why blobs?", "a": "- Scale invariance — blobs establish scale that edges/corners cannot\n- Compare 2 objects & check if they are the same — blob is less likely to be affected by object background than edges/corners because it is in the middle of an object"}, {"q": "Describe the blob detection method.", "a": "1. Build image pyramid of smoothed images $S(x, y, \\sigma_i) = G_{\\sigma_i} * I$\n2. Compute DoG images by subtracting neighbouring levels: $S(x, y, \\sigma_{i+1}) - S(x, y, \\sigma_i)$\n3. Find max/min of DoG image over position $(x, y)$ and scale $\\sigma_i$ by comparing 26 neighbours (3×3 grid at scales $\\sigma_{i-1}$, $\\sigma_i$, $\\sigma_{i+1}$)\n4. The max/min response gives the blob centre $(x, y)$ and the $\\sigma_i$ of max/min gives the scale\n5. Radius of blob $= \\sqrt{2} \\; \\sigma_i$\n\nfig_1.jpg"}, {"q": "Show that the LoG is a band-pass filter.", "a": "- The FT of the Laplacian of the Gaussian is:\n\n$$\\frac{d^2 g_\\sigma(x)}{dx^2} \\xrightarrow{FT} -\\omega^2 G_{\\sigma'}(\\omega)$$\n\n- Behaves as $-\\omega^2$ near the origin (suppresses DC) and decays to zero for large $\\omega$ (Gaussian envelope)\n- This gives a band-pass shape with peak at $\\omega \\propto \\frac{1}{\\sigma}$"}, {"q": "Derive the blob radius.", "a": "- The 2D LoG is $\\nabla^2 G_\\sigma(x,y) \\propto \\left(\\frac{r^2}{\\sigma^2} - 2\\right) e^{-r^2/2\\sigma^2}$ where $r^2 = x^2 + y^2$\n- The zero-crossing occurs when $\\frac{r^2}{\\sigma^2} - 2 = 0$, i.e. $r = \\sqrt{2}\\sigma$\n- A blob of radius $R$ gives maximum LoG response when $R = \\sqrt{2}\\sigma_i$"}, {"q": "Why must the LoG response be multiplied by $\\sigma^2$ when comparing across scales?", "a": "- The LoG response magnitude decreases with increasing $\\sigma$ because the Gaussian becomes wider and flatter, spreading the response over a larger area\n- Without normalisation, smaller-scale blobs would always have stronger responses, making cross-scale comparison impossible\n- Multiplying by $\\sigma^2$ compensates for this decay, so blobs at different scales produce comparable response magnitudes\n- Note: the DoG already includes this normalisation implicitly since $G(k\\sigma) - G(\\sigma) \\approx (k-1)\\sigma^2 \\nabla^2 G$"}, {"q": "Show that the DoG is a band-pass filter.", "a": "- In the Fourier domain:\n\n$$g_\\sigma(x) \\xrightarrow{FT} e^{-\\frac{\\omega^2 \\sigma^2}{2}}, \\quad g_{k\\sigma}(x) \\xrightarrow{FT} e^{-\\frac{\\omega^2 k^2 \\sigma^2}{2}}$$\n\n- Both are low-pass filters. Their difference:\n\n$$|DOG(\\omega)| = e^{-\\frac{\\omega^2 k^2 \\sigma^2}{2}} - e^{-\\frac{\\omega^2 \\sigma^2}{2}}$$\n\n- Difference of two low-pass filters is a band-pass filter, with peak centred at $\\frac{1}{\\sigma_i}$"}, {"q": "Show that the DoG approximates the scale-normalised LoG.", "a": "1. Taylor expand $G(x, y, k\\sigma)$ around $\\sigma$, treating $G$ as a function of $\\sigma$:\n\n$$G(k\\sigma) \\approx G(\\sigma) + (k-1)\\sigma \\frac{\\partial G}{\\partial \\sigma}$$\n\n2. Therefore:\n\n$$G(k\\sigma) - G(\\sigma) \\approx (k-1)\\sigma \\frac{\\partial G}{\\partial \\sigma}$$\n\n3. Show that $\\sigma \\frac{\\partial G}{\\partial \\sigma} = \\sigma^2 \\nabla^2 G$. With $r^2 = x^2 + y^2$:\n\n$$\\frac{\\partial G}{\\partial \\sigma} = \\frac{1}{2\\pi\\sigma^3} e^{-\\frac{r^2}{2\\sigma^2}} \\left(\\frac{r^2}{\\sigma^2} - 2\\right)$$\n\n$$\\nabla^2 G = \\frac{1}{2\\pi\\sigma^4} e^{-\\frac{r^2}{2\\sigma^2}} \\left(\\frac{r^2}{\\sigma^2} - 2\\right)$$\n\n$$\\Rightarrow \\sigma \\frac{\\partial G}{\\partial \\sigma} = \\sigma^2 \\nabla^2 G$$\n\n4. Substituting:\n\n$$\\boxed{G(x, y, k\\sigma) - G(x, y, \\sigma) \\approx (k-1)\\sigma^2 \\nabla^2 G(x, y, \\sigma)}$$\n\n- This means we can compute blob responses by subtracting neighbouring smoothed images in the pyramid, avoiding differentiation"}, {"q": "Describe the image pyramid for efficient multi-scale smoothing.", "a": "1. Generate smoothed images at logarithmically spaced scales: $\\sigma_i = 2^{i/s}\\sigma_0$ with $s$ images per octave\n2. Implement all Gaussian blurs as $2 \\times$ 1D convolutions\n3. Use incremental blurs within each octave: $g(\\sigma_{i+1}) = g(\\sigma_i) * g(\\sigma_K)$ with small kernels $\\sigma_K = \\sigma_i\\sqrt{2^{2/s}-1}$\n4. After $s$ blurs, $\\sigma$ has doubled — subsample image to $\\frac{1}{4}$ size (Nyquist)\n5. Apply the same family of $\\sigma_K$ kernels to the smaller image — equivalent to large $\\sigma$ on the full-size image"}, {"q": "Derive the incremental blur kernel $\\sigma_K$ for computing $S(\\sigma_{i+1})$ from $S(\\sigma_i)$.", "a": "- By the reproducing property of the Gaussian: $G(\\sigma_1) * G(\\sigma_2) = G(\\sqrt{\\sigma_1^2 + \\sigma_2^2})$\n- We want $G(\\sigma_{i+1}) = G(\\sigma_i) * G(\\sigma_{K_i})$, so:\n\n$$\\sigma_{K_i} = \\sqrt{\\sigma_{i+1}^2 - \\sigma_i^2}$$\n\n- With $\\sigma_{i+1} = 2^{1/s} \\sigma_i$:\n\n$$\\sigma_{K_i} = \\sigma_i \\sqrt{2^{2/s} - 1}$$\n\n- This is efficient because we use small incremental blur kernels instead of large ones"}, {"q": "Why can we subsample the image after $\\sigma$ doubles?", "a": "- After $s$ incremental blurs, $\\sigma$ has doubled ($\\sigma_{i+s} = 2\\sigma_0$)\n- The smoothing has removed all frequencies above $\\omega_c \\propto \\frac{1}{2\\sigma_0}$\n- By the Nyquist sampling theorem, we can subsample by a factor of 2 (reducing image to $\\frac{1}{4}$ size) without aliasing\n- We then apply the same family of small incremental blur kernels $\\sigma_K$ to the smaller image — equivalent to large $\\sigma$ on the full-size image"}], "Keypoint Detection": [{"q": "What is meant by invariance and distinctiveness in feature matching?", "a": "- **Invariance:** a feature $f$ is invariant to a transformation $g$ if $f(\\mathbf{x}) = f(g(\\mathbf{x}))$\n- **Distinctiveness:** a feature $f$ is distinctive to a transformation $g$ if $f(\\mathbf{x}) \\neq f(g(\\mathbf{x}))$\n- There is a tension between the two — we want invariance to nuisance factors (occlusion, viewpoint, illumination) but distinctiveness to the unique characteristics of the visual feature (shape)"}, {"q": "Describe the intensity descriptor for patch matching.", "a": "- Store the intensity values in a 16×16 patch as a 256D vector\n- Zero-mean and normalise to unit length:\n\n$$\\mathbf{X}_{NC} = \\frac{I(i,j) - \\mu}{\\sigma}$$\n\n- Compare patches via dot product of normalised vectors (equivalent to NCC)"}, {"q": "Compare the intensity descriptor with SIFT.", "a": "- **Intensity descriptor:** very simple to compute, 256D, but poor if scale and orientation are incorrect\n- **SIFT:** invariant to scale, orientation and lighting; robust to small geometric/perspective distortion; poor at boundaries"}, {"q": "Describe the main steps in computing the SIFT descriptor.", "a": "1. Sample 16×16 pixels from $S(x, y, \\sigma_i)$ at blob centre, aligned with dominant orientation (invariance to **scale** and **rotation**)\n2. Compute gradients $\\nabla S$ at each pixel (invariance to **brightness**)\n3. Weight gradients by Gaussian $g(1.5\\sigma_i)$ centred on blob centre (invariance to **occlusion** by emphasising pixels away from the boundaries)\n4. Split patch into 4×4 grid of cells\n5. In each cell, produce a histogram of oriented gradients (HOG) in 8 directions (45° bins), accumulating gradient magnitudes\n6. Concatenate to give 128D vector ($8 \\times 16$)\n7. Normalise to unit length (invariance to **contrast**)\n8. Truncate any entry above 0.2 to 0.2 (reduce effect of strong gradients/highlights)\n9. Renormalise to unit vector (invariance to **nonlinear illumination**)"}, {"q": "What are the limitations of SIFT?", "a": "- HOGs and spatial binning into 16 cells provide some tolerance for small viewpoint changes only (up to ~30°)\n- Large viewpoint changes (strong perspective/out-of-plane rotations)\n- Features on occluding boundaries"}, {"q": "How are SIFT descriptors used to find correspondences between images?", "a": "1. Compute SIFT descriptor for each keypoint in both images\n2. For each descriptor $\\mathbf{x}$ in image 1, find the nearest neighbour $\\mathbf{x}_1$ and second nearest neighbour $\\mathbf{x}_2$ in image 2 using Euclidean distance\n3. Accept match if:\n\n$$\\frac{D(\\mathbf{x}, \\mathbf{x}_1)}{D(\\mathbf{x}, \\mathbf{x}_2)} < 0.7$$\n\n- This avoids ambiguous matches — a good match should be uniquely close, not one of many similar features\n- Efficiently implemented using a k-d tree for nearest neighbour search ($O(\\log N)$)"}, {"q": "How is the 16×16 patch sampled at appropriate scale and orientation?", "a": "1. Find scale of blob $\\sigma_i$ (search 26 neighbours for local max in DoG pyramid)\n2. Sample 16×16 pixels around blob centre from $S(x, y, \\sigma_i)$\n3. Compute gradients $\\nabla S_{\\sigma_i}(x, y)$ in this patch\n4. Build histogram of gradient magnitudes in 10° bins (36 bins), weighted by $g(1.5\\sigma_i)$\n5. Smooth the 36-bin histogram with a Gaussian kernel to reduce noise and ensure a robust peak\n6. Find peak of smoothed histogram — this is the dominant orientation $\\theta_i$\n7. Refine by fitting a parabola to the peak bin and its two neighbours\n8. If no clear single peak, create multiple copies of keypoint with different orientations\n9. Resample 16×16 pixels at scale $\\sigma_i$ aligned with dominant orientation $\\theta_i$"}]};
 
-let activeGroup = null; // null = all
-let filtered = ALL_CARDS.slice();
-let idx = 0;
+let currentTopic = '';
+let totalCards = 0;
+let clearedCards = 0;
+let pile = [];
+let again = [];
+let cardIndex = 0;
+let flipped = false;
 
-function initFilters() {
-  const el = document.getElementById('filters');
-  // "All" pill
-  const all = document.createElement('span');
-  all.className = 'pill active';
-  all.textContent = 'All';
-  all.dataset.group = '';
-  all.onclick = () => selectGroup(null);
-  el.appendChild(all);
+// ── DOM refs ──
+const topicScreen   = document.getElementById('topic-screen');
+const cardScreen    = document.getElementById('card-screen');
+const roundScreen   = document.getElementById('round-screen');
+const doneScreen    = document.getElementById('done-screen');
+const topicList     = document.getElementById('topic-list');
+const card          = document.getElementById('card');
+const cardLabel     = document.getElementById('card-label');
+const cardContent   = document.getElementById('card-content');
+const tapHint       = document.getElementById('tap-hint');
+const actionButtons = document.getElementById('action-buttons');
+const progressText  = document.getElementById('progress-text');
+const progressBar   = document.getElementById('progress-bar');
 
-  GROUPS.forEach(g => {
-    const p = document.createElement('span');
-    p.className = 'pill';
-    p.textContent = g;
-    p.dataset.group = g;
-    p.onclick = () => selectGroup(g);
-    el.appendChild(p);
+// ── Init ──
+try { mermaid.initialize({ startOnLoad: false, theme: 'default' }); } catch(e) {}
+
+function init() {
+  topicList.innerHTML = '';
+  const names = Object.keys(DECKS);
+  names.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'topic-btn';
+    btn.innerHTML = `<span class="topic-name">${esc(name)}</span><span class="topic-count">${DECKS[name].length} cards</span>`;
+    btn.addEventListener('click', () => startTopic(name));
+    topicList.appendChild(btn);
   });
 }
 
-function selectGroup(group) {
-  activeGroup = group;
-  filtered = group ? ALL_CARDS.filter(c => c.group === group) : ALL_CARDS.slice();
-  idx = 0;
-
-  document.querySelectorAll('.pill').forEach(p => {
-    p.classList.toggle('active', group === null ? p.dataset.group === '' : p.dataset.group === group);
-  });
-  document.getElementById('count').textContent = filtered.length;
-  render();
+// ── Navigation ──
+function showScreen(screen) {
+  [topicScreen, cardScreen, roundScreen, doneScreen].forEach(s => s.classList.add('hidden'));
+  screen.classList.remove('hidden');
 }
 
-function render() {
-  if (filtered.length === 0) {
-    document.getElementById('frontBody').innerHTML = '<span style="color:#777;">No cards in this group.</span>';
-    document.getElementById('backBody').innerHTML = '';
-    document.getElementById('frontGroup').textContent = '';
-    document.getElementById('backGroup').textContent = '';
-    document.getElementById('progress').textContent = '0 / 0';
+function startTopic(name) {
+  currentTopic = name;
+  totalCards = DECKS[name].length;
+  clearedCards = 0;
+  pile = shuffle([...DECKS[name]]);
+  again = [];
+  cardIndex = 0;
+  showScreen(cardScreen);
+  showCard();
+}
+
+function goToTopics() {
+  showScreen(topicScreen);
+}
+
+// ── Card Display ──
+function showCard() {
+  if (cardIndex >= pile.length) {
+    endRound();
     return;
   }
-  const c = filtered[idx];
-  // Unflip
-  document.getElementById('card').classList.remove('flipped');
+  flipped = false;
+  const c = pile[cardIndex];
+  card.className = 'card question-side';
+  cardLabel.textContent = 'Question';
+  cardContent.innerHTML = esc(c.q);
+  tapHint.textContent = 'Tap or press Space to flip';
+  actionButtons.classList.add('hidden');
+  updateProgress();
+  card.scrollTop = 0;
 
-  document.getElementById('frontBody').innerHTML = c.question;
-  document.getElementById('backBody').innerHTML = c.answer_html;
-  document.getElementById('frontGroup').textContent = c.group;
-  document.getElementById('backGroup').textContent = c.group;
-  document.getElementById('progress').textContent = (idx + 1) + ' / ' + filtered.length;
-  document.getElementById('prevBtn').disabled = idx === 0;
-  document.getElementById('nextBtn').disabled = idx === filtered.length - 1;
+  // Render KaTeX on question side
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(cardContent, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ],
+      throwOnError: false
+    });
+  }
+}
+
+function flipCard() {
+  if (flipped) return;
+  flipped = true;
+  const c = pile[cardIndex];
+  card.className = 'card answer-side';
+  cardLabel.textContent = 'Answer';
+  tapHint.textContent = '';
+
+  // Render markdown
+  const rawHtml = (typeof marked !== 'undefined' && marked.parse) ? marked.parse(c.a) : c.a.replace(/\n/g, '<br>');
+  cardContent.innerHTML = rawHtml;
 
   // Render KaTeX
-  renderMathInElement(document.getElementById('frontBody'), {
-    delimiters: [
-      {left: '$$', right: '$$', display: true},
-      {left: '$', right: '$', display: false}
-    ],
-    throwOnError: false
-  });
-  renderMathInElement(document.getElementById('backBody'), {
-    delimiters: [
-      {left: '$$', right: '$$', display: true},
-      {left: '$', right: '$', display: false}
-    ],
-    throwOnError: false
-  });
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(cardContent, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ],
+      throwOnError: false
+    });
+  }
+
+  // Render Mermaid
+  if (typeof mermaid !== 'undefined' && mermaid.render) {
+    const codeBlocks = cardContent.querySelectorAll('code.language-mermaid');
+    codeBlocks.forEach((block, i) => {
+      const pre = block.parentElement;
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+      const id = 'mermaid-' + Date.now() + '-' + i;
+      try {
+        mermaid.render(id, block.textContent.trim()).then(({ svg }) => {
+          container.innerHTML = svg;
+          pre.replaceWith(container);
+        }).catch(() => {});
+      } catch(e) {}
+    });
+  }
+
+  actionButtons.classList.remove('hidden');
+  card.scrollTop = 0;
 }
 
-function flip() {
-  document.getElementById('card').classList.toggle('flipped');
+function markGotIt() {
+  clearedCards++;
+  cardIndex++;
+  showCard();
 }
 
-function prev() {
-  if (idx > 0) { idx--; render(); }
+function markAgain() {
+  again.push(pile[cardIndex]);
+  cardIndex++;
+  showCard();
 }
 
-function next() {
-  if (idx < filtered.length - 1) { idx++; render(); }
+function endRound() {
+  if (again.length === 0) {
+    showScreen(doneScreen);
+  } else {
+    document.getElementById('round-remaining').textContent = again.length;
+    document.getElementById('round-message').textContent =
+      again.length + ' card' + (again.length === 1 ? '' : 's') + ' to review. ' + clearedCards + ' of ' + totalCards + ' cleared.';
+    showScreen(roundScreen);
+  }
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowLeft') prev();
-  else if (e.key === 'ArrowRight') next();
-  else if (e.key === ' ') { e.preventDefault(); flip(); }
-});
+function nextRound() {
+  pile = shuffle([...again]);
+  again = [];
+  cardIndex = 0;
+  showScreen(cardScreen);
+  showCard();
+}
 
-// Touch swipe
-let touchStartX = 0;
-document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
-document.addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].screenX - touchStartX;
-  if (Math.abs(dx) > 50) {
-    if (dx > 0) prev(); else next();
+function restartTopic() {
+  startTopic(currentTopic);
+}
+
+// ── Progress ──
+function updateProgress() {
+  progressText.textContent = clearedCards + ' of ' + totalCards + ' cleared';
+  const pct = totalCards > 0 ? (clearedCards / totalCards) * 100 : 0;
+  progressBar.style.width = pct + '%';
+}
+
+// ── Utilities ──
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ── Event Listeners ──
+card.addEventListener('click', flipCard);
+document.getElementById('btn-got-it').addEventListener('click', markGotIt);
+document.getElementById('btn-again').addEventListener('click', markAgain);
+document.getElementById('back-btn').addEventListener('click', goToTopics);
+document.getElementById('round-continue').addEventListener('click', nextRound);
+document.getElementById('round-back').addEventListener('click', goToTopics);
+document.getElementById('done-restart').addEventListener('click', restartTopic);
+document.getElementById('done-back').addEventListener('click', goToTopics);
+
+document.addEventListener('keydown', (e) => {
+  if (cardScreen.classList.contains('hidden')) return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (!flipped) flipCard();
+  } else if (e.code === 'ArrowLeft' && flipped) {
+    e.preventDefault();
+    markAgain();
+  } else if (e.code === 'ArrowRight' && flipped) {
+    e.preventDefault();
+    markGotIt();
   }
 });
 
-initFilters();
-render();
+// ── Start ──
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 </script>
 </body>
 </html>

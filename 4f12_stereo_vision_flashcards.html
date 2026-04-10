@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>4F12 Stereo Vision — Flashcards</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>4F12 Stereo Vision Flashcards</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,368 +17,593 @@ body {
   background: #0f1117;
   color: #e0e0e0;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
 }
 
 .container {
-  max-width: 700px;
+  max-width: 500px;
   margin: 0 auto;
-  padding: 20px 16px 100px;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 4px;
-}
-
-.back-btn {
-  color: #a0c4ff;
-  text-decoration: none;
-  font-size: 1.3rem;
-  line-height: 1;
-  padding: 4px;
-}
-
-h1 {
-  color: #fff;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
-.subtitle {
-  color: #777;
-  font-size: 0.8rem;
-  margin-bottom: 16px;
-  padding-left: 36px;
-}
-
-/* Filter pills */
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 18px;
-}
-
-.pill {
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
-  border-radius: 20px;
-  padding: 6px 14px;
-  font-size: 0.78rem;
-  color: #bbb;
-  cursor: pointer;
-  transition: all 0.15s;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
-
-.pill:hover { border-color: #a0c4ff; color: #e0e0e0; }
-.pill.active { background: #a0c4ff; color: #0f1117; border-color: #a0c4ff; font-weight: 600; }
-
-/* Card */
-.card-wrapper {
-  perspective: 1000px;
-  min-height: 220px;
-  margin-bottom: 16px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.card {
-  position: relative;
-  width: 100%;
-  min-height: 220px;
-  transition: transform 0.45s cubic-bezier(.4,.2,.2,1);
-  transform-style: preserve-3d;
-}
-
-.card.flipped { transform: rotateX(180deg); }
-
-.card-face {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  min-height: 220px;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  border-radius: 12px;
-  padding: 24px 22px;
+  padding: 28px 16px;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
 
-.card-front {
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
+/* ── Topic Picker ── */
+
+#topic-screen h1 {
+  color: #fff;
+  font-size: 1.4rem;
+  margin-bottom: 4px;
 }
 
-.card-back {
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
-  transform: rotateX(180deg);
+#topic-screen .subtitle {
+  color: #777;
+  font-size: 0.85rem;
+  margin-bottom: 24px;
 }
 
-.card-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.topic-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: #1a1d27;
+  border: 1px solid #2a2d3a;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+
+.topic-btn:active { background: #252838; }
+
+.topic-name {
+  color: #e0e0e0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.topic-count {
+  color: #777;
+  font-size: 0.85rem;
+}
+
+/* ── Card Screen ── */
+
+#card-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 12px;
 }
 
-.card-front .card-label { color: #a0c4ff; }
-.card-back .card-label { color: #4ecdc4; }
-
-.card-front .card-body {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: #fff;
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.card-back .card-body {
-  font-size: 0.92rem;
-  line-height: 1.65;
-  color: #e0e0e0;
-  flex: 1;
-  overflow-y: auto;
-}
-
-.card-back .card-body ul,
-.card-back .card-body ol {
-  margin-left: 18px;
-  margin-bottom: 8px;
-}
-
-.card-back .card-body li {
-  margin-bottom: 5px;
-}
-
-.card-back .card-body p {
-  margin-bottom: 8px;
-}
-
-.card-back .card-body code {
-  background: #252838;
-  padding: 1px 5px;
-  border-radius: 3px;
-  font-family: 'Consolas', monospace;
-  font-size: 0.88em;
-}
-
-.card-back .card-body pre {
-  font-family: 'Consolas', monospace;
-}
-
-.math-display {
-  margin: 10px 0;
-  overflow-x: auto;
-}
-
-.group-tag {
-  font-size: 0.68rem;
-  color: #777;
-  margin-top: 10px;
-  text-align: right;
-}
-
-/* Navigation */
-.nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 10px;
-}
-
-.nav button {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid #2a2d3a;
-  background: #1a1d27;
+.back-btn {
+  background: none;
+  border: none;
   color: #a0c4ff;
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.15s;
+  padding: 6px 0;
   -webkit-tap-highlight-color: transparent;
 }
 
-.nav button:hover { background: #252838; }
-.nav button:disabled { opacity: 0.3; cursor: default; }
-
-.progress {
-  color: #777;
+.progress-text {
+  color: #a0c4ff;
   font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 4px;
+  background: #2a2d3a;
+  border-radius: 2px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #4ecdc4;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ── The Card ── */
+
+.card-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+
+.card {
+  background: #fff;
+  color: #1a1a1a;
+  border-radius: 12px;
+  padding: 28px 24px;
+  min-height: 200px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  position: relative;
+  overflow-y: auto;
+  max-height: 65vh;
+}
+
+.card .label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  color: #999;
+}
+
+.card.question-side .label { color: #a0c4ff; }
+.card.answer-side .label { color: #4ecdc4; }
+
+.card .card-content {
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.card.question-side .card-content {
+  font-size: 1.15rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  min-height: 80px;
+}
+
+.card .tap-hint {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  font-size: 0.7rem;
+  color: #bbb;
+}
+
+/* Answer markdown styling */
+.card-content h1, .card-content h2, .card-content h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 12px 0 6px;
+}
+
+.card-content p { margin: 8px 0; }
+
+.card-content ul, .card-content ol {
+  margin: 8px 0 8px 20px;
+}
+
+.card-content li { margin: 4px 0; }
+
+.card-content strong { font-weight: 700; }
+
+.card-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 10px 0;
+  font-size: 0.9rem;
+}
+
+.card-content th, .card-content td {
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.card-content th { background: #f0f0f0; font-weight: 600; }
+
+.card-content code {
+  background: #f4f4f4;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.9em;
   font-family: 'Consolas', monospace;
-  min-width: 60px;
+}
+
+.card-content pre {
+  background: #f4f4f4;
+  padding: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.card-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.card-content .mermaid-container {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.card-content .mermaid-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Buttons ── */
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding-bottom: 16px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+
+.action-btn:active { opacity: 0.8; }
+
+.btn-again {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+.btn-got-it {
+  background: #4ecdc4;
+  color: #fff;
+}
+
+.action-buttons.hidden { display: none; }
+
+/* ── Round Complete / Done ── */
+
+#round-screen, #done-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
-.hint {
-  text-align: center;
-  color: #555;
-  font-size: 0.75rem;
-  margin-top: 4px;
+#round-screen h2, #done-screen h2 {
+  color: #fff;
+  font-size: 1.3rem;
+  margin-bottom: 8px;
 }
 
-/* Keyboard hint */
-.kbd {
-  display: inline-block;
-  background: #1a1d27;
-  border: 1px solid #2a2d3a;
-  border-radius: 4px;
-  padding: 1px 6px;
-  font-family: 'Consolas', monospace;
-  font-size: 0.72rem;
+#round-screen p, #done-screen p {
+  color: #bbb;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
 }
+
+.screen-btn {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.screen-btn.primary {
+  background: #4ecdc4;
+  color: #fff;
+}
+
+.screen-btn.secondary {
+  background: #2a2d3a;
+  color: #e0e0e0;
+}
+
+.screen-btn:active { opacity: 0.8; }
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #4ecdc4;
+  margin-bottom: 4px;
+}
+
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
+
 <div class="container">
-  <div class="header">
-    <a class="back-btn" href="index.html">&larr;</a>
-    <h1>Stereo Vision</h1>
+  <!-- Topic Picker -->
+  <div id="topic-screen">
+    <h1>Stereo Vision Flashcards</h1>
+    <p class="subtitle">4F12 &mdash; Cambridge IIB</p>
+    <div id="topic-list"></div>
   </div>
-  <p class="subtitle">4F12 &middot; <span id="count">14</span> cards</p>
 
-  <div class="filters" id="filters"></div>
-
-  <div class="card-wrapper" id="cardWrapper" onclick="flip()">
-    <div class="card" id="card">
-      <div class="card-face card-front">
-        <div class="card-label">Question</div>
-        <div class="card-body" id="frontBody"></div>
-        <div class="group-tag" id="frontGroup"></div>
+  <!-- Card Screen -->
+  <div id="card-screen" class="hidden">
+    <div class="top-bar">
+      <button class="back-btn" id="back-btn">&larr; Topics</button>
+      <span class="progress-text" id="progress-text"></span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progress-bar"></div>
+    </div>
+    <div class="card-wrapper">
+      <div class="card question-side" id="card">
+        <div class="label" id="card-label">Question</div>
+        <div class="card-content" id="card-content"></div>
+        <div class="tap-hint" id="tap-hint">Tap to flip</div>
       </div>
-      <div class="card-face card-back">
-        <div class="card-label">Answer</div>
-        <div class="card-body" id="backBody"></div>
-        <div class="group-tag" id="backGroup"></div>
-      </div>
+    </div>
+    <div class="action-buttons hidden" id="action-buttons">
+      <button class="action-btn btn-again" id="btn-again">Again</button>
+      <button class="action-btn btn-got-it" id="btn-got-it">Got it</button>
     </div>
   </div>
 
-  <div class="nav">
-    <button id="prevBtn" onclick="event.stopPropagation(); prev();">&larr;</button>
-    <span class="progress" id="progress"></span>
-    <button id="nextBtn" onclick="event.stopPropagation(); next();">&rarr;</button>
+  <!-- Round Complete -->
+  <div id="round-screen" class="hidden">
+    <div class="stat-number" id="round-remaining"></div>
+    <h2>Round complete</h2>
+    <p id="round-message"></p>
+    <button class="screen-btn primary" id="round-continue">Continue</button>
+    <button class="screen-btn secondary" id="round-back">Back to topics</button>
   </div>
-  <p class="hint">Tap card to flip &middot; <span class="kbd">&larr;</span> <span class="kbd">&rarr;</span> navigate &middot; <span class="kbd">Space</span> flip</p>
+
+  <!-- All Done -->
+  <div id="done-screen" class="hidden">
+    <div class="stat-number">0</div>
+    <h2>All cards cleared</h2>
+    <p>You got every card right.</p>
+    <button class="screen-btn primary" id="done-restart">Restart topic</button>
+    <button class="screen-btn secondary" id="done-back">Back to topics</button>
+  </div>
 </div>
 
 <script>
-const ALL_CARDS = [{"group": "Epipolar Geometry", "question": "Derive the epipolar constraint $\\mathbf{p}'^T \\mathbf{E} \\mathbf{p} = 0$ in camera-centred coordinates.", "answer_html": "<div class=\"math-display\">$$\\mathbf{X}' = \\mathbf{R}\\mathbf{X} + \\mathbf{T}$$</div>\n<div class=\"math-display\">$$\\mathbf{T}\\times\\mathbf{X}'=\\mathbf{T}\\times \\mathbf{R}\\mathbf{X}+ \\mathbf{T}\\times \\mathbf{T}$$</div>\n<div class=\"math-display\">$$\\mathbf{T}\\times\\mathbf{X}'=\\mathbf{T}\\times \\mathbf{R}\\mathbf{X}$$</div>\n<div class=\"math-display\">$$\\mathbf{X}'\\cdot(\\mathbf{T}\\times\\mathbf{X}')=\\mathbf{X}'\\cdot(\\mathbf{T}\\times \\mathbf{R}\\mathbf{X})$$</div>\n<div class=\"math-display\">$$0= \\mathbf{X}'\\cdot(\\mathbf{T}\\times \\mathbf{R}\\mathbf{X})$$</div>\n<div class=\"math-display\">$$\\mathbf{T}_X=\\begin{bmatrix}0 & -T_z & T_y \\\\ T_z & 0 & -T_x \\\\ -T_y & T_x & 0 \\end{bmatrix} $$</div>\n<ul>\n<li>Define $\\mathbf{E}=\\mathbf{T}_X\\mathbf{R}$, then $\\mathbf{X}'^T\\mathbf{E}\\mathbf{X}=0 $</li>\n</ul>", "answer_md": "$$\\mathbf{X}' = \\mathbf{R}\\mathbf{X} + \\mathbf{T}$$\n\n$$\\mathbf{T}\\times\\mathbf{X}'=\\mathbf{T}\\times \\mathbf{R}\\mathbf{X}+ \\mathbf{T}\\times \\mathbf{T}$$\n\n$$\\mathbf{T}\\times\\mathbf{X}'=\\mathbf{T}\\times \\mathbf{R}\\mathbf{X}$$\n\n$$\\mathbf{X}'\\cdot(\\mathbf{T}\\times\\mathbf{X}')=\\mathbf{X}'\\cdot(\\mathbf{T}\\times \\mathbf{R}\\mathbf{X})$$\n\n$$0= \\mathbf{X}'\\cdot(\\mathbf{T}\\times \\mathbf{R}\\mathbf{X})$$\n\n$$\\mathbf{T}_X=\\begin{bmatrix}0 & -T_z & T_y \\\\ T_z & 0 & -T_x \\\\ -T_y & T_x & 0 \\end{bmatrix} $$\n\n- Define $\\mathbf{E}=\\mathbf{T}_X\\mathbf{R}$, then $\\mathbf{X}'^T\\mathbf{E}\\mathbf{X}=0 $"}, {"group": "Epipolar Geometry", "question": "Show that $\\mathbf{E}\\mathbf{p}_e = 0$. What does this mean geometrically?", "answer_html": "<div class=\"math-display\">$$\\lambda \\mathbf{T} = \\mathbf{R}\\mathbf{p}_e + \\mathbf{T}$$</div>\n<div class=\"math-display\">$$0 = \\mathbf{T} \\times \\mathbf{R}\\mathbf{p}_e$$</div>\n<div class=\"math-display\">$$0 = \\mathbf{E}\\mathbf{p}_e$$</div>\n<ul>\n<li>The epipole $\\mathbf{p}_e$ is the image of the other camera's optical centre</li>\n<li>All epipolar lines in the left image pass through $\\mathbf{p}_e$</li>\n</ul>", "answer_md": "$$\\lambda \\mathbf{T} = \\mathbf{R}\\mathbf{p}_e + \\mathbf{T}$$\n\n$$0 = \\mathbf{T} \\times \\mathbf{R}\\mathbf{p}_e$$\n\n$$0 = \\mathbf{E}\\mathbf{p}_e$$\n\n- The epipole $\\mathbf{p}_e$ is the image of the other camera's optical centre\n- All epipolar lines in the left image pass through $\\mathbf{p}_e$"}, {"group": "Epipolar Geometry", "question": "Derive the fundamental matrix constraint $\\tilde{\\mathbf{w}}'^T \\mathbf{F} \\tilde{\\mathbf{w}} = 0$ in pixel coordinates.", "answer_html": "<ul>\n<li>Pixel coordinates relate to camera coordinates by $\\tilde{\\mathbf{w}} = \\mathbf{K}\\mathbf{p}$, so $\\mathbf{p} = \\mathbf{K}^{-1}\\tilde{\\mathbf{w}}$</li>\n<li>Substituting into $\\mathbf{p}'^T \\mathbf{E} \\mathbf{p} = 0$:</li>\n<div class=\"math-display\">$$(\\mathbf{K}'^{-1}\\tilde{\\mathbf{w}}')^T \\mathbf{E} (\\mathbf{K}^{-1}\\tilde{\\mathbf{w}}) = 0$$</div>\n</ul>\n<div class=\"math-display\">$$\\tilde{\\mathbf{w}}'^T \\underbrace{\\mathbf{K}'^{-T} \\mathbf{E} \\mathbf{K}^{-1}}_{\\mathbf{F}} \\tilde{\\mathbf{w}} = 0$$</div>\n<ul>\n<li>The <strong>fundamental matrix</strong> is $\\mathbf{F} = \\mathbf{K}'^{-T} \\mathbf{T}_\\times \\mathbf{R} \\mathbf{K}^{-1}$</li>\n<li>The <strong>epipolar line</strong> in the right image for a point $\\tilde{\\mathbf{w}}$ in the left image is $\\mathbf{l}' = \\mathbf{F}\\tilde{\\mathbf{w}}$ so $\\tilde{\\mathbf{w}}^T\\mathbf{l}'=0$</li>\n</ul>", "answer_md": "- Pixel coordinates relate to camera coordinates by $\\tilde{\\mathbf{w}} = \\mathbf{K}\\mathbf{p}$, so $\\mathbf{p} = \\mathbf{K}^{-1}\\tilde{\\mathbf{w}}$\n- Substituting into $\\mathbf{p}'^T \\mathbf{E} \\mathbf{p} = 0$:\n$$(\\mathbf{K}'^{-1}\\tilde{\\mathbf{w}}')^T \\mathbf{E} (\\mathbf{K}^{-1}\\tilde{\\mathbf{w}}) = 0$$\n\n$$\\tilde{\\mathbf{w}}'^T \\underbrace{\\mathbf{K}'^{-T} \\mathbf{E} \\mathbf{K}^{-1}}_{\\mathbf{F}} \\tilde{\\mathbf{w}} = 0$$\n\n- The **fundamental matrix** is $\\mathbf{F} = \\mathbf{K}'^{-T} \\mathbf{T}_\\times \\mathbf{R} \\mathbf{K}^{-1}$\n- The **epipolar line** in the right image for a point $\\tilde{\\mathbf{w}}$ in the left image is $\\mathbf{l}' = \\mathbf{F}\\tilde{\\mathbf{w}}$ so $\\tilde{\\mathbf{w}}^T\\mathbf{l}'=0$"}, {"group": "Epipolar Geometry", "question": "Show that $\\mathbf{F}\\tilde{\\mathbf{w}}_e = 0$ and that $\\text{rank}(\\mathbf{F}) = 2$.", "answer_html": "<ul>\n<li>The epipole $\\tilde{\\mathbf{w}}_e$ satisfies $\\mathbf{F}\\tilde{\\mathbf{w}}_e = 0$ (and $\\mathbf{F}^T\\tilde{\\mathbf{w}}'_e = 0$ for the right epipole)</li>\n<li>Since $\\mathbf{F}\\tilde{\\mathbf{w}}_e = 0$ has a non-trivial solution, $\\mathbf{F}$ is not invertible → $\\det \\mathbf{F} = 0$ → $\\text{rank}(\\mathbf{F}) \\leq 2$</li>\n<li>$\\mathbf{F}$ has rank exactly 2 (not 1) because it encodes a genuine epipolar geometry with distinct epipoles</li>\n</ul>", "answer_md": "- The epipole $\\tilde{\\mathbf{w}}_e$ satisfies $\\mathbf{F}\\tilde{\\mathbf{w}}_e = 0$ (and $\\mathbf{F}^T\\tilde{\\mathbf{w}}'_e = 0$ for the right epipole)\n- Since $\\mathbf{F}\\tilde{\\mathbf{w}}_e = 0$ has a non-trivial solution, $\\mathbf{F}$ is not invertible → $\\det \\mathbf{F} = 0$ → $\\text{rank}(\\mathbf{F}) \\leq 2$\n- $\\mathbf{F}$ has rank exactly 2 (not 1) because it encodes a genuine epipolar geometry with distinct epipoles"}, {"group": "Epipolar Geometry", "question": "How many dof does $\\mathbf{F}$ have?", "answer_html": "<ul>\n<li>7 dof</li>\n<li>9 terms in the matrix</li>\n<li>But scale irrelevant so 8</li>\n<li>And we force zero determinant so 7</li>\n</ul>", "answer_md": "- 7 dof\n  - 9 terms in the matrix\n  - But scale irrelevant so 8\n  - And we force zero determinant so 7"}, {"group": "Epipolar Geometry", "question": "How is the fundamental matrix estimated from point correspondences?", "answer_html": "<ul>\n<li>Each correspondence $(u_i, v_i) \\leftrightarrow (u'_i, v'_i)$ gives one linear equation in the 9 elements of $\\mathbf{F}$:</li>\n<div class=\"math-display\">$$\\begin{bmatrix} u'_iu_i & u'_iv_i & u'_i & v'_iu_i & v'_iv_i & v'_i & u_i & v_i & 1 \\end{bmatrix} \\mathbf{f} = 0$$</div>\n<li>$\\mathbf{F}$ has 8 DoF (9 elements, minus scale) → need $\\geq 8$ correspondences</li>\n<li>Normalise points for numerical stability</li>\n<li>Stack into $A\\mathbf{f} = 0$, solve by SVD (smallest singular vector)</li>\n<li>The solution may not satisfy $\\det \\mathbf{F} = 0$ — enforce rank 2 by SVD of the estimated $\\mathbf{F}$: set the third singular value to 0</li>\n<li>Use RANSAC to handle outlier correspondences</li>\n</ul>", "answer_md": "- Each correspondence $(u_i, v_i) \\leftrightarrow (u'_i, v'_i)$ gives one linear equation in the 9 elements of $\\mathbf{F}$:\n$$\\begin{bmatrix} u'_iu_i & u'_iv_i & u'_i & v'_iu_i & v'_iv_i & v'_i & u_i & v_i & 1 \\end{bmatrix} \\mathbf{f} = 0$$\n- $\\mathbf{F}$ has 8 DoF (9 elements, minus scale) → need $\\geq 8$ correspondences\n- Normalise points for numerical stability\n- Stack into $A\\mathbf{f} = 0$, solve by SVD (smallest singular vector)\n- The solution may not satisfy $\\det \\mathbf{F} = 0$ — enforce rank 2 by SVD of the estimated $\\mathbf{F}$: set the third singular value to 0\n- Use RANSAC to handle outlier correspondences"}, {"group": "Epipolar Geometry", "question": "What matching constraints can be used to find point correspondences in stereo vision?", "answer_html": "<ul>\n<li><strong>Epipolar constraint</strong>: corresponding point must lie on the epipolar line in the other image (from $\\mathbf{E}$ or $\\mathbf{F}$)</li>\n<li><strong>Uniqueness</strong>: for opaque objects, each point in one image has at most one match in the other</li>\n<li><strong>Ordering</strong>: corresponding points on the surface of an opaque object appear in the same order in both images</li>\n<li><strong>Figural continuity</strong>: when points lie on contours, the contour structure aids matching</li>\n<li><strong>Disparity gradient</strong>: for smooth surfaces, disparity varies smoothly — limit the allowable spatial derivative of disparity</li>\n</ul>", "answer_md": "- **Epipolar constraint**: corresponding point must lie on the epipolar line in the other image (from $\\mathbf{E}$ or $\\mathbf{F}$)\n- **Uniqueness**: for opaque objects, each point in one image has at most one match in the other\n- **Ordering**: corresponding points on the surface of an opaque object appear in the same order in both images\n- **Figural continuity**: when points lie on contours, the contour structure aids matching\n- **Disparity gradient**: for smooth surfaces, disparity varies smoothly — limit the allowable spatial derivative of disparity"}, {"group": "Epipolar Geometry", "question": "Given calibrated cameras ($\\mathbf{K}$, $\\mathbf{R}$, $\\mathbf{T}$ all known), how are 3D positions recovered?", "answer_html": "<ol>\n<li>For each correspondence, triangulate by solving $A\\mathbf{X} = 0$ where $\\mathbf{P} = \\mathbf{K}[I | 0]$ and $\\mathbf{P}' = \\mathbf{K}'[\\mathbf{R} | \\mathbf{T}]$</li>\n</ol>\n<div class=\"math-display\">$$\\begin{bmatrix} u_i \\mathbf{p}_{3}^T - \\mathbf{p}_{1}^T \\\\ v_i \\mathbf{p}_{3}^T - \\mathbf{p}_{2}^T \\\\ u'_i \\mathbf{p}'^T_{3} - \\mathbf{p}'^T_{1} \\\\ v'_i \\mathbf{p}'^T_{3} - \\mathbf{p}'^T_{2} \\end{bmatrix} \\tilde{\\mathbf{X}} = 0$$</div>\n<ol>\n<li>Solve by SVD. Geometrically this is triangulation: finding the 3D point most consistent with the two rays.</li>\n</ol>\n<ul>\n<li>Improve with more views</li>\n<li>Track features across multiple views</li>\n<li>Optimise camera poses and 3D positions jointly</li>\n</ul>", "answer_md": "1. For each correspondence, triangulate by solving $A\\mathbf{X} = 0$ where $\\mathbf{P} = \\mathbf{K}[I | 0]$ and $\\mathbf{P}' = \\mathbf{K}'[\\mathbf{R} | \\mathbf{T}]$\n\n$$\\begin{bmatrix} u_i \\mathbf{p}_{3}^T - \\mathbf{p}_{1}^T \\\\ v_i \\mathbf{p}_{3}^T - \\mathbf{p}_{2}^T \\\\ u'_i \\mathbf{p}'^T_{3} - \\mathbf{p}'^T_{1} \\\\ v'_i \\mathbf{p}'^T_{3} - \\mathbf{p}'^T_{2} \\end{bmatrix} \\tilde{\\mathbf{X}} = 0$$\n\n2. Solve by SVD. Geometrically this is triangulation: finding the 3D point most consistent with the two rays.\n\n- Improve with more views\n  - Track features across multiple views\n  - Optimise camera poses and 3D positions jointly"}, {"group": "Epipolar Geometry", "question": "Given unknown camera motion but known $\\mathbf{K}$, how are $\\mathbf{R}$, $\\mathbf{T}$, and 3D positions recovered?", "answer_html": "<ol>\n<li>Find corners in both images</li>\n<li>Use normalised cross-correlation to obtain a few matches</li>\n<li>Use the seed matches to compute $\\mathbf{F}$ - find an $\\mathbf{F}$ that is consistent with as many matches as possible, then reject the rest as mistakes</li>\n<li>Now we know $\\mathbf{F}$ we can search for more matches in a narrow band around the epipolar lines to get a lot of matches</li>\n<li>Known $\\mathbf{K}$</li>\n<li>Compute the essential matrix: $\\mathbf{E} = \\mathbf{K}'^T \\mathbf{F} \\mathbf{K}$</li>\n<li>SVD decompose: $\\mathbf{E} = \\mathbf{U}\\Lambda \\mathbf{V}^T$ where $\\Lambda = \\text{diag}(1, 1, 0)$</li>\n<li>Recover $\\mathbf{R}$ and $\\mathbf{T}_\\times$:</li>\n<div class=\"math-display\">$$\\mathbf{T}_\\times = \\mathbf{U} \\begin{bmatrix} 0 & 1 & 0 \\\\ -1 & 0 & 0 \\\\ 0 & 0 & 0 \\end{bmatrix} \\mathbf{U}^T \\qquad \\mathbf{R} = \\mathbf{U} \\begin{bmatrix} 0 & -1 & 0 \\\\ 1 & 0 & 0 \\\\ 0 & 0 & 1 \\end{bmatrix} \\mathbf{V}^T$$</div>\n<li>4 possible solutions (sign ambiguities) — resolve by checking that reconstructed depths are positive</li>\n<li>Recover the structure as for the calibrated case</li>\n<li>We do not know $|\\mathbf{T}|$ so we can only recover structure up to scale (speed-scale ambiguity)</li>\n</ol>", "answer_md": "1. Find corners in both images\n2. Use normalised cross-correlation to obtain a few matches\n3. Use the seed matches to compute $\\mathbf{F}$ - find an $\\mathbf{F}$ that is consistent with as many matches as possible, then reject the rest as mistakes\n4. Now we know $\\mathbf{F}$ we can search for more matches in a narrow band around the epipolar lines to get a lot of matches\n5. Known $\\mathbf{K}$\n    6. Compute the essential matrix: $\\mathbf{E} = \\mathbf{K}'^T \\mathbf{F} \\mathbf{K}$\n    7. SVD decompose: $\\mathbf{E} = \\mathbf{U}\\Lambda \\mathbf{V}^T$ where $\\Lambda = \\text{diag}(1, 1, 0)$\n    8. Recover $\\mathbf{R}$ and $\\mathbf{T}_\\times$:\n    $$\\mathbf{T}_\\times = \\mathbf{U} \\begin{bmatrix} 0 & 1 & 0 \\\\ -1 & 0 & 0 \\\\ 0 & 0 & 0 \\end{bmatrix} \\mathbf{U}^T \\qquad \\mathbf{R} = \\mathbf{U} \\begin{bmatrix} 0 & -1 & 0 \\\\ 1 & 0 & 0 \\\\ 0 & 0 & 1 \\end{bmatrix} \\mathbf{V}^T$$\n    9. 4 possible solutions (sign ambiguities) — resolve by checking that reconstructed depths are positive\n    10. Recover the structure as for the calibrated case\n    11. We do not know $|\\mathbf{T}|$ so we can only recover structure up to scale (speed-scale ambiguity)"}, {"group": "Epipolar Geometry", "question": "What can be recovered when the camera intrinsic parameters $\\mathbf{K}$ are unknown?", "answer_html": "<ol>\n<li>Estimate $\\mathbf{F}$ from $\\geq 8$ correspondences (using matching constraints and RANSAC)</li>\n<li>$\\mathbf{F}$ gives epipolar geometry: epipolar lines, epipoles</li>\n<li>But $\\mathbf{F} = \\mathbf{K}'^{-T} \\mathbf{T}_\\times \\mathbf{R} \\mathbf{K}^{-1}$ — without $\\mathbf{K}$, cannot extract $\\mathbf{R}$ or $\\mathbf{T}$</li>\n<li>Only a <strong>projective reconstruction</strong> is possible (see below)</li>\n<li>To recover metric 3D, $\\mathbf{K}$ must be known or estimated (e.g. from self-calibration constraints)</li>\n</ol>", "answer_md": "1. Estimate $\\mathbf{F}$ from $\\geq 8$ correspondences (using matching constraints and RANSAC)\n2. $\\mathbf{F}$ gives epipolar geometry: epipolar lines, epipoles\n3. But $\\mathbf{F} = \\mathbf{K}'^{-T} \\mathbf{T}_\\times \\mathbf{R} \\mathbf{K}^{-1}$ — without $\\mathbf{K}$, cannot extract $\\mathbf{R}$ or $\\mathbf{T}$\n4. Only a **projective reconstruction** is possible (see below)\n5. To recover metric 3D, $\\mathbf{K}$ must be known or estimated (e.g. from self-calibration constraints)"}, {"group": "Epipolar Geometry", "question": "Why can 3D structure only be recovered up to a projective transformation when $\\mathbf{K}$ is unknown?", "answer_html": "<ul>\n<li>For any invertible $4 \\times 4$ matrix $\\mathbf{H}$:</li>\n<div class=\"math-display\">$$\\mathbf{P}\\tilde{\\mathbf{X}} = (\\mathbf{P}\\mathbf{H}^{-1})(\\mathbf{H}\\tilde{\\mathbf{X}}) \\quad \\text{and} \\quad \\mathbf{P}'\\tilde{\\mathbf{X}} = (\\mathbf{P}'\\mathbf{H}^{-1})(\\mathbf{H}\\tilde{\\mathbf{X}})$$</div>\n<li>Images are identical for $(\\mathbf{P}, \\mathbf{P}', \\tilde{\\mathbf{X}})$ and $(\\mathbf{P}\\mathbf{H}^{-1}, \\mathbf{P}'\\mathbf{H}^{-1}, \\mathbf{H}\\tilde{\\mathbf{X}})$ — so $\\mathbf{H}$ is unrecoverable from images alone</li>\n<li>Choose $\\mathbf{H} = \\mathbf{P}^{-1}$ (extending $\\mathbf{P}$ to $4 \\times 4$), giving:</li>\n<div class=\"math-display\">$$\\mathbf{P}\\mathbf{H} = [I | 0], \\qquad \\mathbf{P}'\\mathbf{H} = [\\mathbf{M} | \\mathbf{e}']$$</div>\n<li>where $\\mathbf{M}$ and $\\mathbf{e}'$ are extracted from $\\mathbf{F}$ (since $\\mathbf{F} = [\\mathbf{e}']_\\times \\mathbf{M}$, with $\\mathbf{M} = [\\mathbf{e}']_\\times \\mathbf{F} + \\mathbf{e}'\\mathbf{v}^T$)</li>\n<li>This gives a projective reconstruction — 3D structure up to the unknown $\\mathbf{H}$</li>\n</ul>", "answer_md": "- For any invertible $4 \\times 4$ matrix $\\mathbf{H}$:\n$$\\mathbf{P}\\tilde{\\mathbf{X}} = (\\mathbf{P}\\mathbf{H}^{-1})(\\mathbf{H}\\tilde{\\mathbf{X}}) \\quad \\text{and} \\quad \\mathbf{P}'\\tilde{\\mathbf{X}} = (\\mathbf{P}'\\mathbf{H}^{-1})(\\mathbf{H}\\tilde{\\mathbf{X}})$$\n- Images are identical for $(\\mathbf{P}, \\mathbf{P}', \\tilde{\\mathbf{X}})$ and $(\\mathbf{P}\\mathbf{H}^{-1}, \\mathbf{P}'\\mathbf{H}^{-1}, \\mathbf{H}\\tilde{\\mathbf{X}})$ — so $\\mathbf{H}$ is unrecoverable from images alone\n- Choose $\\mathbf{H} = \\mathbf{P}^{-1}$ (extending $\\mathbf{P}$ to $4 \\times 4$), giving:\n$$\\mathbf{P}\\mathbf{H} = [I | 0], \\qquad \\mathbf{P}'\\mathbf{H} = [\\mathbf{M} | \\mathbf{e}']$$\n- where $\\mathbf{M}$ and $\\mathbf{e}'$ are extracted from $\\mathbf{F}$ (since $\\mathbf{F} = [\\mathbf{e}']_\\times \\mathbf{M}$, with $\\mathbf{M} = [\\mathbf{e}']_\\times \\mathbf{F} + \\mathbf{e}'\\mathbf{v}^T$)\n- This gives a projective reconstruction — 3D structure up to the unknown $\\mathbf{H}$"}, {"group": "Affine Stereo", "question": "Why can't you determine X and Y from the left image and Z from the right?", "answer_html": "<ul>\n<li>Under <strong>perspective</strong> projection, the left image gives a <strong>ray</strong> (not normal to the image plane) — this does not fix $X$ and $Y$. The right image determines where on the ray the point lies.</li>\n<li>Under <strong>orthographic</strong> projection, the ray is normal to the image plane, so the left image does fix $X$ and $Y$. The right image then fixes $Z$.</li>\n<li>Real cameras use perspective, not orthographic — so the architecture student's suggestion only works for orthographic projection.</li>\n</ul>", "answer_md": "- Under **perspective** projection, the left image gives a **ray** (not normal to the image plane) — this does not fix $X$ and $Y$. The right image determines where on the ray the point lies.\n- Under **orthographic** projection, the ray is normal to the image plane, so the left image does fix $X$ and $Y$. The right image then fixes $Z$.\n- Real cameras use perspective, not orthographic — so the architecture student's suggestion only works for orthographic projection."}, {"group": "Affine Stereo", "question": "Derive the show that epipolar lines are parallel.", "answer_html": "<ul>\n<li>Weak perspective gives affine projection matrices:</li>\n</ul>\n<div class=\"math-display\">$$\\text{Left:} \\quad \\begin{bmatrix} u \\\\ v \\end{bmatrix} = \\begin{bmatrix} p_{11} & 0 & 0 & p_{14} \\\\ 0 & p_{22} & 0 & p_{24} \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ Z \\\\ 1 \\end{bmatrix} \\qquad \\text{Right:} \\quad \\begin{bmatrix} u' \\\\ v' \\end{bmatrix} = \\begin{bmatrix} p'_{11} & p'_{12} & p'_{13} & p'_{14} \\\\ p'_{21} & p'_{22} & p'_{23} & p'_{24} \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ Z \\\\ 1 \\end{bmatrix}$$</div>\n<ul>\n<li>Eliminate $X$ and $Y$</li>\n</ul>\n<div class=\"math-display\">$$u'=p'_{11} \\frac{u-p_{14}}{p_{11}}+p'_{12} \\frac{u-p_{24}}{p_{22}}+p'_{13}Z+p'_{14} $$</div>\n<div class=\"math-display\">$$v'=p'_{21} \\frac{u-p_{14}}{p_{11}}+p'_{22} \\frac{u-p_{24}}{p_{22}}+p'_{23}Z+p'_{24} $$</div>\n<div class=\"math-display\">$$au' + bv' + cu + dv + 1 = 0$$</div>\n<ul>\n<li>In matrix form:</li>\n</ul>\n<div class=\"math-display\">$$\\begin{bmatrix}u' \\\\ v' \\end{bmatrix} =\\begin{bmatrix} p'_{11} \\frac{u-p_{14}}{p_{11}} + p'_{21} \\frac{u-p_{24}}{p_{22}}+p'_{14} \\\\ p'_{21} \\frac{u-p_{14}}{p_{11}}+p'_{22} \\frac{u-p_{24}}{p_{22}}+p'_{23} \\end{bmatrix}+ Z \\begin{bmatrix}p'_{13} \\\\ p'_{23} \\end{bmatrix} $$</div>\n<ul>\n<li>This says $\\mathbf{w}'=\\mathbf{a}+Z\\mathbf{b}$ and is one of the affine forms of the epipolar constraint</li>\n<li>This shows all epipolar lines are parallel under affine stereo</li>\n</ul>", "answer_md": "- Weak perspective gives affine projection matrices:\n\n$$\\text{Left:} \\quad \\begin{bmatrix} u \\\\ v \\end{bmatrix} = \\begin{bmatrix} p_{11} & 0 & 0 & p_{14} \\\\ 0 & p_{22} & 0 & p_{24} \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ Z \\\\ 1 \\end{bmatrix} \\qquad \\text{Right:} \\quad \\begin{bmatrix} u' \\\\ v' \\end{bmatrix} = \\begin{bmatrix} p'_{11} & p'_{12} & p'_{13} & p'_{14} \\\\ p'_{21} & p'_{22} & p'_{23} & p'_{24} \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ Z \\\\ 1 \\end{bmatrix}$$\n\n- Eliminate $X$ and $Y$\n\n$$u'=p'_{11} \\frac{u-p_{14}}{p_{11}}+p'_{12} \\frac{u-p_{24}}{p_{22}}+p'_{13}Z+p'_{14} $$\n\n$$v'=p'_{21} \\frac{u-p_{14}}{p_{11}}+p'_{22} \\frac{u-p_{24}}{p_{22}}+p'_{23}Z+p'_{24} $$\n\n$$au' + bv' + cu + dv + 1 = 0$$\n\n- In matrix form:\n\n$$\\begin{bmatrix}u' \\\\ v' \\end{bmatrix} =\\begin{bmatrix} p'_{11} \\frac{u-p_{14}}{p_{11}} + p'_{21} \\frac{u-p_{24}}{p_{22}}+p'_{14} \\\\ p'_{21} \\frac{u-p_{14}}{p_{11}}+p'_{22} \\frac{u-p_{24}}{p_{22}}+p'_{23} \\end{bmatrix}+ Z \\begin{bmatrix}p'_{13} \\\\ p'_{23} \\end{bmatrix} $$\n\n- This says $\\mathbf{w}'=\\mathbf{a}+Z\\mathbf{b}$ and is one of the affine forms of the epipolar constraint\n- This shows all epipolar lines are parallel under affine stereo"}, {"group": "Affine Stereo", "question": "Derive the affine fundamental matrix.", "answer_html": "<ul>\n<li>Eliminating $Z$ from $au' + bv' + cu + dv + 1 = 0$ gives:</li>\n</ul>\n<div class=\"math-display\">$$\\begin{bmatrix} u' & v' & 1 \\end{bmatrix} F_A \\begin{bmatrix} u \\\\ v \\\\ 1 \\end{bmatrix} = 0 \\qquad \\text{where} \\quad F_A = \\begin{bmatrix} 0 & 0 & a \\\\ 0 & 0 & b \\\\ c & d & 1 \\end{bmatrix}$$</div>\n<ul>\n<li>$\\det F_A = 0$ by inspection → rank 2</li>\n<li>4 DoF ($a, b, c, d$) — the top-left $2 \\times 2$ block is zero because weak perspective eliminates the nonlinear perspective terms</li>\n</ul>", "answer_md": "- Eliminating $Z$ from $au' + bv' + cu + dv + 1 = 0$ gives:\n\n$$\\begin{bmatrix} u' & v' & 1 \\end{bmatrix} F_A \\begin{bmatrix} u \\\\ v \\\\ 1 \\end{bmatrix} = 0 \\qquad \\text{where} \\quad F_A = \\begin{bmatrix} 0 & 0 & a \\\\ 0 & 0 & b \\\\ c & d & 1 \\end{bmatrix}$$\n\n- $\\det F_A = 0$ by inspection → rank 2\n- 4 DoF ($a, b, c, d$) — the top-left $2 \\times 2$ block is zero because weak perspective eliminates the nonlinear perspective terms"}];
-const GROUPS = ["Epipolar Geometry", "Affine Stereo"];
+// ── Data ──
+const DECKS = {"Epipolar Geometry": [{"q": "Derive the epipolar constraint $\\mathbf{p}'^T \\mathbf{E} \\mathbf{p} = 0$ in camera-centred coordinates.", "a": "$$\\mathbf{X}' = \\mathbf{R}\\mathbf{X} + \\mathbf{T}$$\n\n$$\\mathbf{T}\\times\\mathbf{X}'=\\mathbf{T}\\times \\mathbf{R}\\mathbf{X}+ \\mathbf{T}\\times \\mathbf{T}$$\n\n$$\\mathbf{T}\\times\\mathbf{X}'=\\mathbf{T}\\times \\mathbf{R}\\mathbf{X}$$\n\n$$\\mathbf{X}'\\cdot(\\mathbf{T}\\times\\mathbf{X}')=\\mathbf{X}'\\cdot(\\mathbf{T}\\times \\mathbf{R}\\mathbf{X})$$\n\n$$0= \\mathbf{X}'\\cdot(\\mathbf{T}\\times \\mathbf{R}\\mathbf{X})$$\n\n$$\\mathbf{T}_X=\\begin{bmatrix}0 & -T_z & T_y \\\\ T_z & 0 & -T_x \\\\ -T_y & T_x & 0 \\end{bmatrix} $$\n\n- Define $\\mathbf{E}=\\mathbf{T}_X\\mathbf{R}$, then $\\mathbf{X}'^T\\mathbf{E}\\mathbf{X}=0 $"}, {"q": "Show that $\\mathbf{E}\\mathbf{p}_e = 0$. What does this mean geometrically?", "a": "$$\\lambda \\mathbf{T} = \\mathbf{R}\\mathbf{p}_e + \\mathbf{T}$$\n\n$$0 = \\mathbf{T} \\times \\mathbf{R}\\mathbf{p}_e$$\n\n$$0 = \\mathbf{E}\\mathbf{p}_e$$\n\n- The epipole $\\mathbf{p}_e$ is the image of the other camera's optical centre\n- All epipolar lines in the left image pass through $\\mathbf{p}_e$"}, {"q": "Derive the fundamental matrix constraint $\\tilde{\\mathbf{w}}'^T \\mathbf{F} \\tilde{\\mathbf{w}} = 0$ in pixel coordinates.", "a": "- Pixel coordinates relate to camera coordinates by $\\tilde{\\mathbf{w}} = \\mathbf{K}\\mathbf{p}$, so $\\mathbf{p} = \\mathbf{K}^{-1}\\tilde{\\mathbf{w}}$\n- Substituting into $\\mathbf{p}'^T \\mathbf{E} \\mathbf{p} = 0$:\n$$(\\mathbf{K}'^{-1}\\tilde{\\mathbf{w}}')^T \\mathbf{E} (\\mathbf{K}^{-1}\\tilde{\\mathbf{w}}) = 0$$\n\n$$\\tilde{\\mathbf{w}}'^T \\underbrace{\\mathbf{K}'^{-T} \\mathbf{E} \\mathbf{K}^{-1}}_{\\mathbf{F}} \\tilde{\\mathbf{w}} = 0$$\n\n- The **fundamental matrix** is $\\mathbf{F} = \\mathbf{K}'^{-T} \\mathbf{T}_\\times \\mathbf{R} \\mathbf{K}^{-1}$\n- The **epipolar line** in the right image for a point $\\tilde{\\mathbf{w}}$ in the left image is $\\mathbf{l}' = \\mathbf{F}\\tilde{\\mathbf{w}}$ so $\\tilde{\\mathbf{w}}^T\\mathbf{l}'=0$"}, {"q": "Show that $\\mathbf{F}\\tilde{\\mathbf{w}}_e = 0$ and that $\\text{rank}(\\mathbf{F}) = 2$.", "a": "- The epipole $\\tilde{\\mathbf{w}}_e$ satisfies $\\mathbf{F}\\tilde{\\mathbf{w}}_e = 0$ (and $\\mathbf{F}^T\\tilde{\\mathbf{w}}'_e = 0$ for the right epipole)\n- Since $\\mathbf{F}\\tilde{\\mathbf{w}}_e = 0$ has a non-trivial solution, $\\mathbf{F}$ is not invertible → $\\det \\mathbf{F} = 0$ → $\\text{rank}(\\mathbf{F}) \\leq 2$\n- $\\mathbf{F}$ has rank exactly 2 (not 1) because it encodes a genuine epipolar geometry with distinct epipoles"}, {"q": "How many dof does $\\mathbf{F}$ have?", "a": "- 7 dof\n  - 9 terms in the matrix\n  - But scale irrelevant so 8\n  - And we force zero determinant so 7"}, {"q": "How is the fundamental matrix estimated from point correspondences?", "a": "- Each correspondence $(u_i, v_i) \\leftrightarrow (u'_i, v'_i)$ gives one linear equation in the 9 elements of $\\mathbf{F}$:\n$$\\begin{bmatrix} u'_iu_i & u'_iv_i & u'_i & v'_iu_i & v'_iv_i & v'_i & u_i & v_i & 1 \\end{bmatrix} \\mathbf{f} = 0$$\n- $\\mathbf{F}$ has 8 DoF (9 elements, minus scale) → need $\\geq 8$ correspondences\n- Normalise points for numerical stability\n- Stack into $A\\mathbf{f} = 0$, solve by SVD (smallest singular vector)\n- The solution may not satisfy $\\det \\mathbf{F} = 0$ — enforce rank 2 by SVD of the estimated $\\mathbf{F}$: set the third singular value to 0\n- Use RANSAC to handle outlier correspondences"}, {"q": "What matching constraints can be used to find point correspondences in stereo vision?", "a": "- **Epipolar constraint**: corresponding point must lie on the epipolar line in the other image (from $\\mathbf{E}$ or $\\mathbf{F}$)\n- **Uniqueness**: for opaque objects, each point in one image has at most one match in the other\n- **Ordering**: corresponding points on the surface of an opaque object appear in the same order in both images\n- **Figural continuity**: when points lie on contours, the contour structure aids matching\n- **Disparity gradient**: for smooth surfaces, disparity varies smoothly — limit the allowable spatial derivative of disparity"}, {"q": "Given calibrated cameras ($\\mathbf{K}$, $\\mathbf{R}$, $\\mathbf{T}$ all known), how are 3D positions recovered?", "a": "1. For each correspondence, triangulate by solving $A\\mathbf{X} = 0$ where $\\mathbf{P} = \\mathbf{K}[I | 0]$ and $\\mathbf{P}' = \\mathbf{K}'[\\mathbf{R} | \\mathbf{T}]$\n\n$$\\begin{bmatrix} u_i \\mathbf{p}_{3}^T - \\mathbf{p}_{1}^T \\\\ v_i \\mathbf{p}_{3}^T - \\mathbf{p}_{2}^T \\\\ u'_i \\mathbf{p}'^T_{3} - \\mathbf{p}'^T_{1} \\\\ v'_i \\mathbf{p}'^T_{3} - \\mathbf{p}'^T_{2} \\end{bmatrix} \\tilde{\\mathbf{X}} = 0$$\n\n2. Solve by SVD. Geometrically this is triangulation: finding the 3D point most consistent with the two rays.\n\n- Improve with more views\n  - Track features across multiple views\n  - Optimise camera poses and 3D positions jointly"}, {"q": "Given unknown camera motion but known $\\mathbf{K}$, how are $\\mathbf{R}$, $\\mathbf{T}$, and 3D positions recovered?", "a": "1. Find corners in both images\n2. Use normalised cross-correlation to obtain a few matches\n3. Use the seed matches to compute $\\mathbf{F}$ - find an $\\mathbf{F}$ that is consistent with as many matches as possible, then reject the rest as mistakes\n4. Now we know $\\mathbf{F}$ we can search for more matches in a narrow band around the epipolar lines to get a lot of matches\n5. Known $\\mathbf{K}$\n    6. Compute the essential matrix: $\\mathbf{E} = \\mathbf{K}'^T \\mathbf{F} \\mathbf{K}$\n    7. SVD decompose: $\\mathbf{E} = \\mathbf{U}\\Lambda \\mathbf{V}^T$ where $\\Lambda = \\text{diag}(1, 1, 0)$\n    8. Recover $\\mathbf{R}$ and $\\mathbf{T}_\\times$:\n    $$\\mathbf{T}_\\times = \\mathbf{U} \\begin{bmatrix} 0 & 1 & 0 \\\\ -1 & 0 & 0 \\\\ 0 & 0 & 0 \\end{bmatrix} \\mathbf{U}^T \\qquad \\mathbf{R} = \\mathbf{U} \\begin{bmatrix} 0 & -1 & 0 \\\\ 1 & 0 & 0 \\\\ 0 & 0 & 1 \\end{bmatrix} \\mathbf{V}^T$$\n    9. 4 possible solutions (sign ambiguities) — resolve by checking that reconstructed depths are positive\n    10. Recover the structure as for the calibrated case\n    11. We do not know $|\\mathbf{T}|$ so we can only recover structure up to scale (speed-scale ambiguity)"}, {"q": "What can be recovered when the camera intrinsic parameters $\\mathbf{K}$ are unknown?", "a": "1. Estimate $\\mathbf{F}$ from $\\geq 8$ correspondences (using matching constraints and RANSAC)\n2. $\\mathbf{F}$ gives epipolar geometry: epipolar lines, epipoles\n3. But $\\mathbf{F} = \\mathbf{K}'^{-T} \\mathbf{T}_\\times \\mathbf{R} \\mathbf{K}^{-1}$ — without $\\mathbf{K}$, cannot extract $\\mathbf{R}$ or $\\mathbf{T}$\n4. Only a **projective reconstruction** is possible (see below)\n5. To recover metric 3D, $\\mathbf{K}$ must be known or estimated (e.g. from self-calibration constraints)"}, {"q": "Why can 3D structure only be recovered up to a projective transformation when $\\mathbf{K}$ is unknown?", "a": "- For any invertible $4 \\times 4$ matrix $\\mathbf{H}$:\n$$\\mathbf{P}\\tilde{\\mathbf{X}} = (\\mathbf{P}\\mathbf{H}^{-1})(\\mathbf{H}\\tilde{\\mathbf{X}}) \\quad \\text{and} \\quad \\mathbf{P}'\\tilde{\\mathbf{X}} = (\\mathbf{P}'\\mathbf{H}^{-1})(\\mathbf{H}\\tilde{\\mathbf{X}})$$\n- Images are identical for $(\\mathbf{P}, \\mathbf{P}', \\tilde{\\mathbf{X}})$ and $(\\mathbf{P}\\mathbf{H}^{-1}, \\mathbf{P}'\\mathbf{H}^{-1}, \\mathbf{H}\\tilde{\\mathbf{X}})$ — so $\\mathbf{H}$ is unrecoverable from images alone\n- Choose $\\mathbf{H} = \\mathbf{P}^{-1}$ (extending $\\mathbf{P}$ to $4 \\times 4$), giving:\n$$\\mathbf{P}\\mathbf{H} = [I | 0], \\qquad \\mathbf{P}'\\mathbf{H} = [\\mathbf{M} | \\mathbf{e}']$$\n- where $\\mathbf{M}$ and $\\mathbf{e}'$ are extracted from $\\mathbf{F}$ (since $\\mathbf{F} = [\\mathbf{e}']_\\times \\mathbf{M}$, with $\\mathbf{M} = [\\mathbf{e}']_\\times \\mathbf{F} + \\mathbf{e}'\\mathbf{v}^T$)\n- This gives a projective reconstruction — 3D structure up to the unknown $\\mathbf{H}$"}], "Affine Stereo": [{"q": "Why can't you determine X and Y from the left image and Z from the right?", "a": "- Under **perspective** projection, the left image gives a **ray** (not normal to the image plane) — this does not fix $X$ and $Y$. The right image determines where on the ray the point lies.\n- Under **orthographic** projection, the ray is normal to the image plane, so the left image does fix $X$ and $Y$. The right image then fixes $Z$.\n- Real cameras use perspective, not orthographic — so the architecture student's suggestion only works for orthographic projection."}, {"q": "Derive the show that epipolar lines are parallel.", "a": "- Weak perspective gives affine projection matrices:\n\n$$\\text{Left:} \\quad \\begin{bmatrix} u \\\\ v \\end{bmatrix} = \\begin{bmatrix} p_{11} & 0 & 0 & p_{14} \\\\ 0 & p_{22} & 0 & p_{24} \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ Z \\\\ 1 \\end{bmatrix} \\qquad \\text{Right:} \\quad \\begin{bmatrix} u' \\\\ v' \\end{bmatrix} = \\begin{bmatrix} p'_{11} & p'_{12} & p'_{13} & p'_{14} \\\\ p'_{21} & p'_{22} & p'_{23} & p'_{24} \\end{bmatrix} \\begin{bmatrix} X \\\\ Y \\\\ Z \\\\ 1 \\end{bmatrix}$$\n\n- Eliminate $X$ and $Y$\n\n$$u'=p'_{11} \\frac{u-p_{14}}{p_{11}}+p'_{12} \\frac{u-p_{24}}{p_{22}}+p'_{13}Z+p'_{14} $$\n\n$$v'=p'_{21} \\frac{u-p_{14}}{p_{11}}+p'_{22} \\frac{u-p_{24}}{p_{22}}+p'_{23}Z+p'_{24} $$\n\n$$au' + bv' + cu + dv + 1 = 0$$\n\n- In matrix form:\n\n$$\\begin{bmatrix}u' \\\\ v' \\end{bmatrix} =\\begin{bmatrix} p'_{11} \\frac{u-p_{14}}{p_{11}} + p'_{21} \\frac{u-p_{24}}{p_{22}}+p'_{14} \\\\ p'_{21} \\frac{u-p_{14}}{p_{11}}+p'_{22} \\frac{u-p_{24}}{p_{22}}+p'_{23} \\end{bmatrix}+ Z \\begin{bmatrix}p'_{13} \\\\ p'_{23} \\end{bmatrix} $$\n\n- This says $\\mathbf{w}'=\\mathbf{a}+Z\\mathbf{b}$ and is one of the affine forms of the epipolar constraint\n- This shows all epipolar lines are parallel under affine stereo"}, {"q": "Derive the affine fundamental matrix.", "a": "- Eliminating $Z$ from $au' + bv' + cu + dv + 1 = 0$ gives:\n\n$$\\begin{bmatrix} u' & v' & 1 \\end{bmatrix} F_A \\begin{bmatrix} u \\\\ v \\\\ 1 \\end{bmatrix} = 0 \\qquad \\text{where} \\quad F_A = \\begin{bmatrix} 0 & 0 & a \\\\ 0 & 0 & b \\\\ c & d & 1 \\end{bmatrix}$$\n\n- $\\det F_A = 0$ by inspection → rank 2\n- 4 DoF ($a, b, c, d$) — the top-left $2 \\times 2$ block is zero because weak perspective eliminates the nonlinear perspective terms"}]};
 
-let activeGroup = null; // null = all
-let filtered = ALL_CARDS.slice();
-let idx = 0;
+let currentTopic = '';
+let totalCards = 0;
+let clearedCards = 0;
+let pile = [];
+let again = [];
+let cardIndex = 0;
+let flipped = false;
 
-function initFilters() {
-  const el = document.getElementById('filters');
-  // "All" pill
-  const all = document.createElement('span');
-  all.className = 'pill active';
-  all.textContent = 'All';
-  all.dataset.group = '';
-  all.onclick = () => selectGroup(null);
-  el.appendChild(all);
+// ── DOM refs ──
+const topicScreen   = document.getElementById('topic-screen');
+const cardScreen    = document.getElementById('card-screen');
+const roundScreen   = document.getElementById('round-screen');
+const doneScreen    = document.getElementById('done-screen');
+const topicList     = document.getElementById('topic-list');
+const card          = document.getElementById('card');
+const cardLabel     = document.getElementById('card-label');
+const cardContent   = document.getElementById('card-content');
+const tapHint       = document.getElementById('tap-hint');
+const actionButtons = document.getElementById('action-buttons');
+const progressText  = document.getElementById('progress-text');
+const progressBar   = document.getElementById('progress-bar');
 
-  GROUPS.forEach(g => {
-    const p = document.createElement('span');
-    p.className = 'pill';
-    p.textContent = g;
-    p.dataset.group = g;
-    p.onclick = () => selectGroup(g);
-    el.appendChild(p);
+// ── Init ──
+try { mermaid.initialize({ startOnLoad: false, theme: 'default' }); } catch(e) {}
+
+function init() {
+  topicList.innerHTML = '';
+  const names = Object.keys(DECKS);
+  names.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'topic-btn';
+    btn.innerHTML = `<span class="topic-name">${esc(name)}</span><span class="topic-count">${DECKS[name].length} cards</span>`;
+    btn.addEventListener('click', () => startTopic(name));
+    topicList.appendChild(btn);
   });
 }
 
-function selectGroup(group) {
-  activeGroup = group;
-  filtered = group ? ALL_CARDS.filter(c => c.group === group) : ALL_CARDS.slice();
-  idx = 0;
-
-  document.querySelectorAll('.pill').forEach(p => {
-    p.classList.toggle('active', group === null ? p.dataset.group === '' : p.dataset.group === group);
-  });
-  document.getElementById('count').textContent = filtered.length;
-  render();
+// ── Navigation ──
+function showScreen(screen) {
+  [topicScreen, cardScreen, roundScreen, doneScreen].forEach(s => s.classList.add('hidden'));
+  screen.classList.remove('hidden');
 }
 
-function render() {
-  if (filtered.length === 0) {
-    document.getElementById('frontBody').innerHTML = '<span style="color:#777;">No cards in this group.</span>';
-    document.getElementById('backBody').innerHTML = '';
-    document.getElementById('frontGroup').textContent = '';
-    document.getElementById('backGroup').textContent = '';
-    document.getElementById('progress').textContent = '0 / 0';
+function startTopic(name) {
+  currentTopic = name;
+  totalCards = DECKS[name].length;
+  clearedCards = 0;
+  pile = shuffle([...DECKS[name]]);
+  again = [];
+  cardIndex = 0;
+  showScreen(cardScreen);
+  showCard();
+}
+
+function goToTopics() {
+  showScreen(topicScreen);
+}
+
+// ── Card Display ──
+function showCard() {
+  if (cardIndex >= pile.length) {
+    endRound();
     return;
   }
-  const c = filtered[idx];
-  // Unflip
-  document.getElementById('card').classList.remove('flipped');
+  flipped = false;
+  const c = pile[cardIndex];
+  card.className = 'card question-side';
+  cardLabel.textContent = 'Question';
+  cardContent.innerHTML = esc(c.q);
+  tapHint.textContent = 'Tap or press Space to flip';
+  actionButtons.classList.add('hidden');
+  updateProgress();
+  card.scrollTop = 0;
 
-  document.getElementById('frontBody').innerHTML = c.question;
-  document.getElementById('backBody').innerHTML = c.answer_html;
-  document.getElementById('frontGroup').textContent = c.group;
-  document.getElementById('backGroup').textContent = c.group;
-  document.getElementById('progress').textContent = (idx + 1) + ' / ' + filtered.length;
-  document.getElementById('prevBtn').disabled = idx === 0;
-  document.getElementById('nextBtn').disabled = idx === filtered.length - 1;
+  // Render KaTeX on question side
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(cardContent, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ],
+      throwOnError: false
+    });
+  }
+}
+
+function flipCard() {
+  if (flipped) return;
+  flipped = true;
+  const c = pile[cardIndex];
+  card.className = 'card answer-side';
+  cardLabel.textContent = 'Answer';
+  tapHint.textContent = '';
+
+  // Render markdown
+  const rawHtml = (typeof marked !== 'undefined' && marked.parse) ? marked.parse(c.a) : c.a.replace(/\n/g, '<br>');
+  cardContent.innerHTML = rawHtml;
 
   // Render KaTeX
-  renderMathInElement(document.getElementById('frontBody'), {
-    delimiters: [
-      {left: '$$', right: '$$', display: true},
-      {left: '$', right: '$', display: false}
-    ],
-    throwOnError: false
-  });
-  renderMathInElement(document.getElementById('backBody'), {
-    delimiters: [
-      {left: '$$', right: '$$', display: true},
-      {left: '$', right: '$', display: false}
-    ],
-    throwOnError: false
-  });
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(cardContent, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ],
+      throwOnError: false
+    });
+  }
+
+  // Render Mermaid
+  if (typeof mermaid !== 'undefined' && mermaid.render) {
+    const codeBlocks = cardContent.querySelectorAll('code.language-mermaid');
+    codeBlocks.forEach((block, i) => {
+      const pre = block.parentElement;
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+      const id = 'mermaid-' + Date.now() + '-' + i;
+      try {
+        mermaid.render(id, block.textContent.trim()).then(({ svg }) => {
+          container.innerHTML = svg;
+          pre.replaceWith(container);
+        }).catch(() => {});
+      } catch(e) {}
+    });
+  }
+
+  actionButtons.classList.remove('hidden');
+  card.scrollTop = 0;
 }
 
-function flip() {
-  document.getElementById('card').classList.toggle('flipped');
+function markGotIt() {
+  clearedCards++;
+  cardIndex++;
+  showCard();
 }
 
-function prev() {
-  if (idx > 0) { idx--; render(); }
+function markAgain() {
+  again.push(pile[cardIndex]);
+  cardIndex++;
+  showCard();
 }
 
-function next() {
-  if (idx < filtered.length - 1) { idx++; render(); }
+function endRound() {
+  if (again.length === 0) {
+    showScreen(doneScreen);
+  } else {
+    document.getElementById('round-remaining').textContent = again.length;
+    document.getElementById('round-message').textContent =
+      again.length + ' card' + (again.length === 1 ? '' : 's') + ' to review. ' + clearedCards + ' of ' + totalCards + ' cleared.';
+    showScreen(roundScreen);
+  }
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowLeft') prev();
-  else if (e.key === 'ArrowRight') next();
-  else if (e.key === ' ') { e.preventDefault(); flip(); }
-});
+function nextRound() {
+  pile = shuffle([...again]);
+  again = [];
+  cardIndex = 0;
+  showScreen(cardScreen);
+  showCard();
+}
 
-// Touch swipe
-let touchStartX = 0;
-document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
-document.addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].screenX - touchStartX;
-  if (Math.abs(dx) > 50) {
-    if (dx > 0) prev(); else next();
+function restartTopic() {
+  startTopic(currentTopic);
+}
+
+// ── Progress ──
+function updateProgress() {
+  progressText.textContent = clearedCards + ' of ' + totalCards + ' cleared';
+  const pct = totalCards > 0 ? (clearedCards / totalCards) * 100 : 0;
+  progressBar.style.width = pct + '%';
+}
+
+// ── Utilities ──
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ── Event Listeners ──
+card.addEventListener('click', flipCard);
+document.getElementById('btn-got-it').addEventListener('click', markGotIt);
+document.getElementById('btn-again').addEventListener('click', markAgain);
+document.getElementById('back-btn').addEventListener('click', goToTopics);
+document.getElementById('round-continue').addEventListener('click', nextRound);
+document.getElementById('round-back').addEventListener('click', goToTopics);
+document.getElementById('done-restart').addEventListener('click', restartTopic);
+document.getElementById('done-back').addEventListener('click', goToTopics);
+
+document.addEventListener('keydown', (e) => {
+  if (cardScreen.classList.contains('hidden')) return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (!flipped) flipCard();
+  } else if (e.code === 'ArrowLeft' && flipped) {
+    e.preventDefault();
+    markAgain();
+  } else if (e.code === 'ArrowRight' && flipped) {
+    e.preventDefault();
+    markGotIt();
   }
 });
 
-initFilters();
-render();
+// ── Start ──
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 </script>
 </body>
 </html>
