@@ -473,6 +473,32 @@ function showCard() {
   }
 }
 
+// Shield LaTeX from marked: extract $...$ and $$...$$ blocks, run marked
+// on the rest, then restore the LaTeX so KaTeX can render it cleanly.
+function renderMarkdownWithLatex(src) {
+  const placeholders = [];
+  // Replace display math first ($$...$$), then inline ($...$)
+  let shielded = src.replace(/\$\$([\s\S]*?)\$\$/g, (m) => {
+    placeholders.push(m);
+    return '%%MATH' + (placeholders.length - 1) + '%%';
+  });
+  shielded = shielded.replace(/\$([^
+$]+?)\$/g, (m) => {
+    placeholders.push(m);
+    return '%%MATH' + (placeholders.length - 1) + '%%';
+  });
+
+  let html = (typeof marked !== 'undefined' && marked.parse)
+    ? marked.parse(shielded)
+    : shielded.replace(/\n/g, '<br>');
+
+  // Restore LaTeX
+  for (let i = 0; i < placeholders.length; i++) {
+    html = html.replace('%%MATH' + i + '%%', placeholders[i]);
+  }
+  return html;
+}
+
 function flipCard() {
   if (flipped) return;
   flipped = true;
@@ -481,9 +507,7 @@ function flipCard() {
   cardLabel.textContent = 'Answer';
   tapHint.textContent = '';
 
-  // Render markdown
-  const rawHtml = (typeof marked !== 'undefined' && marked.parse) ? marked.parse(c.a) : c.a.replace(/\n/g, '<br>');
-  cardContent.innerHTML = rawHtml;
+  cardContent.innerHTML = renderMarkdownWithLatex(c.a);
 
   // Render KaTeX
   if (typeof renderMathInElement === 'function') {
