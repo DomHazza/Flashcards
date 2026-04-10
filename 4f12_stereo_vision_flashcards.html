@@ -482,8 +482,7 @@ function renderMarkdownWithLatex(src) {
     placeholders.push(m);
     return '%%MATH' + (placeholders.length - 1) + '%%';
   });
-  shielded = shielded.replace(/\$([^
-$]+?)\$/g, (m) => {
+  shielded = shielded.replace(/\$([^\n$]+?)\$/g, (m) => {
     placeholders.push(m);
     return '%%MATH' + (placeholders.length - 1) + '%%';
   });
